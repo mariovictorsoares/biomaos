@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(dir:*)",
+      "Bash(npx vue-tsc:*)",
+      "Bash(timeout 15 npm run dev:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx nuxt typecheck:*)",
+      "Bash(timeout:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout 20 npm run dev:*)",
+      "Bash(npx nuxi typecheck:*)",
+      "Bash(find:*)",
+      "Bash(powershell -Command \"Get-Content ''C:\\\\Users\\\\mario\\\\Desktop\\\\fazenda_biomas\\\\Bioma OS \\(28_01_2026 09：55：33\\).html'' -TotalCount 200\")",
+      "Bash(powershell -Command:*)",
+      "Bash(findstr:*)",
+      "Bash(type \"C:\\\\Users\\\\mario\\\\Desktop\\\\fazenda_biomas\\\\Bioma OS \\(28_01_2026 09：55：33\\).html\")",
+      "Bash(more:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(npm install:*)",
+      "Bash(git config:*)",
+      "Bash(git reset:*)",
+      "Bash(git add:*)",
+      "Bash(Remove-Item -Force \"\\\\?\\\\C:\\\\Users\\\\mario\\\\Desktop\\\\fazenda_biomas\\\\nul\")"
+    ]
+  }
+}
