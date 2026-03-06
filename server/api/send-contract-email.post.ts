@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   if (!contratoId || !email) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Dados incompletos: contratoId e email sao obrigatorios'
+      statusMessage: 'Dados incompletos: contratoId e email são obrigatórios'
     })
   }
 
@@ -45,14 +45,14 @@ export default defineEventHandler(async (event) => {
       console.error('Erro ao buscar contrato:', contratoError)
       throw createError({
         statusCode: 404,
-        statusMessage: `Contrato nao encontrado: ${contratoError.message}`
+        statusMessage: `Contrato não encontrado: ${contratoError.message}`
       })
     }
 
     if (!contrato) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Contrato nao encontrado'
+        statusMessage: 'Contrato não encontrado'
       })
     }
 
@@ -125,15 +125,15 @@ export default defineEventHandler(async (event) => {
                   <tr>
                     <td style="padding: 32px;">
                       <h1 style="margin: 0 0 16px; font-size: 20px; font-weight: 600; color: #333333;">
-                        Ola, ${clienteNome}!
+                        Olá, ${clienteNome}!
                       </h1>
 
                       <p style="margin: 0 0 24px; font-size: 14px; line-height: 1.6; color: #666666;">
-                        Voce esta prestes a visualizar o contrato de fornecimento de microverdes com todos os detalhes.
+                        Você está prestes a visualizar o contrato de fornecimento de microverdes com todos os detalhes.
                       </p>
 
                       <p style="margin: 0 0 24px; font-size: 14px; line-height: 1.6; color: #666666;">
-                        Caso tenha duvidas, estamos a disposicao para esclarecimentos por telefone, e-mail ou em uma reuniao.
+                        Caso tenha dúvidas, estamos à disposição para esclarecimentos por telefone, e-mail ou em uma reunião.
                       </p>
 
                       <!-- Access Key Box -->
@@ -162,7 +162,7 @@ export default defineEventHandler(async (event) => {
                       </p>
 
                       <p style="margin: 16px 0 0; font-size: 12px; color: #999999; text-align: center;">
-                        Agradecemos desde ja pela confianca em nosso trabalho!
+                        Agradecemos desde já pela confiança em nosso trabalho!
                       </p>
                     </td>
                   </tr>

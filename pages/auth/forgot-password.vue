@@ -54,7 +54,7 @@
       <p class="text-sm text-red-600 dark:text-red-400">{{ errorMessage }}</p>
     </div>
 
-    <!-- Formulario -->
+    <!-- Formulário -->
     <form @submit.prevent="handleSubmit" class="space-y-5" v-if="!successMessage">
       <!-- Email -->
       <div>
@@ -77,7 +77,7 @@
         </div>
       </div>
 
-      <!-- Botao de Enviar -->
+      <!-- Botão de Enviar -->
       <button
         type="submit"
         :disabled="loading"
@@ -97,7 +97,7 @@
       </button>
     </form>
 
-    <!-- Acao apos sucesso -->
+    <!-- Ação após sucesso -->
     <div v-if="successMessage" class="space-y-4">
       <NuxtLink
         to="/auth/login"

@@ -21,7 +21,7 @@
             >
               Voltar
             </button>
-            <button class="btn btn-primary">
+            <button @click="handleCadastrar" class="btn btn-primary">
               Cadastrar
             </button>
           </div>
@@ -83,8 +83,9 @@
                 <input
                   type="text"
                   v-model="form.razaoSocial"
-                  class="input"
+                  :class="['input', attempted && !form.razaoSocial ? 'border-red-500' : '']"
                 />
+                <span v-if="attempted && !form.razaoSocial" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Nome fantasia</label>
@@ -118,11 +119,11 @@
 
             <!-- Contato WhatsApp -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Contato Whatsapp</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Contato WhatsApp</label>
               <input
                 type="text"
                 v-model="form.whatsapp"
-                placeholder="Numero de whatsapp para envio de notificações"
+                placeholder="Número de WhatsApp para envio de notificações"
                 class="input"
               />
             </div>
@@ -318,7 +319,7 @@
                     <input
                       type="email"
                       v-model="form.emailPedido"
-                      placeholder="E-mail responsável financeiro"
+                      placeholder="E-mail responsável pedido"
                       class="input"
                     />
                   </div>
@@ -327,7 +328,7 @@
                     <input
                       type="text"
                       v-model="form.telefonePedido"
-                      placeholder="Telefone responsável financeiro"
+                      placeholder="Telefone responsável pedido"
                       class="input"
                     />
                   </div>
@@ -384,7 +385,7 @@
                     <input
                       type="text"
                       v-model="form.complementoEntrega"
-                      placeholder="Complemento ende"
+                      placeholder="Complemento endereço de entrega"
                       class="input"
                     />
                   </div>
@@ -393,7 +394,7 @@
                     <input
                       type="text"
                       v-model="form.bairroEntrega"
-                      placeholder="Bairro endereço de"
+                      placeholder="Bairro endereço de entrega"
                       class="input"
                     />
                   </div>
@@ -507,7 +508,7 @@
                       <div>
                         <label class="block text-xs text-gray-500 mb-1">A partir</label>
                         <select v-model="form.horaManhaInicio" class="input">
-                          <option value="">horário de iníci</option>
+                          <option value="">horário de início</option>
                           <option value="06:00">06:00</option>
                           <option value="07:00">07:00</option>
                           <option value="08:00">08:00</option>
@@ -537,7 +538,7 @@
                       <div>
                         <label class="block text-xs text-gray-500 mb-1">A partir</label>
                         <select v-model="form.horaTardeInicio" class="input">
-                          <option value="">horário de iníci</option>
+                          <option value="">horário de início</option>
                           <option value="12:00">12:00</option>
                           <option value="13:00">13:00</option>
                           <option value="14:00">14:00</option>
@@ -582,8 +583,9 @@
 <script setup>
 import { ref } from 'vue'
 
-defineEmits(['close'])
+const emit = defineEmits(['close', 'save'])
 
+const attempted = ref(false)
 const activeTab = ref('dados-gerais')
 
 const tabs = [
@@ -639,4 +641,13 @@ const form = ref({
   horaTardeFim: '',
   observacoesEntrega: ''
 })
+
+function handleCadastrar() {
+  attempted.value = true
+  if (!form.value.razaoSocial) {
+    activeTab.value = 'dados-gerais'
+    return
+  }
+  emit('save', { ...form.value })
+}
 </script>

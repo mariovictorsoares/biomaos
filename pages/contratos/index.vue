@@ -1,55 +1,37 @@
 <template>
   <div>
-    <h1 class="text-xl sm:text-2xl font-bold text-text-light dark:text-text-dark mb-4 sm:mb-6">Contratos</h1>
+    <h1 class="text-lg font-medium text-text-light/70 dark:text-text-dark/70 tracking-wide uppercase mb-12">Contratos</h1>
+
+    <!-- Toolbar: Filtros + Ação -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+      <!-- Esquerda: Filtros -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+        <!-- Filtro Cliente -->
+        <select v-model="filterCliente" class="input text-sm w-full sm:w-48 shrink-0">
+          <option value="">Todos clientes</option>
+          <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.id">
+            {{ cliente.nome_fantasia || cliente.razao_social }}
+          </option>
+        </select>
+        <!-- Toggle Visualizar Cancelados -->
+        <label class="flex items-center gap-2 cursor-pointer shrink-0">
+          <input
+            type="checkbox"
+            v-model="showCancelados"
+            class="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary dark:bg-gray-800 dark:border-gray-600"
+          />
+          <span class="text-sm text-subtext-light dark:text-subtext-dark whitespace-nowrap">Visualizar Cancelados</span>
+        </label>
+      </div>
+      <!-- Direita: Botão -->
+      <button @click="openCreateModal" class="btn btn-primary shrink-0 justify-center sm:justify-start">
+        <span class="material-icons text-sm">add</span>
+        Novo contrato
+      </button>
+    </div>
 
     <!-- Card da Tabela -->
     <div class="card">
-      <!-- Header do Card -->
-      <div class="p-3 sm:p-4 border-b border-border-light dark:border-border-dark">
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xs sm:text-sm font-medium text-subtext-light dark:text-subtext-dark uppercase tracking-wider">Lista Contratos</h2>
-            <!-- Botao Novo Contrato - Desktop -->
-            <button @click="openCreateModal" class="hidden sm:flex btn btn-primary shrink-0">
-              <span class="material-icons text-sm">add</span>
-              Novo contrato
-            </button>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center">
-            <!-- Filtro Cliente -->
-            <select v-model="filterCliente" class="input text-sm w-full sm:w-48 shrink-0">
-              <option value="">Todos clientes</option>
-              <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.id">
-                {{ cliente.nome_fantasia || cliente.razao_social }}
-              </option>
-            </select>
-            <!-- Toggle Visualizar Cancelados -->
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-subtext-light dark:text-subtext-dark whitespace-nowrap">Visualizar Cancelados</span>
-              <button
-                @click="showCancelados = !showCancelados"
-                :class="[
-                  'relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0',
-                  showCancelados ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-                ]"
-              >
-                <span
-                  :class="[
-                    'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-                    showCancelados ? 'translate-x-6' : 'translate-x-1'
-                  ]"
-                />
-              </button>
-            </div>
-            <!-- Botao Novo Contrato - Mobile -->
-            <button @click="openCreateModal" class="sm:hidden btn btn-primary w-full justify-center">
-              <span class="material-icons text-sm">add</span>
-              Novo contrato
-            </button>
-          </div>
-        </div>
-      </div>
-
       <!-- Loading -->
       <div v-if="loading" class="p-8 text-center">
         <span class="material-icons text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
@@ -75,7 +57,7 @@
               v-for="contrato in paginatedContratos"
               :key="contrato.id"
               class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-              @click="openDetailsSlideover(contrato)"
+              @click="openDetailsModal(contrato)"
             >
               <!-- Cliente -->
               <td class="table-cell">
@@ -133,7 +115,7 @@
               <!-- Acoes -->
               <td class="table-cell text-center" @click.stop>
                 <button
-                  @click="openDetailsSlideover(contrato)"
+                  @click="openDetailsModal(contrato)"
                   class="text-gray-400 hover:text-primary dark:text-gray-500 dark:hover:text-primary transition-colors"
                   title="Ver detalhes"
                 >
@@ -151,7 +133,7 @@
           v-for="contrato in paginatedContratos"
           :key="contrato.id"
           class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-          @click="openDetailsSlideover(contrato)"
+          @click="openDetailsModal(contrato)"
         >
           <div class="flex items-start gap-3">
             <div class="flex-1 min-w-0">
@@ -174,7 +156,7 @@
               </div>
             </div>
             <button
-              @click.stop="openDetailsSlideover(contrato)"
+              @click.stop="openDetailsModal(contrato)"
               class="text-gray-400 hover:text-primary transition-colors shrink-0"
             >
               <span class="material-icons-outlined text-xl">chevron_right</span>
@@ -239,7 +221,7 @@
       </div>
     </div>
 
-    <!-- Modal de Criacao - Novo Design Multi-Etapas -->
+    <!-- Modal de Criação - Novo Design Multi-Etapas -->
     <Teleport to="body">
       <Transition
         enter-active-class="transition-opacity duration-200"
@@ -265,7 +247,7 @@
             <div class="sticky top-0 glass-panel border-b border-border-light dark:border-border-dark px-6 py-4 z-10">
               <h2 class="text-2xl font-semibold text-text-light dark:text-text-dark mb-4">Cadastro de contrato</h2>
 
-              <!-- Navegacao das Etapas -->
+              <!-- Navegação das Etapas -->
               <div class="flex items-center justify-center gap-4">
                 <button
                   v-for="step in 5"
@@ -287,9 +269,9 @@
 
             <!-- Modal Body -->
             <div class="p-6">
-              <!-- Etapa 1 - Informacoes de Contrato -->
+              <!-- Etapa 1 - Informações de Contrato -->
               <div v-show="currentStep === 1">
-                <h3 class="text-base font-medium text-text-light dark:text-text-dark mb-6">Etapa 1 - Informacoes de Contrato</h3>
+                <h3 class="text-base font-medium text-text-light dark:text-text-dark mb-6">Etapa 1 - Informações de Contrato</h3>
 
                 <div class="space-y-4">
                   <!-- Linha 1: Cliente (largura total) -->
@@ -303,7 +285,7 @@
                     </select>
                   </div>
 
-                  <!-- Linha 2: Tipo de plano, Modalidade, Bonificacao, Inicio -->
+                  <!-- Linha 2: Tipo de plano, Modalidade, Bonificação, Início -->
                   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
                       <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tipo de plano</label>
@@ -330,7 +312,7 @@
                       </select>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Bonificacao (%)</label>
+                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Bonificação (%)</label>
                       <input
                         type="number"
                         v-model.number="newContrato.bonificacao"
@@ -344,7 +326,7 @@
                       />
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Inicio do plano</label>
+                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Início do plano</label>
                       <input type="date" v-model="newContrato.data_inicio" class="input" @change="calcularDataFim" />
                     </div>
                   </div>
@@ -365,15 +347,15 @@
                       </p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Possui credito anterior?</label>
+                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Possui crédito anterior?</label>
                       <select v-model="newContrato.possui_credito_anterior" class="input">
                         <option value="">Selecione</option>
                         <option :value="true">Sim</option>
-                        <option :value="false">Nao</option>
+                        <option :value="false">Não</option>
                       </select>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Valor do credito</label>
+                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Valor do crédito</label>
                       <input
                         type="number"
                         v-model.number="newContrato.valor_credito"
@@ -398,10 +380,10 @@
                     </div>
                   </div>
 
-                  <!-- Linha 4: Tabela de preco -->
+                  <!-- Linha 4: Tabela de preço -->
                   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="md:col-span-2">
-                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tabela de preco</label>
+                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tabela de preço</label>
                       <div class="flex gap-2">
                         <select v-model="newContrato.tabela_preco_id" class="input flex-1" @change="onTabelaPrecoChangeCreate">
                           <option value="">Selecione</option>
@@ -413,7 +395,7 @@
                           type="button"
                           @click="showTabelaPrecoModal = true"
                           class="p-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors shrink-0"
-                          title="Gerenciar tabelas de preco"
+                          title="Gerenciar tabelas de preço"
                         >
                           <span class="material-icons text-lg">add</span>
                         </button>
@@ -421,9 +403,9 @@
                     </div>
                   </div>
 
-                  <!-- Linha 5: Endereco de entrega (largura total) -->
+                  <!-- Linha 5: Endereço de entrega (largura total) -->
                   <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Endereco de entrega</label>
+                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Endereço de entrega</label>
                     <input
                       type="text"
                       :value="enderecoEntregaCliente"
@@ -433,13 +415,13 @@
                     />
                   </div>
 
-                  <!-- Linha 5: Observacoes (largura total) -->
+                  <!-- Linha 5: Observações (largura total) -->
                   <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observacoes</label>
+                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observações</label>
                     <textarea
                       v-model="newContrato.observacoes"
                       class="input min-h-[80px] resize-y"
-                      placeholder="Digite aqui observacoes sobre o contrato..."
+                      placeholder="Digite aqui observações sobre o contrato..."
                     ></textarea>
                   </div>
                 </div>
@@ -449,7 +431,7 @@
               <div v-show="currentStep === 2">
                 <h3 class="text-base font-medium text-text-light dark:text-text-dark mb-4">Etapa 2 - Microverdes entregues por semana</h3>
 
-                <!-- Formulario de adicao de item -->
+                <!-- Formulário de adição de item -->
                 <div class="grid grid-cols-12 gap-3 items-end mb-4">
                   <!-- Dia da semana -->
                   <div class="col-span-6 sm:col-span-2">
@@ -495,7 +477,7 @@
                     />
                   </div>
 
-                  <!-- Botao adicionar -->
+                  <!-- Botão adicionar -->
                   <div class="col-span-2 sm:col-span-1">
                     <button
                       @click="addWeeklyItem"
@@ -566,9 +548,9 @@
                 </div>
               </div>
 
-              <!-- Etapa 3 - Previsao de entrega -->
+              <!-- Etapa 3 - Previsão de entrega -->
               <div v-show="currentStep === 3">
-                <h3 class="text-base font-medium text-text-light dark:text-text-dark mb-6">Etapa 3 - Previsao de entrega</h3>
+                <h3 class="text-base font-medium text-text-light dark:text-text-dark mb-6">Etapa 3 - Previsão de entrega</h3>
 
                 <!-- Lista de entregas -->
                 <div v-if="newContrato.delivery_schedule.length > 0" class="space-y-2 max-h-96 overflow-y-auto mb-6">
@@ -612,10 +594,10 @@
                 <div v-else class="text-center py-8 text-subtext-light dark:text-subtext-dark border border-dashed border-border-light dark:border-border-dark rounded-lg mb-6">
                   <span class="material-icons-outlined text-3xl mb-2">event_busy</span>
                   <p>Nenhuma entrega prevista</p>
-                  <p class="text-sm">Volte a etapa anterior e adicione os itens semanais</p>
+                  <p class="text-sm">Volte à etapa anterior e adicione os itens semanais</p>
                 </div>
 
-                <!-- Botao adicionar entrega manual -->
+                <!-- Botão adicionar entrega manual -->
                 <button @click="openAddDeliveryModal" class="btn btn-secondary text-sm mb-6">
                   <span class="material-icons text-sm">add</span>
                   Adicionar microverde
@@ -647,14 +629,14 @@
                   <div class="p-3 bg-white dark:bg-gray-800 rounded-lg">
                     <p class="text-xs text-subtext-light dark:text-subtext-dark flex items-center gap-1">
                       <span class="material-icons text-primary text-sm">card_giftcard</span>
-                      Valor da bonificacao
+                      Valor da bonificação
                     </p>
                     <p class="text-lg font-semibold text-primary">{{ formatCurrency(valorBonificacao) }}</p>
                   </div>
                   <div class="p-3 bg-white dark:bg-gray-800 rounded-lg">
                     <p class="text-xs text-subtext-light dark:text-subtext-dark flex items-center gap-1">
                       <span class="material-icons text-primary text-sm">account_balance_wallet</span>
-                      Valor total de creditos
+                      Valor total de créditos
                     </p>
                     <p class="text-lg font-semibold text-text-light dark:text-text-dark">{{ formatCurrency(valorTotalCreditos) }}</p>
                   </div>
@@ -675,7 +657,7 @@
                   <div class="p-3 bg-white dark:bg-gray-800 rounded-lg">
                     <p class="text-xs text-subtext-light dark:text-subtext-dark flex items-center gap-1">
                       <span class="material-icons text-primary text-sm">savings</span>
-                      Valor residual credito
+                      Valor residual crédito
                     </p>
                     <p class="text-lg font-semibold text-text-light dark:text-text-dark">{{ formatCurrency(valorResidualCredito) }}</p>
                   </div>
@@ -712,7 +694,7 @@
                   </div>
                 </div>
 
-                <!-- Selecao de forma de pagamento -->
+                <!-- Seleção de forma de pagamento -->
                 <div class="max-w-md">
                   <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-2">Forma de pagamento</label>
                   <select v-model="newContrato.forma_pagamento" class="input">
@@ -808,7 +790,7 @@
 
             <!-- Modal Footer -->
             <div class="sticky bottom-0 glass-panel border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between gap-3">
-              <!-- Botao Voltar -->
+              <!-- Botão Voltar -->
               <button
                 v-if="currentStep > 1"
                 @click="currentStep--"
@@ -829,7 +811,7 @@
                   class="btn btn-primary"
                   :disabled="!canAdvanceStep"
                 >
-                  Avancar
+                  Avançar
                   <span class="material-icons text-sm">chevron_right</span>
                 </button>
                 <button
@@ -938,11 +920,11 @@
                           <span v-if="newDeliveryForm.datas_selecionadas.includes(data)" class="material-icons text-primary text-sm">check</span>
                         </div>
                         <div v-if="datasDisponiveisOrdenadas.length === 0" class="px-3 py-2 text-sm text-gray-400">
-                          Nenhuma data disponivel
+                          Nenhuma data disponível
                         </div>
                       </div>
                     </div>
-                    <!-- Botao adicionar todas as datas -->
+                    <!-- Botão adicionar todas as datas -->
                     <button
                       @click="adicionarTodasAsDatas"
                       class="mt-2 text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
@@ -1230,7 +1212,7 @@
                   <p class="text-sm text-subtext-light dark:text-subtext-dark">Cadastro de tabelas de precos</p>
                 </div>
 
-                <!-- Conteudo -->
+                <!-- Conteúdo -->
                 <div class="p-6">
                   <!-- Nome da tabela -->
                   <div class="mb-4">
@@ -1347,7 +1329,7 @@
                   <p class="text-sm text-subtext-light dark:text-subtext-dark">Cadastro de tabelas de precos</p>
                 </div>
 
-                <!-- Conteudo -->
+                <!-- Conteúdo -->
                 <div class="p-6">
                   <div>
                     <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Nome da tabela</label>
@@ -1372,7 +1354,7 @@
       </Transition>
     </Teleport>
 
-    <!-- Modal de Edicao -->
+    <!-- Modal de Edição -->
     <Teleport to="body">
       <Transition
         enter-active-class="transition-opacity duration-200"
@@ -1463,8 +1445,8 @@
                   </select>
                 </div>
                 <div class="md:col-span-4">
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observacoes</label>
-                  <textarea v-model="editContrato.observacoes" class="input min-h-[60px] resize-y" placeholder="Observacoes sobre o contrato"></textarea>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observações</label>
+                  <textarea v-model="editContrato.observacoes" class="input min-h-[60px] resize-y" placeholder="Observações sobre o contrato"></textarea>
                 </div>
               </div>
 
@@ -1523,48 +1505,47 @@
       </Transition>
     </Teleport>
 
-    <!-- Slideover de Detalhes -->
+    <!-- Modal de Detalhes -->
     <Teleport to="body">
       <Transition
-        enter-active-class="transition-opacity duration-300 ease-out"
+        enter-active-class="transition-opacity duration-200"
         enter-from-class="opacity-0"
         enter-to-class="opacity-100"
-        leave-active-class="transition-opacity duration-200 ease-in"
+        leave-active-class="transition-opacity duration-200"
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="showDetailsSlideover" class="fixed inset-0 z-50 overflow-hidden">
-          <div class="fixed inset-0 glass-backdrop" @click="closeDetailsSlideover"></div>
-          <div class="fixed inset-y-0 right-0 flex max-w-full">
+        <div v-if="showDetailsModal" class="fixed inset-0 z-50 overflow-y-auto">
+          <div class="fixed inset-0 glass-backdrop" @click="closeDetailsModal"></div>
+          <div class="flex min-h-full items-center justify-center p-4">
             <Transition
-              enter-active-class="transform transition-transform duration-300 ease-out"
-              enter-from-class="translate-x-full"
-              enter-to-class="translate-x-0"
-              leave-active-class="transform transition-transform duration-200 ease-in"
-              leave-from-class="translate-x-0"
-              leave-to-class="translate-x-full"
+              enter-active-class="transition-all duration-200"
+              enter-from-class="opacity-0 scale-95"
+              enter-to-class="opacity-100 scale-100"
+              leave-active-class="transition-all duration-200"
+              leave-from-class="opacity-100 scale-100"
+              leave-to-class="opacity-0 scale-95"
             >
-              <div v-if="showDetailsSlideover" class="w-screen max-w-full sm:max-w-xl">
-                <div class="flex h-full flex-col glass-panel shadow-xl">
-              <!-- Slideover Header -->
-              <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between">
+              <div v-if="showDetailsModal" class="relative glass-panel rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+              <!-- Modal Header -->
+              <div class="sticky top-0 glass-panel border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between z-10">
                 <div>
                   <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Detalhes do Contrato</h2>
                   <p class="text-sm text-subtext-light dark:text-subtext-dark">Contrato #{{ selectedContrato?.numero }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <button @click="openEditFromSlideover" class="btn btn-secondary">
+                  <button @click="openEditFromDetails" class="btn btn-secondary">
                     <span class="material-icons text-sm">edit</span>
                     Editar
                   </button>
-                  <button @click="closeDetailsSlideover" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <button @click="closeDetailsModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <span class="material-icons">close</span>
                   </button>
                 </div>
               </div>
 
-              <!-- Slideover Body -->
-              <div class="flex-1 overflow-y-auto" v-if="selectedContrato">
+              <!-- Modal Body -->
+              <div v-if="selectedContrato">
 
                 <!-- Tab: Resumo do Contrato -->
                 <div class="p-6">
@@ -1575,7 +1556,7 @@
                     </span>
                   </div>
 
-                  <!-- Informacoes do Contrato -->
+                  <!-- Informações do Contrato -->
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <!-- Dados do Contrato -->
                     <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
@@ -1658,11 +1639,11 @@
                     </div>
                   </div>
 
-                  <!-- Observacoes -->
+                  <!-- Observações -->
                   <div v-if="selectedContrato.observacoes" class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 mb-6">
                     <h3 class="text-sm font-semibold text-text-light dark:text-text-dark mb-3 flex items-center gap-2">
                       <span class="material-icons text-primary text-sm">notes</span>
-                      Observacoes
+                      Observações
                     </h3>
                     <p class="text-sm text-text-light dark:text-text-dark whitespace-pre-wrap">{{ selectedContrato.observacoes }}</p>
                   </div>
@@ -1765,8 +1746,8 @@
                 </div>
               </div>
 
-              <!-- Slideover Footer - Botoes de Acao -->
-              <div class="border-t border-border-light dark:border-border-dark px-6 py-4 bg-surface-light dark:bg-surface-dark">
+              <!-- Modal Footer - Botões de Ação -->
+              <div class="sticky bottom-0 glass-panel border-t border-border-light dark:border-border-dark px-6 py-4">
                 <div class="flex gap-3">
                   <button
                     @click="abrirModalEnviarEmail"
@@ -1785,7 +1766,6 @@
                   </button>
                 </div>
               </div>
-                </div>
               </div>
             </Transition>
           </div>
@@ -1896,12 +1876,12 @@
                     <input
                       type="email"
                       v-model="emailDestinatario"
-                      placeholder="Digite o e-mail do destinatario"
+                      placeholder="Digite o e-mail do destinatário"
                       class="input w-full"
                     />
                   </div>
 
-                  <!-- Historico de Envio -->
+                  <!-- Histórico de Envio -->
                   <div v-if="selectedContrato?.email_enviado_em" class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                     <div class="flex items-start gap-2">
                       <span class="material-icons text-green-500 text-base">check_circle</span>
@@ -2226,10 +2206,10 @@ const currentStep = ref(1)
 // Modais
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
-const showDetailsSlideover = ref(false)
+const showDetailsModal = ref(false)
 const selectedContrato = ref<Contrato | null>(null)
 
-// Slideover - Estados
+// Modal Detalhes - Estados
 const showPrevisaoEntrega = ref(false)
 const pedidosContrato = ref<any[]>([])
 const loadingPedidosContrato = ref(false)
@@ -2329,13 +2309,13 @@ const enderecoEntregaCliente = computed(() => {
     if (cliente.estado) partes.push(cliente.estado)
   }
 
-  return partes.join(', ') || 'Endereco nao cadastrado'
+  return partes.join(', ') || 'Endereço não cadastrado'
 })
 
-// Computed para slideover - Link e chave de acesso do contrato
+// Computed para modal detalhes - Link e chave de acesso do contrato
 const contratoLink = computed(() => {
   if (!selectedContrato.value) return ''
-  // Link para pagina publica de visualizacao do contrato
+  // Link para página pública de visualização do contrato
   const baseUrl = window?.location?.origin || 'https://app.fazendasbioma.com.br'
   return `${baseUrl}/contrato/${selectedContrato.value.id}`
 })
@@ -2841,13 +2821,13 @@ async function createTabelaPreco() {
 
     if (error) throw error
 
-    success('Tabela de preco criada com sucesso')
+    success('Tabela de preço criada com sucesso')
     await loadTabelasPreco()
     showTabelaPrecoCreateModal.value = false
     showTabelaPrecoModal.value = true
   } catch (e: any) {
-    console.error('Erro ao criar tabela de preco:', e)
-    showError('Erro ao criar tabela de preco')
+    console.error('Erro ao criar tabela de preço:', e)
+    showError('Erro ao criar tabela de preço')
   }
 }
 
@@ -2860,7 +2840,7 @@ async function addTabelaPrecoItem() {
   // Verificar se produto ja existe na tabela
   const existe = selectedTabelaPrecoItens.value.some(i => i.produto_id === newTabelaPrecoItemForm.value.produto_id)
   if (existe) {
-    showError('Produto ja existe na tabela')
+    showError('Produto já existe na tabela')
     return
   }
 
@@ -3415,7 +3395,7 @@ function canGoToStep(step: number): boolean {
   // Pode sempre voltar para etapas anteriores
   if (step <= currentStep.value) return true
 
-  // Para avancar, precisa ter completado todas as etapas anteriores
+  // Para avançar, precisa ter completado todas as etapas anteriores
   for (let i = 1; i < step; i++) {
     if (!isStepCompleted(i)) return false
   }
@@ -3448,14 +3428,14 @@ function goToStep(step: number) {
   currentStep.value = step
 }
 
-// Funcao para avancar etapa com validacao
+// Função para avançar etapa com validação
 function nextStep() {
   if (!canAdvanceStep.value) {
-    showError('Complete os campos obrigatorios antes de avancar')
+    showError('Complete os campos obrigatórios antes de avançar')
     return
   }
 
-  // Ao avancar da etapa 2 para 3, gerar cronograma
+  // Ao avançar da etapa 2 para 3, gerar cronograma
   if (currentStep.value === 2) {
     generateDeliverySchedule()
   }
@@ -3682,7 +3662,7 @@ function closeEditModal() {
   showEditModal.value = false
 }
 
-function openEditFromSlideover() {
+function openEditFromDetails() {
   if (selectedContrato.value) {
     openEditModal(selectedContrato.value)
   }
@@ -3695,7 +3675,7 @@ async function updateContrato() {
   }
 
   if (!isEditFormValid.value) {
-    showError('Preencha todos os campos obrigatorios')
+    showError('Preencha todos os campos obrigatórios')
     return
   }
 
@@ -3751,7 +3731,7 @@ async function updateContrato() {
     closeEditModal()
     await loadContratos()
 
-    // Atualizar slideover se estiver aberto
+    // Atualizar modal de detalhes se estiver aberto
     if (selectedContrato.value?.id === editContrato.value.id) {
       const updated = contratos.value.find(c => c.id === editContrato.value.id)
       if (updated) {
@@ -3767,10 +3747,10 @@ async function updateContrato() {
   }
 }
 
-// Slideover de detalhes
-async function openDetailsSlideover(contrato: Contrato) {
+// Modal de detalhes
+async function openDetailsModal(contrato: Contrato) {
   selectedContrato.value = contrato
-  showDetailsSlideover.value = true
+  showDetailsModal.value = true
   showPrevisaoEntrega.value = false
   motivoCancelamento.value = ''
   emailDestinatario.value = ''
@@ -3778,8 +3758,8 @@ async function openDetailsSlideover(contrato: Contrato) {
   await loadPedidosContrato(contrato.id)
 }
 
-function closeDetailsSlideover() {
-  showDetailsSlideover.value = false
+function closeDetailsModal() {
+  showDetailsModal.value = false
   selectedContrato.value = null
   contratoItens.value = []
   pedidosContrato.value = []
@@ -3868,7 +3848,7 @@ async function abrirModalEnviarEmail() {
 
 function copiarLink() {
   navigator.clipboard.writeText(contratoLink.value)
-  success('Link copiado para a area de transferencia')
+  success('Link copiado para a área de transferência')
 }
 
 function copiarChaveAcesso() {
@@ -3962,7 +3942,7 @@ async function confirmarCancelamento() {
     success('Contrato cancelado com sucesso')
     showCancelarContratoModal.value = false
     motivoCancelamento.value = ''
-    closeDetailsSlideover()
+    closeDetailsModal()
     await loadContratos()
   } catch (e: any) {
     console.error('Erro ao cancelar contrato:', e)

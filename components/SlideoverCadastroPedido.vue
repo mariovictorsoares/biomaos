@@ -41,7 +41,7 @@
                   <!-- Codigo do Pedido -->
                   <div class="flex-shrink-0">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Codigo do pedido
+                      Código do pedido
                     </label>
                     <input
                       type="text"
@@ -54,7 +54,7 @@
                   <!-- Previsao de Entrega -->
                   <div class="flex-shrink-0">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Previsao de entrega
+                      Previsão de entrega
                     </label>
                     <input
                       type="date"
@@ -81,7 +81,7 @@
                 <div class="flex items-end gap-3 mb-8">
                   <div class="flex-1">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Tabela de preco
+                      Tabela de preço
                     </label>
                     <select v-model="form.tabelaPrecoId" class="input">
                       <option value="">Selecione...</option>
@@ -93,7 +93,7 @@
                   <button
                     type="button"
                     class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full hover:bg-primary-dark transition-colors flex-shrink-0"
-                    title="Adicionar tabela de preco"
+                    title="Adicionar tabela de preço"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -136,7 +136,7 @@
                     <!-- Valor Unitario -->
                     <div class="w-32">
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        Valor unitario
+                        Valor unitário
                       </label>
                       <input
                         type="number"
@@ -224,7 +224,7 @@
                         <ellipse cx="50" cy="70" rx="25" ry="10"/>
                       </svg>
                     </div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Nenhum item cadastrado ate o momento</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Nenhum item cadastrado até o momento</p>
                   </div>
                 </div>
               </div>

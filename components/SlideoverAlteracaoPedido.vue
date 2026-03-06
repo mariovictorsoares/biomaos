@@ -14,7 +14,7 @@
             <!-- Header -->
             <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-                Alteracao de pedido
+                Alteração de pedido
               </h2>
               <div class="flex items-center gap-3">
                 <button
@@ -40,7 +40,7 @@
                   <!-- Codigo do Pedido -->
                   <div class="flex-shrink-0">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Codigo do pedido
+                      Código do pedido
                     </label>
                     <input
                       type="text"
@@ -53,7 +53,7 @@
                   <!-- Previsao de Entrega -->
                   <div class="flex-shrink-0">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Previsao de entrega
+                      Previsão de entrega
                     </label>
                     <input
                       type="date"
@@ -80,7 +80,7 @@
                 <div class="flex items-end gap-3 mb-8">
                   <div class="flex-1">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Tabela de preco
+                      Tabela de preço
                     </label>
                     <select v-model="form.tabelaPrecoId" class="input">
                       <option value="">Selecione...</option>
@@ -92,7 +92,7 @@
                   <button
                     type="button"
                     class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full hover:bg-primary-dark transition-colors flex-shrink-0"
-                    title="Adicionar tabela de preco"
+                    title="Adicionar tabela de preço"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -135,7 +135,7 @@
                     <!-- Valor Unitario -->
                     <div class="w-32">
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        Valor unitario
+                        Valor unitário
                       </label>
                       <input
                         type="number"
@@ -276,7 +276,7 @@
                     <!-- Logistica -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        Logistica
+                        Logística
                       </label>
                       <div class="flex items-center gap-2">
                         <select v-model="form.logistica" class="input flex-1">
@@ -326,8 +326,8 @@
                         <select v-model="form.tipo" class="input">
                           <option value="">Tipo pedido</option>
                           <option value="venda">Venda</option>
-                          <option value="consignacao">Consignacao</option>
-                          <option value="bonificacao">Bonificacao</option>
+                          <option value="consignacao">Consignação</option>
+                          <option value="bonificacao">Bonificação</option>
                         </select>
                       </div>
                     </div>

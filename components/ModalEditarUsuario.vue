@@ -58,8 +58,9 @@
               type="text"
               v-model="form.nome"
               placeholder="Digite o nome completo"
-              class="input"
+              :class="['input', attempted && !form.nome ? 'border-red-500' : '']"
             />
+            <span v-if="attempted && !form.nome" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
           </div>
 
           <!-- Email -->
@@ -71,8 +72,9 @@
               type="email"
               v-model="form.email"
               placeholder="Digite o e-mail"
-              class="input"
+              :class="['input', attempted && !form.email ? 'border-red-500' : '']"
             />
+            <span v-if="attempted && !form.email" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
           </div>
 
           <!-- Grid 2 colunas -->
@@ -82,13 +84,14 @@
               <label class="block text-sm font-medium text-gray-700 mb-1.5">
                 Perfil <span class="text-red-500">*</span>
               </label>
-              <select v-model="form.role" class="input">
+              <select v-model="form.role" :class="['input', attempted && !form.role ? 'border-red-500' : '']">
                 <option value="">Selecione...</option>
                 <option value="admin">Administrador</option>
                 <option value="manager">Gerente</option>
                 <option value="operator">Operador</option>
                 <option value="viewer">Visualizador</option>
               </select>
+              <span v-if="attempted && !form.role" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
             </div>
 
             <!-- Status -->
@@ -108,7 +111,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1.5">
               Empresa <span class="text-red-500">*</span>
             </label>
-            <select v-model="form.empresa" class="input">
+            <select v-model="form.empresa" :class="['input', attempted && !form.empresa ? 'border-red-500' : '']">
               <option value="">Selecione uma empresa...</option>
               <option value="Fazendas Bioma">Fazendas Bioma</option>
               <option value="AgroVerde Sustentável">AgroVerde Sustentável</option>
@@ -117,6 +120,7 @@
               <option value="Grupo Natureza">Grupo Natureza</option>
               <option value="Campos Verdes Ltda">Campos Verdes Ltda</option>
             </select>
+            <span v-if="attempted && !form.empresa" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
           </div>
 
           <!-- Seção de Senha -->
@@ -211,7 +215,7 @@
             >
               Cancelar
             </button>
-            <button class="btn btn-primary">
+            <button @click="handleSave" class="btn btn-primary">
               Salvar Alterações
             </button>
           </div>
@@ -235,6 +239,7 @@ defineEmits(['close'])
 
 const showPassword = ref(false)
 const showPasswordSection = ref(false)
+const attempted = ref(false)
 
 const form = ref({
   nome: '',
@@ -258,8 +263,17 @@ watch(() => props.usuario, (newUser) => {
       novaSenha: '',
       confirmarSenha: ''
     }
+    attempted.value = false
   }
 }, { immediate: true })
+
+const handleSave = () => {
+  attempted.value = true
+  if (!form.value.nome || !form.value.email || !form.value.role || !form.value.empresa) {
+    return
+  }
+  // TODO: implementar lógica de atualização de usuário
+}
 
 const avatarInitials = computed(() => {
   if (!form.value.nome) return 'US'

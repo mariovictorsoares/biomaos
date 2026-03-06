@@ -18,7 +18,7 @@
         <div class="w-16 h-16 mx-auto bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center">
           <span class="material-icons text-red-500 text-3xl">error_outline</span>
         </div>
-        <h2 class="text-xl font-semibold text-text-light dark:text-text-dark">Erro na autenticacao</h2>
+        <h2 class="text-xl font-semibold text-text-light dark:text-text-dark">Erro na autenticação</h2>
         <p class="text-sm text-subtext-light dark:text-subtext-dark max-w-sm">{{ error }}</p>
         <NuxtLink
           to="/auth/login"
@@ -45,16 +45,16 @@ const error = ref('')
 
 onMounted(async () => {
   try {
-    // Verifica se ha um erro na URL
+    // Verifica se há um erro na URL
     const errorParam = route.query.error
     const errorDescription = route.query.error_description
 
     if (errorParam) {
-      error.value = errorDescription || 'Ocorreu um erro durante a autenticacao.'
+      error.value = errorDescription || 'Ocorreu um erro durante a autenticação.'
       return
     }
 
-    // Verifica a sessao atual
+    // Verifica a sessão atual
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
     if (sessionError) {
@@ -63,14 +63,14 @@ onMounted(async () => {
     }
 
     if (session) {
-      // Usuario autenticado, redireciona para o dashboard
+      // Usuário autenticado, redireciona para o dashboard
       router.push('/')
     } else {
-      // Sem sessao, redireciona para login
+      // Sem sessão, redireciona para login
       router.push('/auth/login')
     }
   } catch (err) {
-    error.value = 'Ocorreu um erro inesperado durante a autenticacao.'
+    error.value = 'Ocorreu um erro inesperado durante a autenticação.'
   }
 })
 </script>

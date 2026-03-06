@@ -19,7 +19,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     resendApiKey: process.env.RESEND_API_KEY,
     public: {
-      baseUrl: process.env.BASE_URL || 'http://localhost:3000'
+      baseUrl: process.env.BASE_URL || 'http://localhost:3000',
+      featurebaseAppId: process.env.FEATUREBASE_APP_ID || ''
     }
   },
 

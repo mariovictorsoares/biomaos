@@ -17,55 +17,46 @@
       </NuxtLink>
     </div>
 
-    <!-- Conteudo para usuario admin -->
+    <!-- Conteúdo para usuário admin -->
     <template v-else>
-      <h1 class="text-xl sm:text-2xl font-bold text-text-light dark:text-text-dark mb-4 sm:mb-6">Usuários</h1>
+      <h1 class="text-lg font-medium text-text-light/70 dark:text-text-dark/70 tracking-wide uppercase mb-12">Usuários</h1>
+
+      <!-- Toolbar: Filtros + Ação -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+        <!-- Esquerda: Filtros + Busca -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <!-- Filtro Status -->
+          <select v-model="filterStatus" class="input text-sm w-full sm:w-28 shrink-0">
+            <option value="">Todos</option>
+            <option value="active">Ativos</option>
+            <option value="inactive">Inativos</option>
+          </select>
+          <!-- Filtro Perfil -->
+          <select v-model="filterPerfil" class="input text-sm w-full sm:w-40 shrink-0">
+            <option value="">Todos perfis</option>
+            <option value="admin">Administrador</option>
+            <option value="user">Usuário</option>
+          </select>
+          <!-- Busca -->
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base">search</span>
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Pesquise aqui..."
+              class="input w-full sm:w-64 text-sm pl-9"
+            />
+          </div>
+        </div>
+        <!-- Direita: Botão -->
+        <button @click="openCreateModal" class="btn btn-primary shrink-0 justify-center sm:justify-start">
+          <span class="material-icons text-sm">add</span>
+          Novo usuário
+        </button>
+      </div>
 
       <!-- Card da Tabela -->
       <div class="card">
-        <!-- Header do Card -->
-        <div class="p-3 sm:p-4 border-b border-border-light dark:border-border-dark">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-              <h2 class="text-xs sm:text-sm font-medium text-subtext-light dark:text-subtext-dark uppercase tracking-wider">Lista de Usuários</h2>
-              <!-- Botao Novo Usuario - Desktop -->
-              <button @click="openCreateModal" class="hidden sm:flex btn btn-primary shrink-0">
-                <span class="material-icons text-sm">add</span>
-                Novo usuário
-              </button>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <!-- Filtro Status -->
-              <select v-model="filterStatus" class="input text-sm w-full sm:w-28 shrink-0">
-                <option value="">Todos</option>
-                <option value="active">Ativos</option>
-                <option value="inactive">Inativos</option>
-              </select>
-              <!-- Filtro Perfil -->
-              <select v-model="filterPerfil" class="input text-sm w-full sm:w-40 shrink-0">
-                <option value="">Todos perfis</option>
-                <option value="admin">Administrador</option>
-                <option value="user">Usuário</option>
-              </select>
-              <!-- Busca -->
-              <div class="relative flex-1">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base sm:text-lg">search</span>
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Pesquise aqui..."
-                  class="input w-full text-sm pl-9 sm:pl-10"
-                />
-              </div>
-              <!-- Botao Novo Usuario - Mobile -->
-              <button @click="openCreateModal" class="sm:hidden btn btn-primary w-full justify-center">
-                <span class="material-icons text-sm">add</span>
-                Novo usuário
-              </button>
-            </div>
-          </div>
-        </div>
-
         <!-- Tabela - Desktop -->
         <div class="hidden md:block overflow-x-auto">
           <table class="w-full text-left border-collapse">
@@ -87,8 +78,9 @@
                 @click="openDetailsSlideover(usuario)"
               >
                 <td class="table-cell">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                    {{ getInitials(usuario.nome) }}
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 overflow-hidden">
+                    <img v-if="usuario.foto_url" :src="usuario.foto_url" class="w-full h-full object-cover" />
+                    <span v-else>{{ getInitials(usuario.nome) }}</span>
                   </div>
                 </td>
                 <td class="table-cell">
@@ -133,8 +125,9 @@
             @click="openDetailsSlideover(usuario)"
           >
             <div class="flex items-start gap-3">
-              <div class="w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 shrink-0">
-                {{ getInitials(usuario.nome) }}
+              <div class="w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 shrink-0 overflow-hidden">
+                <img v-if="usuario.foto_url" :src="usuario.foto_url" class="w-full h-full object-cover" />
+                <span v-else>{{ getInitials(usuario.nome) }}</span>
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-2">
@@ -184,7 +177,7 @@
           </button>
         </div>
 
-        <!-- Paginacao -->
+        <!-- Paginação -->
         <div v-if="filteredUsuarios.length > 0" class="p-3 sm:p-4 border-t border-border-light dark:border-border-dark text-xs text-subtext-light dark:text-subtext-dark">
           <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
             <div class="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
@@ -206,7 +199,7 @@
               >
                 <span class="material-icons text-sm">chevron_left</span>
               </button>
-              <span class="hidden xs:inline">Pagina</span>
+              <span class="hidden xs:inline">Página</span>
               <input
                 v-model="pageInput"
                 type="text"
@@ -337,7 +330,7 @@
         </div>
       </div>
 
-      <!-- Modal de Criacao -->
+      <!-- Modal de Criação -->
       <Teleport to="body">
         <Transition
           enter-active-class="transition-opacity duration-200"
@@ -369,6 +362,32 @@
 
                   <!-- Modal Body -->
                   <div class="p-6 space-y-5 overflow-y-auto flex-1">
+                    <!-- Foto do Usuario -->
+                    <div class="flex items-center gap-4">
+                      <div
+                        class="w-20 h-20 rounded-full border-2 border-dashed border-border-light dark:border-border-dark flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800 cursor-pointer hover:border-primary transition-colors shrink-0"
+                        @click="$refs.fotoInputNew.click()"
+                      >
+                        <img v-if="newFotoPreview" :src="newFotoPreview" class="w-full h-full object-cover" />
+                        <span v-else class="material-icons-outlined text-2xl text-gray-400">add_photo_alternate</span>
+                      </div>
+                      <div class="flex-1">
+                        <input type="file" ref="fotoInputNew" class="hidden" accept="image/*" @change="handleFotoChange($event, 'new')" />
+                        <button type="button" @click="$refs.fotoInputNew.click()" class="text-primary text-sm hover:underline">
+                          {{ newFotoPreview ? 'Trocar foto' : 'Adicionar foto' }}
+                        </button>
+                        <button
+                          v-if="newFotoPreview"
+                          type="button"
+                          @click="newFotoPreview = null; newFotoFile = null"
+                          class="text-red-500 text-sm hover:underline ml-2"
+                        >
+                          Remover
+                        </button>
+                        <p class="text-xs text-subtext-light dark:text-subtext-dark mt-1">PNG, JPG até 2MB</p>
+                      </div>
+                    </div>
+
                     <!-- Perfil de Acesso -->
                     <div>
                       <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Perfil de acesso <span class="text-red-500">*</span></label>
@@ -378,7 +397,7 @@
                         <option value="user">Usuário</option>
                       </select>
                       <p class="text-xs text-subtext-light dark:text-subtext-dark mt-1">
-                        {{ newUsuario.perfil === 'admin' ? 'Administradores tem acesso total ao sistema' : newUsuario.perfil === 'user' ? 'Usuarios tem acesso limitado as empresas vinculadas' : 'Selecione o nivel de acesso do usuario' }}
+                        {{ newUsuario.perfil === 'admin' ? 'Administradores têm acesso total ao sistema' : newUsuario.perfil === 'user' ? 'Usuários têm acesso limitado às empresas vinculadas' : 'Selecione o nível de acesso do usuário' }}
                       </p>
                     </div>
 
@@ -414,14 +433,14 @@
                       />
                     </div>
 
-                    <!-- Endereco e Numero -->
+                    <!-- Endereço e Número -->
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Endereco</label>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Endereço</label>
                         <input type="text" v-model="newUsuario.endereco" class="input" placeholder="Rua, Avenida..." />
                       </div>
                       <div>
-                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Numero</label>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Número</label>
                         <input type="text" v-model="newUsuario.numero" class="input" placeholder="Nº" />
                       </div>
                     </div>
@@ -454,7 +473,7 @@
                         <div>
                           <p class="text-sm font-medium text-blue-800 dark:text-blue-300">Convite por e-mail</p>
                           <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                            O usuario recebera um e-mail de convite para criar sua senha e acessar o sistema.
+                            O usuário receberá um e-mail de convite para criar sua senha e acessar o sistema.
                           </p>
                         </div>
                       </div>
@@ -477,7 +496,7 @@
         </Transition>
       </Teleport>
 
-      <!-- Modal de Edicao -->
+      <!-- Modal de Edição -->
       <Teleport to="body">
         <Transition
           enter-active-class="transition-opacity duration-200"
@@ -501,7 +520,7 @@
                 <div v-if="showEditModal" class="relative glass-panel rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
                   <!-- Modal Header -->
                   <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between shrink-0">
-                    <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Editar usuario</h2>
+                    <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Editar usuário</h2>
                     <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                       <span class="material-icons">close</span>
                     </button>
@@ -509,14 +528,33 @@
 
                   <!-- Modal Body -->
                   <div class="p-6 space-y-5 overflow-y-auto flex-1">
-                    <!-- Avatar Preview -->
+                    <!-- Avatar com Upload de Foto -->
                     <div class="flex items-center gap-4">
-                      <div class="w-16 h-16 rounded-full flex items-center justify-center text-xl font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                        {{ getInitials(editUsuario.nome) }}
+                      <div
+                        class="w-20 h-20 rounded-full border-2 border-dashed border-border-light dark:border-border-dark flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800 cursor-pointer hover:border-primary transition-colors shrink-0"
+                        @click="$refs.fotoInputEdit.click()"
+                      >
+                        <img v-if="editFotoPreview || editUsuario.foto_url" :src="editFotoPreview || editUsuario.foto_url" class="w-full h-full object-cover" />
+                        <span v-else class="text-xl font-medium text-gray-600 dark:text-gray-300">{{ getInitials(editUsuario.nome) }}</span>
                       </div>
-                      <div>
+                      <div class="flex-1">
+                        <input type="file" ref="fotoInputEdit" class="hidden" accept="image/*" @change="handleFotoChange($event)" />
                         <p class="text-sm font-medium text-text-light dark:text-text-dark">{{ editUsuario.nome }}</p>
-                        <p class="text-xs text-subtext-light dark:text-subtext-dark">{{ editUsuario.email }}</p>
+                        <p class="text-xs text-subtext-light dark:text-subtext-dark mb-2">{{ editUsuario.email }}</p>
+                        <div class="flex items-center gap-2">
+                          <button type="button" @click="$refs.fotoInputEdit.click()" class="text-primary text-xs hover:underline">
+                            {{ editFotoPreview || editUsuario.foto_url ? 'Trocar foto' : 'Adicionar foto' }}
+                          </button>
+                          <button
+                            v-if="editFotoPreview || editUsuario.foto_url"
+                            type="button"
+                            @click="removeFoto"
+                            class="text-red-500 text-xs hover:underline"
+                          >
+                            Remover
+                          </button>
+                        </div>
+                        <p class="text-[10px] text-subtext-light dark:text-subtext-dark mt-1">PNG, JPG até 2MB</p>
                       </div>
                     </div>
 
@@ -555,14 +593,14 @@
                       />
                     </div>
 
-                    <!-- Endereco e Numero -->
+                    <!-- Endereço e Número -->
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Endereco</label>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Endereço</label>
                         <input type="text" v-model="editUsuario.endereco" class="input" />
                       </div>
                       <div>
-                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Numero</label>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Número</label>
                         <input type="text" v-model="editUsuario.numero" class="input" />
                       </div>
                     </div>
@@ -591,8 +629,8 @@
                     <!-- Status -->
                     <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                       <div>
-                        <p class="text-sm font-medium text-text-light dark:text-text-dark">Status do usuario</p>
-                        <p class="text-xs text-subtext-light dark:text-subtext-dark">{{ editUsuario.ativo ? 'Usuario ativo no sistema' : 'Usuario desativado' }}</p>
+                        <p class="text-sm font-medium text-text-light dark:text-text-dark">Status do usuário</p>
+                        <p class="text-xs text-subtext-light dark:text-subtext-dark">{{ editUsuario.ativo ? 'Usuário ativo no sistema' : 'Usuário desativado' }}</p>
                       </div>
                       <button
                         @click="editUsuario.ativo = !editUsuario.ativo"
@@ -608,7 +646,7 @@
                     <button @click="closeEditModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
                     <button @click="updateUsuario" class="btn btn-primary" :disabled="saving">
                       <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
-                      {{ saving ? 'Salvando...' : 'Salvar alteracoes' }}
+                      {{ saving ? 'Salvando...' : 'Salvar alterações' }}
                     </button>
                   </div>
                 </div>
@@ -645,8 +683,9 @@
                     <!-- Header -->
                     <div class="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100 dark:border-border-dark flex items-center justify-between gap-3">
                       <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                        <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-sm sm:text-lg font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 shrink-0">
-                          {{ getInitials(selectedUsuario?.nome) }}
+                        <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-sm sm:text-lg font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 shrink-0 overflow-hidden">
+                          <img v-if="selectedUsuario?.foto_url" :src="selectedUsuario.foto_url" class="w-full h-full object-cover" />
+                          <span v-else>{{ getInitials(selectedUsuario?.nome) }}</span>
                         </div>
                         <div class="min-w-0 flex-1">
                           <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-text-dark truncate">{{ selectedUsuario?.nome }}</h2>
@@ -672,9 +711,9 @@
                           </span>
                         </div>
 
-                        <!-- Informacoes do Usuario -->
+                        <!-- Informações do Usuario -->
                         <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
-                          <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Informacoes</h3>
+                          <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Informações</h3>
                           <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
                             <div class="col-span-1 xs:col-span-2">
                               <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">E-mail</p>
@@ -691,9 +730,9 @@
                           </div>
                         </div>
 
-                        <!-- Endereco -->
+                        <!-- Endereço -->
                         <div v-if="selectedUsuario?.endereco || selectedUsuario?.cidade" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
-                          <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Endereco</h3>
+                          <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Endereço</h3>
                           <div class="space-y-2">
                             <p v-if="selectedUsuario?.endereco" class="text-sm text-gray-900 dark:text-text-dark">
                               {{ selectedUsuario?.endereco }}<span v-if="selectedUsuario?.numero">, {{ selectedUsuario?.numero }}</span>
@@ -759,7 +798,7 @@
                     <div class="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-border-dark">
                       <button @click="openEditFromSlideover" class="w-full btn btn-primary justify-center">
                         <span class="material-icons text-sm">edit</span>
-                        Editar usuario
+                        Editar usuário
                       </button>
                     </div>
                   </div>
@@ -835,43 +874,43 @@ const showDetailsSlideover = ref(false)
 const selectedUsuario = ref(null)
 const selectedUsuarioEmpresas = ref([])
 
-// Paginacao
+// Páginacao
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const pageInput = ref('1')
 
 // Filtros
 const searchQuery = ref('')
-const filterStatus = ref('')
+const filterStatus = ref('active')
 const filterPerfil = ref('')
 
 // Lista de estados brasileiros
 const estados = [
   { sigla: 'AC', nome: 'Acre' },
   { sigla: 'AL', nome: 'Alagoas' },
-  { sigla: 'AP', nome: 'Amapa' },
+  { sigla: 'AP', nome: 'Amapá' },
   { sigla: 'AM', nome: 'Amazonas' },
   { sigla: 'BA', nome: 'Bahia' },
-  { sigla: 'CE', nome: 'Ceara' },
+  { sigla: 'CE', nome: 'Ceará' },
   { sigla: 'DF', nome: 'Distrito Federal' },
-  { sigla: 'ES', nome: 'Espirito Santo' },
-  { sigla: 'GO', nome: 'Goias' },
-  { sigla: 'MA', nome: 'Maranhao' },
+  { sigla: 'ES', nome: 'Espírito Santo' },
+  { sigla: 'GO', nome: 'Goiás' },
+  { sigla: 'MA', nome: 'Maranhão' },
   { sigla: 'MT', nome: 'Mato Grosso' },
   { sigla: 'MS', nome: 'Mato Grosso do Sul' },
   { sigla: 'MG', nome: 'Minas Gerais' },
-  { sigla: 'PA', nome: 'Para' },
-  { sigla: 'PB', nome: 'Paraiba' },
-  { sigla: 'PR', nome: 'Parana' },
+  { sigla: 'PA', nome: 'Pará' },
+  { sigla: 'PB', nome: 'Paraíba' },
+  { sigla: 'PR', nome: 'Paraná' },
   { sigla: 'PE', nome: 'Pernambuco' },
-  { sigla: 'PI', nome: 'Piaui' },
+  { sigla: 'PI', nome: 'Piauí' },
   { sigla: 'RJ', nome: 'Rio de Janeiro' },
   { sigla: 'RN', nome: 'Rio Grande do Norte' },
   { sigla: 'RS', nome: 'Rio Grande do Sul' },
-  { sigla: 'RO', nome: 'Rondonia' },
+  { sigla: 'RO', nome: 'Rondônia' },
   { sigla: 'RR', nome: 'Roraima' },
   { sigla: 'SC', nome: 'Santa Catarina' },
-  { sigla: 'SP', nome: 'Sao Paulo' },
+  { sigla: 'SP', nome: 'São Paulo' },
   { sigla: 'SE', nome: 'Sergipe' },
   { sigla: 'TO', nome: 'Tocantins' }
 ]
@@ -909,6 +948,15 @@ const newUsuario = ref(getEmptyUsuario())
 
 // Form de edicao
 const editUsuario = ref({})
+
+// Foto do usuario - criacao
+const newFotoFile = ref(null)
+const newFotoPreview = ref(null)
+
+// Foto do usuario - edicao
+const editFotoFile = ref(null)
+const editFotoPreview = ref(null)
+const removedFoto = ref(false)
 
 function getEmptyUsuario() {
   return {
@@ -986,7 +1034,7 @@ function getPerfilLabel(perfil) {
     admin: 'Administrador',
     user: 'Usuario'
   }
-  return labels[perfil] || 'Usuario'
+  return labels[perfil] || 'Usuário'
 }
 
 function getPerfilBadgeClass(perfil) {
@@ -1054,6 +1102,70 @@ async function buscarCep(cep, formType) {
   }
 }
 
+// Funcao para manipular upload de foto
+function handleFotoChange(event, type = 'edit') {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  // Validar tamanho (2MB max)
+  if (file.size > 2 * 1024 * 1024) {
+    toast.error('A imagem deve ter no máximo 2MB')
+    return
+  }
+
+  // Validar tipo
+  if (!file.type.startsWith('image/')) {
+    toast.error('Selecione uma imagem válida')
+    return
+  }
+
+  // Criar preview
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    if (type === 'new') {
+      newFotoPreview.value = e.target.result
+      newFotoFile.value = file
+    } else {
+      editFotoPreview.value = e.target.result
+      editFotoFile.value = file
+      removedFoto.value = false
+    }
+  }
+  reader.readAsDataURL(file)
+}
+
+// Remover foto
+function removeFoto() {
+  editFotoPreview.value = null
+  editFotoFile.value = null
+  removedFoto.value = true
+}
+
+// Upload de foto ao Supabase Storage
+async function uploadFoto(file, userId) {
+  if (!file) return null
+
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${userId}.${fileExt}`
+  const filePath = `avatars/${fileName}`
+
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(filePath, file, { upsert: true })
+
+  if (uploadError) {
+    console.error('Erro no upload da foto:', uploadError)
+    toast.error('Erro ao fazer upload da foto: ' + uploadError.message)
+    return null
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(filePath)
+
+  return `${publicUrl}?t=${Date.now()}`
+}
+
 // Carregar usuarios do Supabase (usuarios unicos, nao vinculos)
 async function loadUsuarios() {
   if (!isAdmin.value) return
@@ -1097,7 +1209,7 @@ async function loadUsuarios() {
       usuarios.value = Array.from(usuariosMap.values())
     } catch (fallbackError) {
       console.error('Erro no fallback:', fallbackError)
-      toast.error('Erro ao carregar usuarios')
+      toast.error('Erro ao carregar usuários')
     }
   } finally {
     loading.value = false
@@ -1149,6 +1261,8 @@ async function loadUsuarioEmpresas(userId) {
 // Modal de criacao
 function openCreateModal() {
   newUsuario.value = getEmptyUsuario()
+  newFotoFile.value = null
+  newFotoPreview.value = null
   showCreateModal.value = true
 }
 
@@ -1158,13 +1272,12 @@ function closeCreateModal() {
 
 async function createUsuario() {
   if (!canCreate.value) {
-    toast.error('Preencha todos os campos obrigatorios')
+    toast.error('Preencha todos os campos obrigatórios')
     return
   }
 
   saving.value = true
   try {
-    // Salvar dados do convite temporariamente (sera associado quando o usuario aceitar)
     // Criar convite de usuario via API
     const response = await $fetch('/api/invite-user', {
       method: 'POST',
@@ -1186,14 +1299,26 @@ async function createUsuario() {
       throw new Error(response.error)
     }
 
-    toast.success('Convite enviado com sucesso! O usuario recebera um e-mail para criar sua conta.')
+    // Upload da foto se tiver (usando o ID do convite como identificador)
+    if (newFotoFile.value && response.conviteId) {
+      const fotoUrl = await uploadFoto(newFotoFile.value, response.conviteId)
+      if (fotoUrl) {
+        // Atualizar convite com a foto_url
+        await supabase
+          .from('convites_usuario')
+          .update({ foto_url: fotoUrl })
+          .eq('id', response.conviteId)
+      }
+    }
+
+    toast.success('Convite enviado com sucesso! O usuário receberá um e-mail para criar sua conta.')
     closeCreateModal()
     await loadUsuarios()
     await loadConvitesPendentes()
   } catch (error) {
     console.error('Erro ao enviar convite:', error)
     if (error.message?.includes('already registered') || error.message?.includes('ja cadastrado')) {
-      toast.error('Este email ja esta cadastrado no sistema')
+      toast.error('Este email já está cadastrado no sistema')
     } else {
       toast.error('Erro ao enviar convite: ' + (error.message || 'Erro desconhecido'))
     }
@@ -1205,6 +1330,9 @@ async function createUsuario() {
 // Modal de edicao
 function openEditModal(usuario) {
   editUsuario.value = { ...usuario }
+  editFotoFile.value = null
+  editFotoPreview.value = null
+  removedFoto.value = false
   showEditModal.value = true
 }
 
@@ -1215,6 +1343,17 @@ function closeEditModal() {
 async function updateUsuario() {
   saving.value = true
   try {
+    // Upload foto se tiver nova
+    let fotoUrl = editUsuario.value.foto_url
+    if (editFotoFile.value) {
+      const newFotoUrl = await uploadFoto(editFotoFile.value, editUsuario.value.user_id)
+      if (newFotoUrl) {
+        fotoUrl = newFotoUrl
+      }
+    } else if (removedFoto.value) {
+      fotoUrl = null
+    }
+
     // Verificar se ja existe registro para o usuario
     const { data: existing } = await supabase
       .from('user_preferences')
@@ -1222,41 +1361,33 @@ async function updateUsuario() {
       .eq('user_id', editUsuario.value.user_id)
       .single()
 
+    const updateData = {
+      perfil: editUsuario.value.perfil,
+      nome_completo: editUsuario.value.nome,
+      celular: editUsuario.value.celular || null,
+      cep: editUsuario.value.cep || null,
+      endereco: editUsuario.value.endereco || null,
+      numero: editUsuario.value.numero || null,
+      complemento: editUsuario.value.complemento || null,
+      estado: editUsuario.value.estado || null,
+      cidade: editUsuario.value.cidade || null,
+      ativo: editUsuario.value.ativo,
+      foto_url: fotoUrl
+    }
+
     let error
     if (existing) {
-      // Atualizar registro existente
       const result = await supabase
         .from('user_preferences')
-        .update({
-          perfil: editUsuario.value.perfil,
-          nome_completo: editUsuario.value.nome,
-          celular: editUsuario.value.celular || null,
-          cep: editUsuario.value.cep || null,
-          endereco: editUsuario.value.endereco || null,
-          numero: editUsuario.value.numero || null,
-          complemento: editUsuario.value.complemento || null,
-          estado: editUsuario.value.estado || null,
-          cidade: editUsuario.value.cidade || null,
-          ativo: editUsuario.value.ativo
-        })
+        .update(updateData)
         .eq('user_id', editUsuario.value.user_id)
       error = result.error
     } else {
-      // Inserir novo registro
       const result = await supabase
         .from('user_preferences')
         .insert({
           user_id: editUsuario.value.user_id,
-          perfil: editUsuario.value.perfil,
-          nome_completo: editUsuario.value.nome,
-          celular: editUsuario.value.celular || null,
-          cep: editUsuario.value.cep || null,
-          endereco: editUsuario.value.endereco || null,
-          numero: editUsuario.value.numero || null,
-          complemento: editUsuario.value.complemento || null,
-          estado: editUsuario.value.estado || null,
-          cidade: editUsuario.value.cidade || null,
-          ativo: editUsuario.value.ativo
+          ...updateData
         })
       error = result.error
     }
@@ -1264,21 +1395,22 @@ async function updateUsuario() {
     if (error) throw error
 
     // Atualizar na lista local
+    const updatedUser = { ...editUsuario.value, foto_url: fotoUrl }
     const index = usuarios.value.findIndex(u => u.user_id === editUsuario.value.user_id)
     if (index !== -1) {
-      usuarios.value[index] = { ...usuarios.value[index], ...editUsuario.value }
+      usuarios.value[index] = { ...usuarios.value[index], ...updatedUser }
     }
 
     // Atualizar usuario selecionado se estava aberto no slideover
     if (selectedUsuario.value?.user_id === editUsuario.value.user_id) {
-      selectedUsuario.value = { ...selectedUsuario.value, ...editUsuario.value }
+      selectedUsuario.value = { ...selectedUsuario.value, ...updatedUser }
     }
 
     closeEditModal()
-    toast.success('Usuario atualizado com sucesso')
+    toast.success('Usuário atualizado com sucesso')
   } catch (error) {
-    console.error('Erro ao atualizar usuario:', error)
-    toast.error('Erro ao atualizar usuario')
+    console.error('Erro ao atualizar usuário:', error)
+    toast.error('Erro ao atualizar usuário')
   } finally {
     saving.value = false
   }

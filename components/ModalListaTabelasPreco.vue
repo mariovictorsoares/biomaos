@@ -17,8 +17,8 @@
             </svg>
           </div>
           <div class="min-w-0">
-            <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Tabelas de preco</h2>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Cadastro de tabelas de precos</p>
+            <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Tabelas de preço</h2>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Cadastro de tabelas de preços</p>
           </div>
         </div>
 

@@ -1,54 +1,44 @@
 <template>
   <div>
-    <h1 class="text-xl sm:text-2xl font-bold text-text-light dark:text-text-dark mb-4 sm:mb-6">Estoque</h1>
+    <!-- Toolbar: Filtros + Ação -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+      <!-- Esquerda: Busca + Filtros -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+        <!-- Busca -->
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base">search</span>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Buscar estoque..."
+            class="input w-full sm:w-64 text-sm pl-9"
+          />
+        </div>
+        <!-- Filtro Status -->
+        <select v-model="filterStatus" class="input text-sm w-full sm:w-auto shrink-0">
+          <option value="">Todos</option>
+          <option value="normal">Normal</option>
+          <option value="baixo">Estoque Baixo</option>
+          <option value="esgotado">Esgotado</option>
+        </select>
+      </div>
+      <!-- Direita: Botão -->
+      <button @click="openMovimentacaoModal" class="btn btn-primary shrink-0 justify-center sm:justify-start">
+        <span class="material-icons text-sm">swap_horiz</span>
+        Movimentação
+      </button>
+    </div>
 
     <!-- Card da Tabela -->
     <div class="card">
-      <!-- Header do Card -->
-      <div class="p-3 sm:p-4 border-b border-border-light dark:border-border-dark">
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xs sm:text-sm font-medium text-subtext-light dark:text-subtext-dark uppercase tracking-wider">Controle de Estoque</h2>
-            <!-- Botao Movimentacao - Desktop -->
-            <button @click="openMovimentacaoModal" class="hidden sm:flex btn btn-primary shrink-0">
-              <span class="material-icons text-sm">swap_horiz</span>
-              Movimentacao
-            </button>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
-            <!-- Filtro Status -->
-            <select v-model="filterStatus" class="input text-sm w-full sm:w-32 shrink-0">
-              <option value="">Todos</option>
-              <option value="normal">Normal</option>
-              <option value="baixo">Estoque Baixo</option>
-              <option value="esgotado">Esgotado</option>
-            </select>
-            <!-- Busca -->
-            <div class="relative flex-1">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base sm:text-lg">search</span>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Pesquise aqui..."
-                class="input w-full text-sm pl-9 sm:pl-10"
-              />
-            </div>
-            <!-- Botao Movimentacao - Mobile -->
-            <button @click="openMovimentacaoModal" class="sm:hidden btn btn-primary w-full justify-center">
-              <span class="material-icons text-sm">swap_horiz</span>
-              Movimentacao
-            </button>
-          </div>
-        </div>
-      </div>
 
       <!-- Tabela - Desktop -->
       <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-gray-50 dark:bg-gray-800 border-b border-border-light dark:border-border-dark">
-              <th class="table-header">Codigo</th>
-              <th class="table-header">Especie</th>
+            <tr class="bg-gray-100 dark:bg-gray-700/50 border-b border-border-light dark:border-border-dark">
+              <th class="table-header">Código</th>
+              <th class="table-header">Espécie</th>
               <th class="table-header text-right">Quantidade</th>
               <th class="table-header text-right">Estoque Min.</th>
               <th class="table-header text-center w-28">Status</th>
@@ -119,11 +109,11 @@
         <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 mb-2">inventory_2</span>
         <h3 class="text-lg font-medium text-text-light dark:text-text-dark mb-1">Nenhum produto encontrado</h3>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mb-4">
-          {{ searchQuery || filterStatus ? 'Tente ajustar os filtros' : 'Cadastre produtos e faca movimentacoes' }}
+          {{ searchQuery || filterStatus ? 'Tente ajustar os filtros' : 'Cadastre produtos e faça movimentações' }}
         </p>
         <button @click="openMovimentacaoModal" class="btn btn-primary">
           <span class="material-icons text-sm">swap_horiz</span>
-          Movimentacao
+          Movimentação
         </button>
       </div>
 
@@ -149,7 +139,7 @@
             >
               <span class="material-icons text-sm">chevron_left</span>
             </button>
-            <span class="hidden xs:inline">Pagina</span>
+            <span class="hidden xs:inline">Página</span>
             <input
               v-model="pageInput"
               type="text"
@@ -170,7 +160,7 @@
       </div>
     </div>
 
-    <!-- Modal de Movimentacao (z-index maior que slideover) -->
+    <!-- Modal de Movimentação (z-index maior que slideover) -->
     <Teleport to="body">
       <Transition
         enter-active-class="transition-opacity duration-200"
@@ -194,7 +184,7 @@
               <div v-if="showMovimentacaoModal" class="relative glass-panel rounded-lg shadow-xl w-full max-w-lg">
                 <!-- Modal Header -->
                 <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between">
-                  <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Movimentacao de Estoque</h2>
+                  <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Movimentação de Estoque</h2>
                   <button @click="closeMovimentacaoModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <span class="material-icons">close</span>
                   </button>
@@ -203,9 +193,9 @@
                 <!-- Modal Body -->
                 <div class="p-6 space-y-4">
                   <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Especie *</label>
+                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Espécie *</label>
                     <select v-model="movimentacao.especie_id" class="input" required>
-                      <option value="">Selecione a especie</option>
+                      <option value="">Selecione a espécie</option>
                       <option v-for="especie in especies" :key="especie.id" :value="especie.id">
                         {{ especie.codigo }} - {{ especie.nome }}
                       </option>
@@ -220,7 +210,7 @@
                       </label>
                       <label class="flex items-center gap-2 cursor-pointer">
                         <input type="radio" v-model="movimentacao.tipo" value="saida" class="text-primary" />
-                        <span class="text-text-light dark:text-text-dark">Saida</span>
+                        <span class="text-text-light dark:text-text-dark">Saída</span>
                       </label>
                     </div>
                   </div>
@@ -233,16 +223,16 @@
                     <select v-model="movimentacao.motivo" class="input">
                       <option value="">Selecione</option>
                       <option value="compra">Compra</option>
-                      <option value="producao">Producao</option>
+                      <option value="producao">Produção</option>
                       <option value="venda">Venda</option>
-                      <option value="ajuste">Ajuste de Inventario</option>
+                      <option value="ajuste">Ajuste de Inventário</option>
                       <option value="perda">Perda/Descarte</option>
                       <option value="outro">Outro</option>
                     </select>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observacoes</label>
-                    <textarea v-model="movimentacao.observacoes" class="input min-h-[60px] resize-y" placeholder="Detalhes da movimentacao"></textarea>
+                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observações</label>
+                    <textarea v-model="movimentacao.observacoes" class="input min-h-[60px] resize-y" placeholder="Detalhes da movimentação"></textarea>
                   </div>
                 </div>
 
@@ -261,7 +251,7 @@
       </Transition>
     </Teleport>
 
-    <!-- Modal de Detalhes da Movimentacao -->
+    <!-- Modal de Detalhes da Movimentação -->
     <Teleport to="body">
       <Transition
         enter-active-class="transition-opacity duration-200"
@@ -294,9 +284,9 @@
                     </span>
                     <div>
                       <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">
-                        {{ selectedMovimentacao.tipo === 'entrada' ? 'Entrada' : 'Saida' }}
+                        {{ selectedMovimentacao.tipo === 'entrada' ? 'Entrada' : 'Saída' }}
                       </h2>
-                      <p class="text-xs text-subtext-light dark:text-subtext-dark">Detalhes da movimentacao</p>
+                      <p class="text-xs text-subtext-light dark:text-subtext-dark">Detalhes da movimentação</p>
                     </div>
                   </div>
                   <button @click="closeDetalhesModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -308,9 +298,9 @@
                 <div class="p-6 space-y-4">
                   <!-- Status -->
                   <div v-if="selectedMovimentacao.cancelado" class="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                    <p class="text-sm font-medium text-red-600 dark:text-red-400">Movimentacao Cancelada</p>
+                    <p class="text-sm font-medium text-red-600 dark:text-red-400">Movimentação Cancelada</p>
                     <p class="text-xs text-red-500 mt-1">
-                      Por {{ selectedMovimentacao.cancelado_por_nome || 'Usuario desconhecido' }} em {{ formatDateTime(selectedMovimentacao.cancelado_em) }}
+                      Por {{ selectedMovimentacao.cancelado_por_nome || 'Usuário desconhecido' }} em {{ formatDateTime(selectedMovimentacao.cancelado_em) }}
                     </p>
                     <p v-if="selectedMovimentacao.motivo_cancelamento" class="text-xs text-red-500 mt-1 italic">
                       "{{ selectedMovimentacao.motivo_cancelamento }}"
@@ -327,7 +317,7 @@
                     </div>
                     <div>
                       <p class="text-xs text-subtext-light dark:text-subtext-dark">Motivo</p>
-                      <p class="text-sm font-medium text-text-light dark:text-text-dark">{{ selectedMovimentacao.motivo || 'Nao informado' }}</p>
+                      <p class="text-sm font-medium text-text-light dark:text-text-dark">{{ selectedMovimentacao.motivo || 'Não informado' }}</p>
                     </div>
                   </div>
 
@@ -338,11 +328,11 @@
 
                   <div>
                     <p class="text-xs text-subtext-light dark:text-subtext-dark">Criado por</p>
-                    <p class="text-sm text-text-light dark:text-text-dark">{{ selectedMovimentacao.usuario_nome || 'Usuario desconhecido' }}</p>
+                    <p class="text-sm text-text-light dark:text-text-dark">{{ selectedMovimentacao.usuario_nome || 'Usuário desconhecido' }}</p>
                   </div>
 
                   <div v-if="selectedMovimentacao.observacoes">
-                    <p class="text-xs text-subtext-light dark:text-subtext-dark">Observacoes</p>
+                    <p class="text-xs text-subtext-light dark:text-subtext-dark">Observações</p>
                     <p class="text-sm text-text-light dark:text-text-dark italic">"{{ selectedMovimentacao.observacoes }}"</p>
                   </div>
 
@@ -351,7 +341,7 @@
                     <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-4">
                       <p class="text-xs text-yellow-700 dark:text-yellow-400">
                         <span class="material-icons text-sm align-middle mr-1">warning</span>
-                        Ao cancelar, o estoque sera revertido automaticamente. Esta acao nao pode ser desfeita.
+                        Ao cancelar, o estoque será revertido automaticamente. Esta ação não pode ser desfeita.
                       </p>
                     </div>
                     <div>
@@ -443,7 +433,7 @@
                           </span>
                         </div>
                         <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
-                          <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Estoque Minimo</p>
+                          <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Estoque Mínimo</p>
                           <input
                             type="number"
                             v-model.number="estoqueMinimo"
@@ -456,10 +446,10 @@
                         </div>
                       </div>
 
-                      <!-- Historico de Movimentacoes -->
+                      <!-- Historico de Movimentações -->
                       <div>
                         <div class="flex flex-col gap-3 mb-4">
-                          <h3 class="text-sm font-semibold text-gray-900 dark:text-text-dark">Movimentacoes</h3>
+                          <h3 class="text-sm font-semibold text-gray-900 dark:text-text-dark">Movimentações</h3>
                           <!-- Filtro de Range de Data -->
                           <div class="flex flex-wrap items-center gap-2">
                             <div class="flex items-center gap-2">
@@ -471,7 +461,7 @@
                               />
                             </div>
                             <div class="flex items-center gap-2">
-                              <label class="text-xs text-gray-500">Ate:</label>
+                              <label class="text-xs text-gray-500">Até:</label>
                               <input
                                 type="date"
                                 v-model="filterDataFim"
@@ -495,7 +485,7 @@
                           </div>
                         </div>
 
-                        <!-- Loading Movimentacoes -->
+                        <!-- Loading Movimentações -->
                         <div v-if="loadingMovimentacoes" class="text-center py-8">
                           <span class="material-icons text-2xl text-gray-300 animate-spin">refresh</span>
                         </div>
@@ -521,7 +511,7 @@
                                 <div class="min-w-0">
                                   <div class="flex items-center gap-2">
                                     <p class="text-sm font-medium text-gray-900 dark:text-text-dark">
-                                      {{ mov.tipo === 'entrada' ? 'Entrada' : 'Saida' }}
+                                      {{ mov.tipo === 'entrada' ? 'Entrada' : 'Saída' }}
                                     </p>
                                     <span v-if="mov.cancelado" class="badge badge-inactive text-xs">Cancelado</span>
                                   </div>
@@ -547,9 +537,9 @@
                             </div>
                           </div>
 
-                          <!-- Paginacao Movimentacoes -->
+                          <!-- Paginacao Movimentações -->
                           <div v-if="totalPagesMovimentacoes > 1" class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
-                            <span class="text-xs text-gray-500">{{ movimentacoes.length }} movimentacoes</span>
+                            <span class="text-xs text-gray-500">{{ movimentacoes.length }} movimentações</span>
                             <div class="flex items-center gap-2">
                               <button
                                 @click="currentPageMovimentacoes--"
@@ -572,7 +562,7 @@
 
                         <div v-else class="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                           <span class="material-icons-outlined text-3xl text-gray-300 dark:text-gray-600 mb-2">history</span>
-                          <p class="text-sm text-gray-500 dark:text-subtext-dark">Nenhuma movimentacao</p>
+                          <p class="text-sm text-gray-500 dark:text-subtext-dark">Nenhuma movimentação</p>
                         </div>
                       </div>
                     </div>
@@ -582,7 +572,7 @@
                   <div class="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-border-dark">
                     <button @click="openMovimentacaoForProduct()" class="w-full btn btn-primary justify-center">
                       <span class="material-icons text-sm">swap_horiz</span>
-                      Nova Movimentacao
+                      Nova Movimentação
                     </button>
                   </div>
                 </div>
@@ -1018,7 +1008,7 @@ async function saveMovimentacao() {
       if (insError) throw insError
     }
 
-    success('Movimentacao registrada com sucesso')
+    success('Movimentação registrada com sucesso')
     closeMovimentacaoModal()
     loadEstoque()
 
@@ -1030,7 +1020,7 @@ async function saveMovimentacao() {
       }
     }
   } catch (e: any) {
-    showError('Erro ao salvar movimentacao: ' + e.message)
+    showError('Erro ao salvar movimentação: ' + e.message)
   } finally {
     saving.value = false
   }
@@ -1074,13 +1064,13 @@ async function confirmarCancelamento() {
       if (estoqueError) throw estoqueError
     }
 
-    success('Movimentacao cancelada com sucesso')
+    success('Movimentação cancelada com sucesso')
     selectedEstoque.value.quantidade = novaQuantidade
     closeDetalhesModal()
     loadMovimentacoes(selectedEstoque.value.especie_id, selectedEstoque.value.produto_id)
     loadEstoque()
   } catch (e: any) {
-    showError('Erro ao cancelar movimentacao: ' + e.message)
+    showError('Erro ao cancelar movimentação: ' + e.message)
   } finally {
     saving.value = false
   }
@@ -1125,11 +1115,11 @@ async function saveEstoqueMinimo() {
       if (error) throw error
     }
 
-    success('Estoque minimo atualizado')
+    success('Estoque mínimo atualizado')
     selectedEstoque.value.estoque_minimo = estoqueMinimo.value
     loadEstoque()
   } catch (e: any) {
-    showError('Erro ao atualizar estoque minimo: ' + e.message)
+    showError('Erro ao atualizar estoque mínimo: ' + e.message)
   }
 }
 

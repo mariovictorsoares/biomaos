@@ -28,7 +28,7 @@
       <p class="text-sm text-red-600 dark:text-red-400">{{ errorMessage }}</p>
     </div>
 
-    <!-- Formulario -->
+    <!-- Formulário -->
     <form @submit.prevent="handleLogin" class="space-y-5">
       <!-- Email -->
       <div>
@@ -102,7 +102,7 @@
         </label>
       </div>
 
-      <!-- Botao de Login -->
+      <!-- Botão de Login -->
       <button
         type="submit"
         :disabled="loading"

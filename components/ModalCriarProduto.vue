@@ -21,42 +21,45 @@
             <!-- Código -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                Código
+                Código <span class="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 v-model="form.codigo"
                 placeholder=""
-                class="input"
+                :class="['input', attempted && !form.codigo ? 'border-red-500' : '']"
                 maxlength="10"
               />
+              <span v-if="attempted && !form.codigo" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
             </div>
 
             <!-- Unidade -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                Unidade
+                Unidade <span class="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 v-model="form.unidade"
                 placeholder=""
-                class="input"
+                :class="['input', attempted && !form.unidade ? 'border-red-500' : '']"
               />
+              <span v-if="attempted && !form.unidade" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
             </div>
           </div>
 
           <!-- Produto -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1.5">
-              Produto
+              Produto <span class="text-red-500">*</span>
             </label>
             <input
               type="text"
               v-model="form.nome"
               placeholder=""
-              class="input"
+              :class="['input', attempted && !form.nome ? 'border-red-500' : '']"
             />
+            <span v-if="attempted && !form.nome" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
           </div>
         </div>
 
@@ -87,6 +90,8 @@ import { useToast } from '~/composables/useToast'
 const { showToast } = useToast()
 const emit = defineEmits(['close', 'save'])
 
+const attempted = ref(false)
+
 const form = ref({
   codigo: '',
   nome: '',
@@ -94,8 +99,9 @@ const form = ref({
 })
 
 const handleSave = () => {
+  attempted.value = true
   if (!form.value.codigo || !form.value.nome || !form.value.unidade) {
-    showToast('Por favor, preencha todos os campos.', 'error')
+    showToast('Por favor, preencha todos os campos obrigatórios.', 'error')
     return
   }
 

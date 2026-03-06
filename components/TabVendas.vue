@@ -1,135 +1,127 @@
 <template>
   <div>
-    <!-- Header com Titulo e Botao -->
-    <div class="flex items-center justify-between mb-3 sm:mb-4">
-      <h1 class="text-lg sm:text-xl font-semibold text-text-light dark:text-text-dark">Vendas</h1>
-      <button @click="openRegistrarModal" class="btn btn-primary text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2">
-        <span class="material-icons text-xs sm:text-sm mr-1">add</span>
-        <span class="hidden sm:inline">Registrar pedido</span>
-        <span class="sm:hidden">Novo</span>
-      </button>
-    </div>
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+      <!-- Faturamento -->
+      <div class="col-span-2 sm:col-span-3 lg:col-span-1 bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark p-3">
+        <p class="text-[11px] text-subtext-light dark:text-subtext-dark uppercase tracking-wide mb-1">Faturamento</p>
+        <p class="text-lg font-semibold text-primary truncate">{{ formatCurrency(metricas.faturamento) }}</p>
+      </div>
 
-    <!-- Periodo e Metricas - Layout responsivo -->
-    <div class="flex flex-col gap-2 sm:gap-3 mb-3 sm:mb-4">
-      <!-- Linha 1: Período (sempre visível e centralizado no mobile) -->
-      <div class="flex justify-center sm:justify-start">
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark px-3 py-1.5 flex items-center gap-2">
-          <span class="text-xs text-subtext-light dark:text-subtext-dark hidden sm:inline">Período</span>
-          <div class="flex items-center">
-            <button @click="periodoAnterior" class="p-1 sm:p-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-              <span class="material-icons text-base sm:text-sm text-subtext-light">chevron_left</span>
-            </button>
-            <span class="text-xs font-medium text-text-light dark:text-text-dark whitespace-nowrap px-1 sm:px-1">
-              {{ formatDateShort(periodo.inicio) }} - {{ formatDateShort(periodo.fim) }}
-            </span>
-            <button @click="proximoPeriodo" class="p-1 sm:p-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-              <span class="material-icons text-base sm:text-sm text-subtext-light">chevron_right</span>
-            </button>
-          </div>
+      <!-- Total -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark p-3">
+        <p class="text-[11px] text-subtext-light dark:text-subtext-dark uppercase tracking-wide mb-1">Total</p>
+        <p class="text-lg font-semibold text-text-light dark:text-text-dark">{{ metricas.totalMicroverdes }}</p>
+      </div>
+
+      <!-- Vendido -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark p-3">
+        <p class="text-[11px] text-subtext-light dark:text-subtext-dark uppercase tracking-wide mb-1">Vendido</p>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-lg font-semibold" :class="metricas.vendido.quantidade > 0 ? 'text-green-600' : 'text-text-light dark:text-text-dark'">{{ metricas.vendido.quantidade }}</span>
+          <span class="text-xs text-green-600">{{ metricas.vendido.percentual }}%</span>
         </div>
       </div>
 
-      <!-- Linha 2: Métricas em grid responsivo -->
-      <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
-        <!-- Faturamento -->
-        <div class="col-span-2 sm:col-span-1 bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark px-2 sm:px-3 py-1.5 flex items-center gap-2">
-          <div class="w-0.5 h-5 sm:h-6 bg-primary rounded-full"></div>
-          <div class="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
-            <span class="text-[10px] sm:text-xs text-subtext-light dark:text-subtext-dark whitespace-nowrap">Faturamento</span>
-            <span class="text-xs sm:text-xs font-bold text-primary truncate">{{ formatCurrency(metricas.faturamento) }}</span>
-          </div>
+      <!-- Vender -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark p-3">
+        <p class="text-[11px] text-subtext-light dark:text-subtext-dark uppercase tracking-wide mb-1">Vender</p>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-lg font-semibold text-yellow-600">{{ metricas.vender.quantidade }}</span>
+          <span class="text-xs text-yellow-600">{{ metricas.vender.percentual }}%</span>
         </div>
+      </div>
 
-        <!-- Total Microverdes -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark px-2 sm:px-3 py-1.5 flex items-center gap-2">
-          <div class="w-0.5 h-5 sm:h-6 bg-gray-400 rounded-full"></div>
-          <div class="flex items-center gap-1 sm:gap-2">
-            <span class="text-[10px] sm:text-xs text-subtext-light dark:text-subtext-dark whitespace-nowrap">Total</span>
-            <span class="text-xs font-bold text-text-light dark:text-text-dark">{{ metricas.totalMicroverdes }}</span>
-          </div>
+      <!-- Colhido -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark p-3">
+        <p class="text-[11px] text-subtext-light dark:text-subtext-dark uppercase tracking-wide mb-1">Colhido</p>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-lg font-semibold text-green-600">{{ metricas.colhido.quantidade }}</span>
+          <span class="text-xs text-green-600">{{ metricas.colhido.percentual }}%</span>
         </div>
+      </div>
 
-        <!-- Vendido -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark px-2 sm:px-3 py-1.5 flex items-center gap-2">
-          <div class="w-0.5 h-5 sm:h-6 bg-green-500 rounded-full"></div>
-          <div class="flex items-center gap-1 sm:gap-2">
-            <span class="text-[10px] sm:text-xs text-subtext-light dark:text-subtext-dark">Vendido</span>
-            <span class="text-xs font-bold" :class="metricas.vendido.quantidade > 0 ? 'text-green-600' : 'text-text-light dark:text-text-dark'">{{ metricas.vendido.quantidade }}</span>
-            <span class="text-[10px] sm:text-xs text-green-600">{{ metricas.vendido.percentual }}%</span>
-          </div>
-        </div>
-
-        <!-- Vender -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark px-2 sm:px-3 py-1.5 flex items-center gap-2">
-          <div class="w-0.5 h-5 sm:h-6 bg-yellow-500 rounded-full"></div>
-          <div class="flex items-center gap-1 sm:gap-2">
-            <span class="text-[10px] sm:text-xs text-subtext-light dark:text-subtext-dark">Vender</span>
-            <span class="text-xs font-bold text-yellow-600">{{ metricas.vender.quantidade }}</span>
-            <span class="text-[10px] sm:text-xs text-yellow-600">{{ metricas.vender.percentual }}%</span>
-          </div>
-        </div>
-
-        <!-- Colhido -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark px-2 sm:px-3 py-1.5 flex items-center gap-2">
-          <div class="w-0.5 h-5 sm:h-6 bg-green-500 rounded-full"></div>
-          <div class="flex items-center gap-1 sm:gap-2">
-            <span class="text-[10px] sm:text-xs text-subtext-light dark:text-subtext-dark">Colhido</span>
-            <span class="text-xs font-bold text-green-600">{{ metricas.colhido.quantidade }}</span>
-            <span class="text-[10px] sm:text-xs text-green-600">{{ metricas.colhido.percentual }}%</span>
-          </div>
-        </div>
-
-        <!-- Colher -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark px-2 sm:px-3 py-1.5 flex items-center gap-2">
-          <div class="w-0.5 h-5 sm:h-6 rounded-full" :class="metricas.colher.quantidade > 0 ? 'bg-red-500' : 'bg-gray-300'"></div>
-          <div class="flex items-center gap-1 sm:gap-2">
-            <span class="text-[10px] sm:text-xs text-subtext-light dark:text-subtext-dark">Colher</span>
-            <span class="text-xs font-bold" :class="metricas.colher.quantidade > 0 ? 'text-red-600' : 'text-text-light dark:text-text-dark'">{{ metricas.colher.quantidade }}</span>
-            <span class="text-[10px] sm:text-xs" :class="metricas.colher.quantidade > 0 ? 'text-red-600' : 'text-subtext-light'">{{ metricas.colher.percentual }}%</span>
-          </div>
+      <!-- Colher -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark p-3">
+        <p class="text-[11px] text-subtext-light dark:text-subtext-dark uppercase tracking-wide mb-1">Colher</p>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-lg font-semibold" :class="metricas.colher.quantidade > 0 ? 'text-red-600' : 'text-text-light dark:text-text-dark'">{{ metricas.colher.quantidade }}</span>
+          <span class="text-xs" :class="metricas.colher.quantidade > 0 ? 'text-red-600' : 'text-subtext-light'">{{ metricas.colher.percentual }}%</span>
         </div>
       </div>
     </div>
 
-    <!-- Filtro Cliente e Toggles - Responsivo -->
-    <div class="flex flex-wrap items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
+    <!-- Toolbar: Período + Filtros + Botão -->
+    <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+      <!-- Seletor de Período -->
+      <div class="flex items-center gap-2 bg-white dark:bg-gray-800 border border-border-light dark:border-border-dark rounded-lg px-3 py-1.5">
+        <button @click="periodoAnterior" class="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+          <span class="material-icons text-sm text-subtext-light">chevron_left</span>
+        </button>
+        <span class="text-xs sm:text-sm font-medium text-text-light dark:text-text-dark whitespace-nowrap px-1">
+          {{ formatDateShort(periodo.inicio) }} - {{ formatDateShort(periodo.fim) }}
+        </span>
+        <button @click="proximoPeriodo" class="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+          <span class="material-icons text-sm text-subtext-light">chevron_right</span>
+        </button>
+      </div>
+
       <!-- Filtro Cliente -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg px-2 sm:px-3 py-1.5 border border-border-light dark:border-border-dark flex items-center gap-2 flex-1 sm:flex-initial min-w-0">
+      <div class="bg-white dark:bg-gray-800 rounded-lg px-2 sm:px-3 py-1.5 border border-border-light dark:border-border-dark flex items-center gap-2">
         <span class="material-icons text-sm text-subtext-light sm:hidden">search</span>
         <span class="text-xs text-subtext-light dark:text-subtext-dark hidden sm:inline">Cliente</span>
         <input
           type="text"
           v-model="filtroCliente"
-          placeholder="Buscar cliente..."
-          class="px-2 py-1 text-xs border border-border-light dark:border-border-dark rounded bg-gray-50 dark:bg-gray-700 w-full sm:w-32 focus:ring-1 focus:ring-primary focus:border-primary"
+          placeholder="Buscar..."
+          class="px-2 py-0.5 text-xs border border-border-light dark:border-border-dark rounded bg-gray-50 dark:bg-gray-700 w-24 sm:w-32 focus:ring-1 focus:ring-primary focus:border-primary"
         />
       </div>
 
-      <!-- Toggles Container -->
-      <div class="flex items-center gap-2">
-        <!-- Toggle Visualizar Inventario -->
-        <label class="flex items-center gap-1.5 sm:gap-2 cursor-pointer bg-white dark:bg-gray-800 rounded-lg px-2 sm:px-3 py-1.5 border border-border-light dark:border-border-dark">
-          <div class="relative">
-            <input type="checkbox" v-model="showInventario" class="sr-only peer" />
-            <div class="w-7 sm:w-8 h-3.5 sm:h-4 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-2.5 sm:after:h-3 after:w-2.5 sm:after:w-3 after:transition-all peer-checked:bg-primary"></div>
-          </div>
-          <span class="text-[10px] sm:text-xs text-text-light dark:text-text-dark whitespace-nowrap">
-            <span class="hidden sm:inline">Visualizar </span>Inventário
-          </span>
-        </label>
+      <!-- Toggles -->
+      <label class="hidden sm:flex items-center gap-2 cursor-pointer bg-white dark:bg-gray-800 rounded-lg px-3 py-1.5 border border-border-light dark:border-border-dark">
+        <div class="relative">
+          <input type="checkbox" v-model="showInventario" class="sr-only peer" />
+          <div class="w-8 h-4 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+        </div>
+        <span class="text-xs text-text-light dark:text-text-dark whitespace-nowrap">Inventário</span>
+      </label>
 
-        <!-- Toggle Visualizar Colher -->
-        <label class="flex items-center gap-1.5 sm:gap-2 cursor-pointer bg-white dark:bg-gray-800 rounded-lg px-2 sm:px-3 py-1.5 border border-border-light dark:border-border-dark">
-          <div class="relative">
-            <input type="checkbox" v-model="showColher" class="sr-only peer" />
-            <div class="w-7 sm:w-8 h-3.5 sm:h-4 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-2.5 sm:after:h-3 after:w-2.5 sm:after:w-3 after:transition-all peer-checked:bg-primary"></div>
-          </div>
-          <span class="text-[10px] sm:text-xs text-text-light dark:text-text-dark whitespace-nowrap">
-            <span class="hidden sm:inline">Visualizar </span>Colher
-          </span>
-        </label>
-      </div>
+      <label class="hidden sm:flex items-center gap-2 cursor-pointer bg-white dark:bg-gray-800 rounded-lg px-3 py-1.5 border border-border-light dark:border-border-dark">
+        <div class="relative">
+          <input type="checkbox" v-model="showColher" class="sr-only peer" />
+          <div class="w-8 h-4 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+        </div>
+        <span class="text-xs text-text-light dark:text-text-dark whitespace-nowrap">Colher</span>
+      </label>
+
+      <!-- Spacer -->
+      <div class="flex-1"></div>
+
+      <!-- Botão Registrar -->
+      <button @click="openRegistrarModal" class="btn btn-primary text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2">
+        <span class="material-icons text-sm mr-1">add</span>
+        <span class="hidden sm:inline">Registrar pedido</span>
+        <span class="sm:hidden">Novo</span>
+      </button>
+    </div>
+
+    <!-- Toggles Mobile (abaixo da toolbar) -->
+    <div class="flex sm:hidden items-center gap-2 mb-3">
+      <label class="flex items-center gap-1.5 cursor-pointer bg-white dark:bg-gray-800 rounded-lg px-2 py-1.5 border border-border-light dark:border-border-dark">
+        <div class="relative">
+          <input type="checkbox" v-model="showInventario" class="sr-only peer" />
+          <div class="w-7 h-3.5 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-2.5 after:w-2.5 after:transition-all peer-checked:bg-primary"></div>
+        </div>
+        <span class="text-[10px] text-text-light dark:text-text-dark whitespace-nowrap">Inventário</span>
+      </label>
+      <label class="flex items-center gap-1.5 cursor-pointer bg-white dark:bg-gray-800 rounded-lg px-2 py-1.5 border border-border-light dark:border-border-dark">
+        <div class="relative">
+          <input type="checkbox" v-model="showColher" class="sr-only peer" />
+          <div class="w-7 h-3.5 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-2.5 after:w-2.5 after:transition-all peer-checked:bg-primary"></div>
+        </div>
+        <span class="text-[10px] text-text-light dark:text-text-dark whitespace-nowrap">Colher</span>
+      </label>
     </div>
 
     <!-- Loading -->
@@ -140,18 +132,19 @@
 
     <!-- Matriz de Produtos e Entregas Previstas - Container com scroll sincronizado -->
     <div v-if="!loading && produtosAtivos.length > 0" class="mb-3 sm:mb-4">
-      <!-- Matriz de Produtos -->
+      <!-- Matriz de Produtos (sticky) -->
+      <div class="sticky top-0 z-20 bg-background-light dark:bg-background-dark -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 pt-2 pb-1 matriz-sticky">
       <div ref="matrizScrollRef" class="overflow-x-auto scrollbar-hide" @scroll="syncScroll('matriz')" style="-ms-overflow-style: none; scrollbar-width: none;">
         <div class="inline-flex flex-col min-w-full gap-1 sm:gap-1.5">
           <!-- Header com códigos dos produtos -->
-          <div class="flex items-center text-[10px] sm:text-xs bg-background-light dark:bg-background-dark py-1.5 sm:py-2 rounded-lg border border-transparent">
+          <div class="flex items-end text-[10px] sm:text-xs py-1.5 sm:py-2 rounded-lg">
             <div class="w-[120px] sm:w-[280px] min-w-[120px] sm:min-w-[280px] shrink-0 px-2 sm:px-3 sticky left-0 bg-background-light dark:bg-background-dark z-10">&nbsp;</div>
             <div class="w-4 sm:w-6 shrink-0"></div>
             <div
               v-for="produto in produtosAtivos"
               :key="produto.id"
-              class="w-10 sm:w-14 shrink-0 px-0.5 sm:px-1 text-center font-medium text-subtext-light dark:text-subtext-dark"
-              :title="produto.nome"
+              class="w-10 sm:w-14 shrink-0 px-0.5 sm:px-1 text-center font-medium text-subtext-light dark:text-subtext-dark truncate"
+              :title="produto.codigo + ' - ' + produto.nome"
             >
               {{ produto.codigo }}
             </div>
@@ -217,6 +210,7 @@
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       <!-- Entregas Previstas -->
@@ -580,7 +574,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useCurrentCompany } from '~/composables/useCurrentCompany'
 
 // Interfaces
@@ -708,7 +702,32 @@ const expandedDatas = ref<string[]>([])
 // Refs para scroll sincronizado
 const matrizScrollRef = ref<HTMLElement | null>(null)
 const entregasScrollRef = ref<HTMLElement | null>(null)
+const matrizStickyRef = ref<HTMLElement | null>(null)
 const isScrolling = ref(false)
+
+// Detectar quando a matriz esta "stuck" para adicionar shadow
+function setupStickyDetection() {
+  nextTick(() => {
+    const stickyEl = document.querySelector('.matriz-sticky') as HTMLElement
+    if (!stickyEl) return
+    matrizStickyRef.value = stickyEl
+
+    const scrollParent = stickyEl.closest('main')
+    if (!scrollParent) return
+
+    const onScroll = () => {
+      if (!matrizStickyRef.value) return
+      const rect = matrizStickyRef.value.getBoundingClientRect()
+      const parentRect = scrollParent.getBoundingClientRect()
+      // Se o top da matriz esta no top do main (com margem de 2px), esta stuck
+      const isStuck = Math.abs(rect.top - parentRect.top) < 2
+      matrizStickyRef.value.classList.toggle('is-stuck', isStuck)
+    }
+
+    scrollParent.addEventListener('scroll', onScroll, { passive: true })
+    onUnmounted(() => scrollParent.removeEventListener('scroll', onScroll))
+  })
+}
 
 // Funcao para sincronizar scroll entre as duas tabelas
 function syncScroll(source: 'matriz' | 'entregas') {
@@ -1307,7 +1326,7 @@ async function salvarPedido() {
   }
 
   if (!isModalFormValid.value) {
-    showError('Preencha todos os campos obrigatorios')
+    showError('Preencha todos os campos obrigatórios')
     return
   }
 
@@ -1571,10 +1590,25 @@ watch(
 // Inicializacao
 onMounted(() => {
   loadAllData()
+  setupStickyDetection()
 })
 </script>
 
 <style scoped>
+/* Sticky matrix shadow */
+.matriz-sticky {
+  box-shadow: none;
+  transition: box-shadow 0.2s ease;
+}
+
+.matriz-sticky.is-stuck {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .matriz-sticky.is-stuck {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.4);
+}
+
 /* Esconder scrollbar na matriz de cima */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;

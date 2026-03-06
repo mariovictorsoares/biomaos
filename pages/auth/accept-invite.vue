@@ -84,7 +84,7 @@ async function acceptInvite() {
   }
 }
 
-// Aceitar convite quando usuario estiver autenticado
+// Aceitar convite quando usuário estiver autenticado
 watch(user, (newUser) => {
   if (newUser && token.value && !success.value && !error.value) {
     acceptInvite()

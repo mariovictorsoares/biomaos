@@ -36,7 +36,7 @@
       <p class="text-sm text-red-600 dark:text-red-400">{{ errorMessage }}</p>
     </div>
 
-    <!-- Formulario -->
+    <!-- Formulário -->
     <form @submit.prevent="handleResetPassword" class="space-y-5" v-if="!successMessage">
       <!-- Nova Senha -->
       <div>
@@ -67,7 +67,7 @@
             </span>
           </button>
         </div>
-        <!-- Indicador de forca da senha -->
+        <!-- Indicador de força da senha -->
         <div class="mt-3">
           <div class="flex gap-1">
             <div
@@ -136,7 +136,7 @@
         </ul>
       </div>
 
-      <!-- Botao de Redefinir -->
+      <!-- Botão de Redefinir -->
       <button
         type="submit"
         :disabled="loading || password !== confirmPassword || password.length < 6"
@@ -156,7 +156,7 @@
       </button>
     </form>
 
-    <!-- Acao apos sucesso -->
+    <!-- Ação após sucesso -->
     <div v-if="successMessage" class="mt-4">
       <NuxtLink
         to="/auth/login"

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-xl sm:text-2xl font-bold text-text-light dark:text-text-dark mb-4 sm:mb-6">Empresas</h1>
+    <h1 class="text-lg font-medium text-text-light/70 dark:text-text-dark/70 tracking-wide uppercase mb-12">Empresas</h1>
 
     <!-- Card da Tabela -->
     <div class="card">
@@ -9,7 +9,7 @@
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between">
             <h2 class="text-xs sm:text-sm font-medium text-subtext-light dark:text-subtext-dark uppercase tracking-wider">Lista Empresas</h2>
-            <!-- Botao Nova Empresa - Desktop -->
+            <!-- Botão Nova Empresa - Desktop -->
             <button v-if="isMasterUser" @click="openCreateModal" class="hidden sm:flex btn btn-primary shrink-0">
               <span class="material-icons text-sm">add</span>
               Nova empresa
@@ -32,7 +32,7 @@
                 class="input w-full text-sm pl-9 sm:pl-10"
               />
             </div>
-            <!-- Botao Nova Empresa - Mobile -->
+            <!-- Botão Nova Empresa - Mobile -->
             <button v-if="isMasterUser" @click="openCreateModal" class="sm:hidden btn btn-primary w-full justify-center">
               <span class="material-icons text-sm">add</span>
               Nova empresa
@@ -148,7 +148,7 @@
         </button>
       </div>
 
-      <!-- Páginacao -->
+      <!-- Paginação -->
       <div v-if="filteredEmpresas.length > 0" class="p-3 sm:p-4 border-t border-border-light dark:border-border-dark text-xs text-subtext-light dark:text-subtext-dark">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           <div class="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
@@ -191,7 +191,7 @@
       </div>
     </div>
 
-    <!-- Modal de Criacao -->
+    <!-- Modal de Criação -->
     <Teleport to="body">
       <Transition
         enter-active-class="transition-opacity duration-200"
@@ -223,7 +223,7 @@
 
                 <!-- Modal Body -->
                 <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-                  <!-- Secao: Dados da Empresa -->
+                  <!-- Seção: Dados da Empresa -->
                   <div>
                     <h3 class="text-sm font-semibold text-text-light dark:text-text-dark mb-4 pb-2 border-b border-border-light dark:border-border-dark">Dados da empresa</h3>
 
@@ -253,6 +253,11 @@
                         <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">CNPJ</label>
                         <div class="flex gap-3 items-center">
                           <input type="text" v-model="newEmpresa.cnpj" class="input flex-1" placeholder="00.000.000/0000-00" v-maska data-maska="##.###.###/####-##" />
+                          <button type="button" @click="buscarCNPJ('new')" :disabled="buscandoCNPJ" class="btn btn-secondary shrink-0">
+                            <span v-if="buscandoCNPJ" class="material-icons text-sm animate-spin">refresh</span>
+                            <span v-else class="material-icons text-sm">search</span>
+                            {{ buscandoCNPJ ? 'Buscando...' : 'Buscar' }}
+                          </button>
                           <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark whitespace-nowrap">
                             <input type="checkbox" v-model="newEmpresa.ativo" class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" />
                             Ativo
@@ -277,7 +282,7 @@
                     </div>
                   </div>
 
-                  <!-- Secao: Endereco -->
+                  <!-- Seção: Endereço -->
                   <div>
                     <h3 class="text-sm font-semibold text-text-light dark:text-text-dark mb-4 pb-2 border-b border-border-light dark:border-border-dark">Endereço</h3>
 
@@ -334,7 +339,7 @@
       </Transition>
     </Teleport>
 
-    <!-- Modal de Edicao -->
+    <!-- Modal de Edição -->
     <Teleport to="body">
       <Transition
         enter-active-class="transition-opacity duration-200"
@@ -366,7 +371,7 @@
 
                 <!-- Modal Body -->
                 <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-                  <!-- Secao: Dados da Empresa -->
+                  <!-- Seção: Dados da Empresa -->
                   <div>
                     <h3 class="text-sm font-semibold text-text-light dark:text-text-dark mb-4 pb-2 border-b border-border-light dark:border-border-dark">Dados da empresa</h3>
 
@@ -396,6 +401,11 @@
                         <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">CNPJ</label>
                         <div class="flex gap-3 items-center">
                           <input type="text" v-model="editEmpresa.cnpj" class="input flex-1" placeholder="00.000.000/0000-00" v-maska data-maska="##.###.###/####-##" />
+                          <button type="button" @click="buscarCNPJ('edit')" :disabled="buscandoCNPJ" class="btn btn-secondary shrink-0">
+                            <span v-if="buscandoCNPJ" class="material-icons text-sm animate-spin">refresh</span>
+                            <span v-else class="material-icons text-sm">search</span>
+                            {{ buscandoCNPJ ? 'Buscando...' : 'Buscar' }}
+                          </button>
                           <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark whitespace-nowrap">
                             <input type="checkbox" v-model="editEmpresa.ativo" class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" />
                             Ativo
@@ -420,7 +430,7 @@
                     </div>
                   </div>
 
-                  <!-- Secao: Endereco -->
+                  <!-- Seção: Endereço -->
                   <div>
                     <h3 class="text-sm font-semibold text-text-light dark:text-text-dark mb-4 pb-2 border-b border-border-light dark:border-border-dark">Endereço</h3>
 
@@ -770,6 +780,7 @@ const loading = ref(false)
 const saving = ref(false)
 const loadingColaboradores = ref(false)
 const sendingInvite = ref(false)
+const buscandoCNPJ = ref(false)
 
 // Estado dos modais
 const showCreateModal = ref(false)
@@ -835,29 +846,29 @@ const empresas = ref([])
 const estados = [
   { sigla: 'AC', nome: 'Acre' },
   { sigla: 'AL', nome: 'Alagoas' },
-  { sigla: 'AP', nome: 'Amapa' },
+  { sigla: 'AP', nome: 'Amapá' },
   { sigla: 'AM', nome: 'Amazonas' },
   { sigla: 'BA', nome: 'Bahia' },
-  { sigla: 'CE', nome: 'Ceara' },
+  { sigla: 'CE', nome: 'Ceará' },
   { sigla: 'DF', nome: 'Distrito Federal' },
-  { sigla: 'ES', nome: 'Espirito Santo' },
-  { sigla: 'GO', nome: 'Goias' },
-  { sigla: 'MA', nome: 'Maranhao' },
+  { sigla: 'ES', nome: 'Espírito Santo' },
+  { sigla: 'GO', nome: 'Goiás' },
+  { sigla: 'MA', nome: 'Maranhão' },
   { sigla: 'MT', nome: 'Mato Grosso' },
   { sigla: 'MS', nome: 'Mato Grosso do Sul' },
   { sigla: 'MG', nome: 'Minas Gerais' },
-  { sigla: 'PA', nome: 'Para' },
-  { sigla: 'PB', nome: 'Paraiba' },
-  { sigla: 'PR', nome: 'Parana' },
+  { sigla: 'PA', nome: 'Pará' },
+  { sigla: 'PB', nome: 'Paraíba' },
+  { sigla: 'PR', nome: 'Paraná' },
   { sigla: 'PE', nome: 'Pernambuco' },
-  { sigla: 'PI', nome: 'Piaui' },
+  { sigla: 'PI', nome: 'Piauí' },
   { sigla: 'RJ', nome: 'Rio de Janeiro' },
   { sigla: 'RN', nome: 'Rio Grande do Norte' },
   { sigla: 'RS', nome: 'Rio Grande do Sul' },
-  { sigla: 'RO', nome: 'Rondonia' },
+  { sigla: 'RO', nome: 'Rondônia' },
   { sigla: 'RR', nome: 'Roraima' },
   { sigla: 'SC', nome: 'Santa Catarina' },
-  { sigla: 'SP', nome: 'Sao Paulo' },
+  { sigla: 'SP', nome: 'São Paulo' },
   { sigla: 'SE', nome: 'Sergipe' },
   { sigla: 'TO', nome: 'Tocantins' }
 ]
@@ -1046,13 +1057,13 @@ function handleLogoChange(event, type) {
 
   // Validar tamanho (2MB max)
   if (file.size > 2 * 1024 * 1024) {
-    toast.error('A imagem deve ter no maximo 2MB')
+    toast.error('A imagem deve ter no máximo 2MB')
     return
   }
 
   // Validar tipo
   if (!file.type.startsWith('image/')) {
-    toast.error('Selecione uma imagem valida')
+    toast.error('Selecione uma imagem válida')
     return
   }
 
@@ -1120,7 +1131,7 @@ function closeCreateModal() {
 
 async function saveEmpresa() {
   if (!newEmpresa.value.razao_social) {
-    toast.error('Razão social e obrigatoria')
+    toast.error('Razão social é obrigatória')
     return
   }
 
@@ -1188,7 +1199,7 @@ function closeEditModal() {
 
 async function updateEmpresa() {
   if (!editEmpresa.value.razao_social) {
-    toast.error('Razão social e obrigatoria')
+    toast.error('Razão social é obrigatória')
     return
   }
 
@@ -1326,7 +1337,7 @@ async function sendInvite() {
 
     // Verificar se o email foi enviado com sucesso
     if (response.emailSent === false) {
-      toast.warning('Convite criado. Email nao enviado (dominio nao verificado)')
+      toast.warning('Convite criado. Email não enviado (domínio não verificado)')
     } else {
       toast.success('Convite enviado com sucesso')
     }
@@ -1365,6 +1376,44 @@ function copyInviteLink(token) {
   }).catch(() => {
     toast.error('Erro ao copiar link')
   })
+}
+
+// Busca de CNPJ via BrasilAPI
+async function buscarCNPJ(type) {
+  const cnpj = type === 'new'
+    ? newEmpresa.value.cnpj?.replace(/\D/g, '')
+    : editEmpresa.value.cnpj?.replace(/\D/g, '')
+
+  if (cnpj?.length !== 14) {
+    toast.error('CNPJ inválido')
+    return
+  }
+
+  buscandoCNPJ.value = true
+  try {
+    const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`)
+    const data = await response.json()
+
+    if (!data.message) {
+      const target = type === 'new' ? newEmpresa.value : editEmpresa.value
+      target.razao_social = data.razao_social || ''
+      target.nome_fantasia = data.nome_fantasia || ''
+      target.cep = data.cep ? data.cep.replace(/(\d{5})(\d{3})/, '$1-$2') : ''
+      target.endereco = data.logradouro || ''
+      target.numero = data.numero || ''
+      target.complemento = data.complemento || ''
+      target.cidade = data.municipio || ''
+      target.estado = data.uf || ''
+      toast.success('Dados do CNPJ carregados')
+    } else {
+      toast.error('CNPJ não encontrado')
+    }
+  } catch (error) {
+    console.error('Erro ao buscar CNPJ:', error)
+    toast.error('Erro ao buscar CNPJ')
+  } finally {
+    buscandoCNPJ.value = false
+  }
 }
 
 // Busca de CEP

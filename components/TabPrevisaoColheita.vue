@@ -1,26 +1,21 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-text-light dark:text-text-dark mb-6">Previsão de Colheita</h1>
+    <!-- Toolbar: Filtros -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+      <!-- Esquerda: Período -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+        <input
+          type="month"
+          v-model="selectedMonth"
+          class="input w-44"
+        />
+      </div>
+    </div>
 
     <!-- Card da Tabela -->
     <div class="card">
-      <!-- Header do Card -->
-      <div class="p-4 flex flex-col sm:flex-row justify-between items-center border-b border-border-light dark:border-border-dark gap-4">
-        <h2 class="text-sm font-medium text-subtext-light dark:text-subtext-dark uppercase tracking-wider self-start sm:self-center">Previsão Semanal</h2>
-        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <!-- Seletor de Mês/Ano -->
-          <div class="relative">
-            <input
-              type="month"
-              v-model="selectedMonth"
-              class="input w-44"
-            />
-          </div>
-        </div>
-      </div>
-
       <!-- Filtros - Semanas -->
-      <div class="p-4 border-b border-border-light dark:border-border-dark bg-gray-50 dark:bg-gray-800/50">
+      <div class="p-4 border-b border-border-light dark:border-border-dark">
         <div class="flex flex-wrap items-center gap-2">
           <span class="text-sm text-subtext-light dark:text-subtext-dark mr-2">Semana:</span>
           <button
@@ -64,8 +59,8 @@
       <div v-else-if="filteredEspecies.length > 0" class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-gray-50 dark:bg-gray-800 border-b border-border-light dark:border-border-dark">
-              <th class="table-header sticky left-0 bg-gray-50 dark:bg-gray-800 z-10">Espécie</th>
+            <tr class="bg-gray-100 dark:bg-gray-700/50 border-b border-border-light dark:border-border-dark">
+              <th class="table-header sticky left-0 bg-gray-100 dark:bg-gray-700/50 z-10">Espécie</th>
               <th
                 v-for="dia in diasDaSemana"
                 :key="dia.data"

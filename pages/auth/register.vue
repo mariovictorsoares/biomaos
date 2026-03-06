@@ -20,7 +20,7 @@
       </NuxtLink>
     </div>
 
-    <!-- Formulario de registro -->
+    <!-- Formulário de registro -->
     <template v-else>
       <!-- Header -->
       <div class="mb-8">
@@ -28,7 +28,7 @@
           Criar sua conta
         </h2>
         <p class="text-gray-500 dark:text-gray-400">
-          Ola, <strong>{{ convite.nome }}</strong>! Complete seu cadastro para acessar o sistema.
+          Olá, <strong>{{ convite.nome }}</strong>! Complete seu cadastro para acessar o sistema.
         </p>
       </div>
 
@@ -61,7 +61,7 @@
         </div>
       </div>
 
-      <!-- Formulario -->
+      <!-- Formulário -->
       <form @submit.prevent="handleRegister" class="space-y-5">
         <!-- Email (readonly) -->
         <div>
@@ -143,7 +143,7 @@
           </div>
         </div>
 
-        <!-- Botao de Registro -->
+        <!-- Botão de Registro -->
         <button
           type="submit"
           :disabled="loading || !canSubmit"
@@ -254,7 +254,7 @@ const handleRegister = async () => {
   errorMessage.value = ''
 
   try {
-    // Criar usuario no Supabase Auth
+    // Criar usuário no Supabase Auth
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: convite.value.email,
       password: password.value,
@@ -280,6 +280,7 @@ const handleRegister = async () => {
         complemento: convite.value.complemento || null,
         estado: convite.value.estado || null,
         cidade: convite.value.cidade || null,
+        foto_url: convite.value.foto_url || null,
         ativo: true
       })
 

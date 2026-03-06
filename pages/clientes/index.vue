@@ -1,58 +1,46 @@
 <template>
   <div>
-    <h1 class="text-xl sm:text-2xl font-bold text-text-light dark:text-text-dark mb-4 sm:mb-6">Clientes</h1>
+    <h1 class="text-lg font-medium text-text-light/70 dark:text-text-dark/70 tracking-wide uppercase mb-12">Clientes</h1>
+
+    <!-- Toolbar: Filtros + Ação -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+      <!-- Esquerda: Busca + Filtro -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+        <!-- Busca -->
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base">search</span>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Pesquise aqui..."
+            class="input w-full sm:w-64 text-sm pl-9"
+          />
+        </div>
+        <!-- Filtro Status -->
+        <select v-model="filterStatus" class="input text-sm w-full sm:w-28 shrink-0">
+          <option value="ativo">Ativos</option>
+          <option value="inativo">Inativos</option>
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <!-- Direita: Botão -->
+      <button @click="openCreateModal" class="btn btn-primary shrink-0 justify-center sm:justify-start">
+        <span class="material-icons text-sm">add</span>
+        Novo cliente
+      </button>
+    </div>
 
     <!-- Card da Tabela -->
-    <div class="card">
-      <!-- Header do Card -->
-      <div class="p-3 sm:p-4 border-b border-border-light dark:border-border-dark">
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xs sm:text-sm font-medium text-subtext-light dark:text-subtext-dark uppercase tracking-wider">Lista Clientes</h2>
-            <!-- Botao Novo Cliente - Desktop -->
-            <button @click="openCreateModal" class="hidden sm:flex btn btn-primary shrink-0">
-              <span class="material-icons text-sm">add</span>
-              Novo cliente
-            </button>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
-            <!-- Filtro Status -->
-            <select v-model="filterStatus" class="input text-sm w-full sm:w-28 shrink-0">
-              <option value="ativo">Ativos</option>
-              <option value="inativo">Inativos</option>
-              <option value="">Todos</option>
-            </select>
-            <!-- Busca -->
-            <div class="relative flex-1">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base sm:text-lg">search</span>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Pesquise aqui..."
-                class="input w-full text-sm pl-9 sm:pl-10"
-              />
-            </div>
-            <!-- Botao Novo Cliente - Mobile -->
-            <button @click="openCreateModal" class="sm:hidden btn btn-primary w-full justify-center">
-              <span class="material-icons text-sm">add</span>
-              Novo cliente
-            </button>
-          </div>
-        </div>
-      </div>
-
+    <div class="card overflow-hidden">
       <!-- Tabela - Desktop -->
       <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-50 dark:bg-gray-800 border-b border-border-light dark:border-border-dark">
-              <th class="table-header">CNPJ</th>
               <th class="table-header">Cliente</th>
-              <th class="table-header">Nome Fantasia</th>
               <th class="table-header">Localidade</th>
               <th class="table-header text-center">Pedidos em aberto</th>
               <th class="table-header text-center">Total de pedidos</th>
-              <th class="table-header text-center w-28">Status</th>
               <th class="table-header text-center w-24">Ações</th>
             </tr>
           </thead>
@@ -61,13 +49,11 @@
               v-for="cliente in paginatedClientes"
               :key="cliente.id"
               class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-              @click="openDetailsSlideover(cliente)"
+              @click="openDetailsModal(cliente)"
             >
-              <td class="table-cell text-subtext-light dark:text-subtext-dark">{{ formatDocument(cliente.cnpj_cpf) }}</td>
               <td class="table-cell">
-                <p class="font-medium text-text-light dark:text-text-dark">{{ formatClienteComCnpj(cliente) }}</p>
+                <p class="font-medium text-text-light dark:text-text-dark">{{ cliente.nome_fantasia || cliente.razao_social }}</p>
               </td>
-              <td class="table-cell text-subtext-light dark:text-subtext-dark">{{ cliente.nome_fantasia || '-' }}</td>
               <td class="table-cell text-subtext-light dark:text-subtext-dark">
                 <span v-if="cliente.cidade || cliente.estado">
                   {{ cliente.cidade }}{{ cliente.cidade && cliente.estado ? ' / ' : '' }}{{ cliente.estado }}
@@ -76,18 +62,13 @@
               </td>
               <td class="table-cell text-center text-subtext-light dark:text-subtext-dark">{{ getPedidosEmAberto(cliente.id) }}</td>
               <td class="table-cell text-center text-subtext-light dark:text-subtext-dark">{{ getTotalPedidos(cliente.id) }}</td>
-              <td class="table-cell text-center">
-                <span :class="['badge', cliente.ativo ? 'badge-success' : 'badge-inactive']">
-                  {{ cliente.ativo ? 'Ativo' : 'Inativo' }}
-                </span>
-              </td>
               <td class="table-cell text-center" @click.stop>
                 <button
-                  @click="openDetailsSlideover(cliente)"
-                  class="text-gray-400 hover:text-primary dark:text-gray-500 dark:hover:text-primary transition-colors"
-                  title="Ver detalhes"
+                  @click="openDetailsModal(cliente)"
+                  class="text-gray-400 hover:text-primary transition-colors"
+                  title="Ver cliente"
                 >
-                  <span class="material-icons-outlined text-xl">chevron_right</span>
+                  <span class="material-icons-outlined text-sm">visibility</span>
                 </button>
               </td>
             </tr>
@@ -101,7 +82,7 @@
           v-for="cliente in paginatedClientes"
           :key="cliente.id"
           class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-          @click="openDetailsSlideover(cliente)"
+          @click="openDetailsModal(cliente)"
         >
           <div class="flex items-start gap-3">
             <div class="flex-1 min-w-0">
@@ -122,7 +103,7 @@
               </p>
             </div>
             <button
-              @click.stop="openDetailsSlideover(cliente)"
+              @click.stop="openDetailsModal(cliente)"
               class="text-gray-400 hover:text-primary transition-colors shrink-0"
             >
               <span class="material-icons-outlined text-xl">chevron_right</span>
@@ -150,7 +131,7 @@
         </button>
       </div>
 
-      <!-- Páginacao -->
+      <!-- Paginação -->
       <div v-if="filteredClientes.length > 0" class="p-3 sm:p-4 border-t border-border-light dark:border-border-dark text-xs text-subtext-light dark:text-subtext-dark">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           <div class="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
@@ -193,7 +174,7 @@
       </div>
     </div>
 
-    <!-- Modal de Criacao/Edicao -->
+    <!-- Modal de Criação/Edição -->
     <Teleport to="body">
       <Transition
         enter-active-class="transition-opacity duration-200"
@@ -334,7 +315,7 @@
                       </div>
                     </div>
 
-                    <!-- Endereco / Numero -->
+                    <!-- Endereço / Número -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div class="md:col-span-3">
                         <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Endereço</label>
@@ -435,7 +416,7 @@
                             v-model="formData.pagamento_cartao"
                             class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
                           />
-                          Cartao
+                          Cartão
                         </label>
                       </div>
                     </div>
@@ -456,7 +437,6 @@
                   <div v-show="activeTab === 'entrega'" class="space-y-6">
                     <!-- Responsável pelo Pedido -->
                     <div>
-                      <h3 class="text-sm font-semibold text-text-light dark:text-text-dark mb-4 pb-2 border-b border-border-light dark:border-border-dark">Responsável pelo Pedido</h3>
                       <div class="space-y-4">
                         <div>
                           <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Responsável Pedido</label>
@@ -480,7 +460,7 @@
                       </div>
                     </div>
 
-                    <!-- Endereco de Entrega -->
+                    <!-- Endereço de Entrega -->
                     <div>
                       <h3 class="text-sm font-semibold text-text-light dark:text-text-dark mb-4 pb-2 border-b border-border-light dark:border-border-dark">Endereço de Entrega</h3>
                       <div class="space-y-4">
@@ -556,7 +536,7 @@
                             </label>
                             <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark">
                               <input type="checkbox" v-model="formData.dia_terca" class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                              Terca
+                              Terça
                             </label>
                             <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark">
                               <input type="checkbox" v-model="formData.dia_quarta" class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" />
@@ -651,12 +631,32 @@
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
-                  <button @click="closeModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
-                  <button @click="saveCliente" class="btn btn-primary" :disabled="saving || !isFormValid">
-                    <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
-                    {{ saving ? 'Salvando...' : (isEditing ? 'Salvar alterações' : 'Cadastrar cliente') }}
-                  </button>
+                <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <button
+                      v-if="isEditing"
+                      @click="toggleStatusFromModal"
+                      :disabled="saving"
+                      :class="[
+                        'btn btn-secondary text-sm',
+                        editingCliente?.ativo
+                          ? 'text-amber-600 dark:text-amber-400'
+                          : 'text-emerald-600 dark:text-emerald-400'
+                      ]"
+                    >
+                      <span class="material-icons-outlined text-sm">
+                        {{ editingCliente?.ativo ? 'block' : 'check_circle' }}
+                      </span>
+                      {{ editingCliente?.ativo ? 'Desativar' : 'Ativar' }}
+                    </button>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <button @click="closeModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
+                    <button @click="saveCliente" class="btn btn-primary" :disabled="saving || !isFormValid">
+                      <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
+                      {{ saving ? 'Salvando...' : (isEditing ? 'Salvar alterações' : 'Cadastrar cliente') }}
+                    </button>
+                  </div>
                 </div>
               </div>
             </Transition>
@@ -665,200 +665,242 @@
       </Transition>
     </Teleport>
 
-    <!-- Slideover de Detalhes -->
+    <!-- Modal de Detalhes -->
     <Teleport to="body">
       <Transition
-        enter-active-class="transition-opacity duration-300 ease-out"
+        enter-active-class="transition-opacity duration-200"
         enter-from-class="opacity-0"
         enter-to-class="opacity-100"
-        leave-active-class="transition-opacity duration-200 ease-in"
+        leave-active-class="transition-opacity duration-200"
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="showDetailsSlideover" class="fixed inset-0 z-50 overflow-hidden">
-          <div class="fixed inset-0 glass-backdrop" @click="closeDetailsSlideover"></div>
-
-          <div class="fixed inset-y-0 right-0 flex max-w-full">
+        <div v-if="showDetailsModal" class="fixed inset-0 z-50 overflow-y-auto">
+          <div class="fixed inset-0 glass-backdrop" @click="closeDetailsModal"></div>
+          <div class="flex min-h-full items-center justify-center p-4">
             <Transition
-              enter-active-class="transform transition-transform duration-300 ease-out"
-              enter-from-class="translate-x-full"
-              enter-to-class="translate-x-0"
-              leave-active-class="transform transition-transform duration-200 ease-in"
-              leave-from-class="translate-x-0"
-              leave-to-class="translate-x-full"
+              enter-active-class="transition-all duration-200"
+              enter-from-class="opacity-0 scale-95"
+              enter-to-class="opacity-100 scale-100"
+              leave-active-class="transition-all duration-200"
+              leave-from-class="opacity-100 scale-100"
+              leave-to-class="opacity-0 scale-95"
             >
-              <div v-if="showDetailsSlideover" class="w-screen max-w-full sm:max-w-2xl">
-                <div class="h-full flex flex-col glass-panel shadow-2xl">
-                  <!-- Header -->
-                  <div class="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100 dark:border-border-dark flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                      <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-primary/10 flex items-center justify-center text-sm sm:text-lg font-bold text-primary shrink-0">
-                        {{ getInitials(selectedCliente?.nome_fantasia || selectedCliente?.razao_social) }}
-                      </div>
-                      <div class="min-w-0 flex-1">
-                        <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-text-dark truncate">{{ selectedCliente?.nome_fantasia || selectedCliente?.razao_social }}</h2>
-                        <p v-if="selectedCliente?.nome_fantasia" class="text-xs sm:text-sm text-gray-500 dark:text-subtext-dark truncate">{{ selectedCliente?.razao_social }}</p>
-                      </div>
+              <div v-if="showDetailsModal" class="relative glass-panel rounded-lg shadow-xl w-full max-w-3xl">
+                <!-- Modal Header -->
+                <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-4 min-w-0 flex-1">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
+                      {{ getInitials(selectedCliente?.nome_fantasia || selectedCliente?.razao_social) }}
                     </div>
-                    <button @click="closeDetailsSlideover" class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shrink-0">
-                      <span class="material-icons text-xl">close</span>
-                    </button>
+                    <div class="min-w-0 flex-1">
+                      <h2 class="text-lg font-semibold text-text-light dark:text-text-dark truncate">{{ selectedCliente?.nome_fantasia || selectedCliente?.razao_social }}</h2>
+                      <p v-if="selectedCliente?.nome_fantasia" class="text-sm text-subtext-light dark:text-subtext-dark truncate">{{ selectedCliente?.razao_social }}</p>
+                    </div>
+                  </div>
+                  <button @click="closeDetailsModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <span class="material-icons">close</span>
+                  </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 max-h-[60vh] overflow-y-auto">
+                  <!-- Status + Resumo -->
+                  <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+                    <div class="flex items-center gap-3">
+                      <span :class="['inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium', selectedCliente?.ativo ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400']">
+                        <span :class="['w-1.5 h-1.5 rounded-full mr-1.5', selectedCliente?.ativo ? 'bg-green-500' : 'bg-gray-400']"></span>
+                        {{ selectedCliente?.ativo ? 'Ativo' : 'Inativo' }}
+                      </span>
+                      <span class="text-xs text-subtext-light dark:text-subtext-dark">{{ formatDocument(selectedCliente?.cnpj_cpf) }}</span>
+                    </div>
                   </div>
 
-                  <!-- Body -->
-                  <div class="flex-1 overflow-y-auto">
-                    <div class="p-4 sm:p-6 space-y-5 sm:space-y-6">
-                      <!-- Status e Ações Rapidas -->
-                      <div class="flex flex-wrap items-center justify-between gap-2">
-                        <span :class="['inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium', selectedCliente?.ativo ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400']">
-                          <span :class="['w-1.5 h-1.5 rounded-full mr-1.5', selectedCliente?.ativo ? 'bg-green-500' : 'bg-gray-400']"></span>
-                          {{ selectedCliente?.ativo ? 'Ativo' : 'Inativo' }}
-                        </span>
-                        <button
-                          @click="toggleStatus"
-                          class="text-sm text-primary hover:underline"
-                          :disabled="saving"
-                        >
-                          {{ selectedCliente?.ativo ? 'Desativar cliente' : 'Ativar cliente' }}
-                        </button>
+                  <!-- Layout 2 colunas -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Coluna Esquerda -->
+                    <div class="space-y-4">
+                      <!-- Contato -->
+                      <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-xs font-semibold text-subtext-light dark:text-subtext-dark uppercase tracking-wider mb-3">Contato</h3>
+                        <div class="space-y-2.5">
+                          <div v-if="selectedCliente?.telefone" class="flex items-center gap-2">
+                            <span class="material-icons-outlined text-sm text-subtext-light dark:text-subtext-dark">phone</span>
+                            <span class="text-sm text-text-light dark:text-text-dark">{{ selectedCliente.telefone }}</span>
+                          </div>
+                          <div v-if="selectedCliente?.email" class="flex items-center gap-2">
+                            <span class="material-icons-outlined text-sm text-subtext-light dark:text-subtext-dark">mail</span>
+                            <span class="text-sm text-text-light dark:text-text-dark truncate">{{ selectedCliente.email }}</span>
+                          </div>
+                          <div v-if="selectedCliente?.whatsapp" class="flex items-center gap-2">
+                            <span class="material-icons-outlined text-sm text-subtext-light dark:text-subtext-dark">chat</span>
+                            <span class="text-sm text-text-light dark:text-text-dark">{{ selectedCliente.whatsapp }}</span>
+                          </div>
+                          <div v-if="!selectedCliente?.telefone && !selectedCliente?.email && !selectedCliente?.whatsapp" class="text-sm text-subtext-light dark:text-subtext-dark">Nenhum contato cadastrado</div>
+                        </div>
                       </div>
 
-                      <!-- Dados do Cliente -->
-                      <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Dados Gerais</h3>
-                        <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
-                          <div>
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">CNPJ/CPF</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ formatDocument(selectedCliente?.cnpj_cpf) }}</p>
-                          </div>
-                          <div>
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Telefone</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedCliente?.telefone || '-' }}</p>
-                          </div>
-                          <div class="col-span-1 xs:col-span-2">
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">E-mail</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedCliente?.email || '-' }}</p>
-                          </div>
-                          <div v-if="selectedCliente?.whatsapp" class="col-span-1 xs:col-span-2">
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">WhatsApp</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedCliente?.whatsapp }}</p>
+                      <!-- Endereço Sede -->
+                      <div v-if="selectedCliente?.logradouro || selectedCliente?.cidade" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-xs font-semibold text-subtext-light dark:text-subtext-dark uppercase tracking-wider mb-3">Endereço</h3>
+                        <div class="flex gap-2">
+                          <span class="material-icons-outlined text-sm text-subtext-light dark:text-subtext-dark mt-0.5 shrink-0">location_on</span>
+                          <div class="text-sm text-text-light dark:text-text-dark leading-relaxed">
+                            <p v-if="selectedCliente?.logradouro">
+                              {{ selectedCliente.logradouro }}{{ selectedCliente.numero ? ', ' + selectedCliente.numero : '' }}
+                            </p>
+                            <p v-if="selectedCliente?.complemento" class="text-subtext-light dark:text-subtext-dark">{{ selectedCliente.complemento }}</p>
+                            <p v-if="selectedCliente?.bairro">{{ selectedCliente.bairro }}</p>
+                            <p>
+                              {{ selectedCliente?.cidade }}{{ selectedCliente?.cidade && selectedCliente?.estado ? '/' : '' }}{{ selectedCliente?.estado }}
+                              <span v-if="selectedCliente?.cep" class="text-subtext-light dark:text-subtext-dark"> - {{ selectedCliente.cep }}</span>
+                            </p>
                           </div>
                         </div>
                       </div>
 
-                      <!-- Endereco -->
-                      <div v-if="selectedCliente?.logradouro || selectedCliente?.cidade" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Endereço</h3>
-                        <div class="text-sm text-gray-900 dark:text-text-dark">
-                          <p v-if="selectedCliente?.logradouro">
-                            {{ selectedCliente.logradouro }}{{ selectedCliente.numero ? ', ' + selectedCliente.numero : '' }}
-                          </p>
-                          <p v-if="selectedCliente?.complemento" class="text-gray-500 dark:text-subtext-dark">{{ selectedCliente.complemento }}</p>
-                          <p v-if="selectedCliente?.bairro">{{ selectedCliente.bairro }}</p>
-                          <p>
-                            {{ selectedCliente?.cidade }}{{ selectedCliente?.cidade && selectedCliente?.estado ? '/' : '' }}{{ selectedCliente?.estado }}
-                            <span v-if="selectedCliente?.cep"> - CEP: {{ selectedCliente.cep }}</span>
-                          </p>
-                        </div>
-                      </div>
-
-                      <!-- Dados Financeiros -->
-                      <div v-if="selectedCliente?.responsavel_financeiro || selectedCliente?.pagamento_pix || selectedCliente?.pagamento_boleto || selectedCliente?.pagamento_cartao" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Financeiro</h3>
-                        <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
+                      <!-- Financeiro -->
+                      <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-xs font-semibold text-subtext-light dark:text-subtext-dark uppercase tracking-wider mb-3">Financeiro</h3>
+                        <div class="space-y-2.5">
                           <div v-if="selectedCliente?.responsavel_financeiro">
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Responsável</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedCliente.responsavel_financeiro }}</p>
+                            <p class="text-xs text-subtext-light dark:text-subtext-dark">Responsável</p>
+                            <p class="text-sm text-text-light dark:text-text-dark">{{ selectedCliente.responsavel_financeiro }}</p>
                           </div>
-                          <div v-if="selectedCliente?.email_financeiro">
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">E-mail</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedCliente.email_financeiro }}</p>
+                          <div v-if="selectedCliente?.email_financeiro || selectedCliente?.telefone_financeiro" class="flex flex-wrap gap-x-4 gap-y-1">
+                            <span v-if="selectedCliente?.email_financeiro" class="text-xs text-subtext-light dark:text-subtext-dark">{{ selectedCliente.email_financeiro }}</span>
+                            <span v-if="selectedCliente?.telefone_financeiro" class="text-xs text-subtext-light dark:text-subtext-dark">{{ selectedCliente.telefone_financeiro }}</span>
                           </div>
-                          <div v-if="selectedCliente?.telefone_financeiro">
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Telefone</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedCliente.telefone_financeiro }}</p>
-                          </div>
-                          <div class="col-span-1 xs:col-span-2">
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Formas de Pagamento</p>
-                            <div class="flex flex-wrap gap-2 mt-1">
+                          <div>
+                            <p class="text-xs text-subtext-light dark:text-subtext-dark mb-1.5">Pagamento</p>
+                            <div class="flex flex-wrap gap-1.5">
                               <span v-if="selectedCliente?.pagamento_pix" class="badge badge-success">Pix</span>
                               <span v-if="selectedCliente?.pagamento_boleto" class="badge badge-success">Boleto</span>
                               <span v-if="selectedCliente?.pagamento_cartao" class="badge badge-success">Cartão</span>
-                              <span v-if="!selectedCliente?.pagamento_pix && !selectedCliente?.pagamento_boleto && !selectedCliente?.pagamento_cartao" class="text-sm text-gray-500">-</span>
+                              <span v-if="!selectedCliente?.pagamento_pix && !selectedCliente?.pagamento_boleto && !selectedCliente?.pagamento_cartao" class="text-xs text-subtext-light dark:text-subtext-dark">Não definido</span>
                             </div>
                           </div>
                         </div>
                       </div>
+                    </div>
 
-                      <!-- Dados de Entrega -->
-                      <div v-if="selectedCliente?.logradouro_entrega || selectedCliente?.responsavel_pedido" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Entrega</h3>
-                        <div class="space-y-4">
-                          <div v-if="selectedCliente?.responsavel_pedido" class="grid grid-cols-1 xs:grid-cols-2 gap-3">
-                            <div>
-                              <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Responsável Pedido</p>
-                              <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedCliente.responsavel_pedido }}</p>
-                            </div>
-                            <div v-if="selectedCliente?.telefone_pedido">
-                              <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Telefone</p>
-                              <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedCliente.telefone_pedido }}</p>
-                            </div>
-                          </div>
-                          <div v-if="selectedCliente?.logradouro_entrega" class="text-sm text-gray-900 dark:text-text-dark">
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Endereço de Entrega</p>
-                            <p>{{ selectedCliente.logradouro_entrega }}{{ selectedCliente.numero_entrega ? ', ' + selectedCliente.numero_entrega : '' }}</p>
-                            <p v-if="selectedCliente?.bairro_entrega">{{ selectedCliente.bairro_entrega }}</p>
-                            <p>{{ selectedCliente?.cidade_entrega }}{{ selectedCliente?.cidade_entrega && selectedCliente?.estado_entrega ? '/' : '' }}{{ selectedCliente?.estado_entrega }}</p>
-                          </div>
-                          <div v-if="selectedCliente?.dia_segunda || selectedCliente?.dia_terca || selectedCliente?.dia_quarta || selectedCliente?.dia_quinta || selectedCliente?.dia_sexta">
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Dias de Entrega</p>
-                            <div class="flex flex-wrap gap-2 mt-1">
-                              <span v-if="selectedCliente?.dia_segunda" class="badge bg-primary/10 text-primary">Seg</span>
-                              <span v-if="selectedCliente?.dia_terca" class="badge bg-primary/10 text-primary">Ter</span>
-                              <span v-if="selectedCliente?.dia_quarta" class="badge bg-primary/10 text-primary">Qua</span>
-                              <span v-if="selectedCliente?.dia_quinta" class="badge bg-primary/10 text-primary">Qui</span>
-                              <span v-if="selectedCliente?.dia_sexta" class="badge bg-primary/10 text-primary">Sex</span>
-                            </div>
-                          </div>
-                          <div v-if="selectedCliente?.hora_manha_inicio || selectedCliente?.hora_tarde_inicio" class="grid grid-cols-2 gap-3">
-                            <div v-if="selectedCliente?.hora_manha_inicio">
-                              <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Turno Manhã</p>
-                              <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedCliente.hora_manha_inicio }} - {{ selectedCliente.hora_manha_fim }}</p>
-                            </div>
-                            <div v-if="selectedCliente?.hora_tarde_inicio">
-                              <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Turno Tarde</p>
-                              <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedCliente.hora_tarde_inicio }} - {{ selectedCliente.hora_tarde_fim }}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Observacoes -->
-                      <div v-if="selectedCliente?.observacoes_financeiro || selectedCliente?.observacoes_entrega" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Observações</h3>
+                    <!-- Coluna Direita -->
+                    <div class="space-y-4">
+                      <!-- Entrega - Responsável + Endereço -->
+                      <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-xs font-semibold text-subtext-light dark:text-subtext-dark uppercase tracking-wider mb-3">Entrega</h3>
                         <div class="space-y-3">
+                          <!-- Responsável -->
+                          <div v-if="selectedCliente?.responsavel_pedido">
+                            <p class="text-xs text-subtext-light dark:text-subtext-dark">Responsável</p>
+                            <p class="text-sm text-text-light dark:text-text-dark">
+                              {{ selectedCliente.responsavel_pedido }}
+                              <span v-if="selectedCliente?.telefone_pedido" class="text-subtext-light dark:text-subtext-dark"> - {{ selectedCliente.telefone_pedido }}</span>
+                            </p>
+                          </div>
+
+                          <!-- Endereço de Entrega -->
+                          <div v-if="selectedCliente?.logradouro_entrega" class="flex gap-2">
+                            <span class="material-icons-outlined text-sm text-subtext-light dark:text-subtext-dark mt-0.5 shrink-0">local_shipping</span>
+                            <div class="text-sm text-text-light dark:text-text-dark leading-relaxed">
+                              <p>{{ selectedCliente.logradouro_entrega }}{{ selectedCliente.numero_entrega ? ', ' + selectedCliente.numero_entrega : '' }}</p>
+                              <p v-if="selectedCliente?.bairro_entrega">{{ selectedCliente.bairro_entrega }}</p>
+                              <p>{{ selectedCliente?.cidade_entrega }}{{ selectedCliente?.cidade_entrega && selectedCliente?.estado_entrega ? '/' : '' }}{{ selectedCliente?.estado_entrega }}</p>
+                            </div>
+                          </div>
+
+                          <!-- Dias de Entrega -->
+                          <div v-if="selectedCliente?.dia_segunda || selectedCliente?.dia_terca || selectedCliente?.dia_quarta || selectedCliente?.dia_quinta || selectedCliente?.dia_sexta">
+                            <p class="text-xs text-subtext-light dark:text-subtext-dark mb-1.5">Dias</p>
+                            <div class="flex gap-1.5">
+                              <span :class="['inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-medium', selectedCliente?.dia_segunda ? 'bg-primary/10 text-primary' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500']">S</span>
+                              <span :class="['inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-medium', selectedCliente?.dia_terca ? 'bg-primary/10 text-primary' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500']">T</span>
+                              <span :class="['inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-medium', selectedCliente?.dia_quarta ? 'bg-primary/10 text-primary' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500']">Q</span>
+                              <span :class="['inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-medium', selectedCliente?.dia_quinta ? 'bg-primary/10 text-primary' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500']">Q</span>
+                              <span :class="['inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-medium', selectedCliente?.dia_sexta ? 'bg-primary/10 text-primary' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500']">S</span>
+                            </div>
+                          </div>
+
+                          <!-- Horários -->
+                          <div v-if="selectedCliente?.hora_manha_inicio || selectedCliente?.hora_tarde_inicio" class="flex flex-wrap gap-3">
+                            <div v-if="selectedCliente?.hora_manha_inicio" class="flex items-center gap-1.5">
+                              <span class="material-icons-outlined text-xs text-subtext-light dark:text-subtext-dark">wb_sunny</span>
+                              <span class="text-xs text-text-light dark:text-text-dark">{{ selectedCliente.hora_manha_inicio }} - {{ selectedCliente.hora_manha_fim }}</span>
+                            </div>
+                            <div v-if="selectedCliente?.hora_tarde_inicio" class="flex items-center gap-1.5">
+                              <span class="material-icons-outlined text-xs text-subtext-light dark:text-subtext-dark">wb_twilight</span>
+                              <span class="text-xs text-text-light dark:text-text-dark">{{ selectedCliente.hora_tarde_inicio }} - {{ selectedCliente.hora_tarde_fim }}</span>
+                            </div>
+                          </div>
+
+                          <div v-if="!selectedCliente?.responsavel_pedido && !selectedCliente?.logradouro_entrega" class="text-sm text-subtext-light dark:text-subtext-dark">
+                            Nenhuma informação de entrega
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Pedidos -->
+                      <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-xs font-semibold text-subtext-light dark:text-subtext-dark uppercase tracking-wider mb-3">Pedidos</h3>
+                        <div class="flex items-center gap-6">
+                          <div>
+                            <p class="text-2xl font-bold text-primary">{{ getPedidosEmAberto(selectedCliente?.id) }}</p>
+                            <p class="text-xs text-subtext-light dark:text-subtext-dark">Em aberto</p>
+                          </div>
+                          <div class="w-px h-10 bg-border-light dark:bg-border-dark"></div>
+                          <div>
+                            <p class="text-2xl font-bold text-text-light dark:text-text-dark">{{ getTotalPedidos(selectedCliente?.id) }}</p>
+                            <p class="text-xs text-subtext-light dark:text-subtext-dark">Total</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Observações -->
+                      <div v-if="selectedCliente?.observacoes_financeiro || selectedCliente?.observacoes_entrega" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-xs font-semibold text-subtext-light dark:text-subtext-dark uppercase tracking-wider mb-3">Observações</h3>
+                        <div class="space-y-2">
                           <div v-if="selectedCliente?.observacoes_financeiro">
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Financeiro</p>
-                            <p class="text-sm text-gray-900 dark:text-text-dark whitespace-pre-wrap">{{ selectedCliente.observacoes_financeiro }}</p>
+                            <p class="text-[10px] uppercase tracking-wider text-subtext-light dark:text-subtext-dark mb-0.5">Financeiro</p>
+                            <p class="text-sm text-text-light dark:text-text-dark whitespace-pre-wrap leading-relaxed">{{ selectedCliente.observacoes_financeiro }}</p>
                           </div>
                           <div v-if="selectedCliente?.observacoes_entrega">
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Entrega</p>
-                            <p class="text-sm text-gray-900 dark:text-text-dark whitespace-pre-wrap">{{ selectedCliente.observacoes_entrega }}</p>
+                            <p class="text-[10px] uppercase tracking-wider text-subtext-light dark:text-subtext-dark mb-0.5">Entrega</p>
+                            <p class="text-sm text-text-light dark:text-text-dark whitespace-pre-wrap leading-relaxed">{{ selectedCliente.observacoes_entrega }}</p>
                           </div>
                         </div>
-                      </div>
-
-                      <!-- Metadados -->
-                      <div class="text-xs text-gray-400 dark:text-gray-600 flex flex-wrap gap-4">
-                        <span>Criado em: {{ formatDateTime(selectedCliente?.created_at) }}</span>
-                        <span>Atualizado em: {{ formatDateTime(selectedCliente?.updated_at) }}</span>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Footer -->
-                  <div class="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-border-dark">
-                    <button @click="openEditFromSlideover" class="w-full btn btn-primary justify-center">
+                  <!-- Metadados -->
+                  <div class="text-xs text-gray-400 dark:text-gray-600 flex flex-wrap gap-4 mt-4 pt-3 border-t border-border-light dark:border-border-dark">
+                    <span>Criado em: {{ formatDateTime(selectedCliente?.created_at) }}</span>
+                    <span>Atualizado em: {{ formatDateTime(selectedCliente?.updated_at) }}</span>
+                  </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between">
+                  <div>
+                    <button
+                      @click="toggleStatus"
+                      :disabled="saving"
+                      :class="[
+                        'btn btn-secondary text-sm',
+                        selectedCliente?.ativo
+                          ? 'text-amber-600 dark:text-amber-400'
+                          : 'text-emerald-600 dark:text-emerald-400'
+                      ]"
+                    >
+                      <span class="material-icons-outlined text-sm">
+                        {{ selectedCliente?.ativo ? 'block' : 'check_circle' }}
+                      </span>
+                      {{ selectedCliente?.ativo ? 'Desativar' : 'Ativar' }}
+                    </button>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <button @click="closeDetailsModal" class="btn btn-secondary">Fechar</button>
+                    <button @click="openEditFromDetails" class="btn btn-primary">
                       <span class="material-icons text-sm">edit</span>
                       Editar cliente
                     </button>
@@ -937,29 +979,29 @@ const toast = useToast()
 const estados = [
   { sigla: 'AC', nome: 'Acre' },
   { sigla: 'AL', nome: 'Alagoas' },
-  { sigla: 'AP', nome: 'Amapa' },
+  { sigla: 'AP', nome: 'Amapá' },
   { sigla: 'AM', nome: 'Amazonas' },
   { sigla: 'BA', nome: 'Bahia' },
-  { sigla: 'CE', nome: 'Ceara' },
+  { sigla: 'CE', nome: 'Ceará' },
   { sigla: 'DF', nome: 'Distrito Federal' },
-  { sigla: 'ES', nome: 'Espirito Santo' },
-  { sigla: 'GO', nome: 'Goias' },
-  { sigla: 'MA', nome: 'Maranhao' },
+  { sigla: 'ES', nome: 'Espírito Santo' },
+  { sigla: 'GO', nome: 'Goiás' },
+  { sigla: 'MA', nome: 'Maranhão' },
   { sigla: 'MT', nome: 'Mato Grosso' },
   { sigla: 'MS', nome: 'Mato Grosso do Sul' },
   { sigla: 'MG', nome: 'Minas Gerais' },
-  { sigla: 'PA', nome: 'Para' },
-  { sigla: 'PB', nome: 'Paraiba' },
-  { sigla: 'PR', nome: 'Parana' },
+  { sigla: 'PA', nome: 'Pará' },
+  { sigla: 'PB', nome: 'Paraíba' },
+  { sigla: 'PR', nome: 'Paraná' },
   { sigla: 'PE', nome: 'Pernambuco' },
-  { sigla: 'PI', nome: 'Piaui' },
+  { sigla: 'PI', nome: 'Piauí' },
   { sigla: 'RJ', nome: 'Rio de Janeiro' },
   { sigla: 'RN', nome: 'Rio Grande do Norte' },
   { sigla: 'RS', nome: 'Rio Grande do Sul' },
-  { sigla: 'RO', nome: 'Rondonia' },
+  { sigla: 'RO', nome: 'Rondônia' },
   { sigla: 'RR', nome: 'Roraima' },
   { sigla: 'SC', nome: 'Santa Catarina' },
-  { sigla: 'SP', nome: 'Sao Paulo' },
+  { sigla: 'SP', nome: 'São Paulo' },
   { sigla: 'SE', nome: 'Sergipe' },
   { sigla: 'TO', nome: 'Tocantins' }
 ]
@@ -987,7 +1029,7 @@ const buscandoCNPJ = ref(false)
 
 // Modais
 const showModal = ref(false)
-const showDetailsSlideover = ref(false)
+const showDetailsModal = ref(false)
 const isEditing = ref(false)
 const activeTab = ref('dados-gerais')
 const selectedCliente = ref<Cliente | null>(null)
@@ -1054,6 +1096,7 @@ const getEmptyForm = () => ({
 
 const formData = ref(getEmptyForm())
 const editingId = ref<string | null>(null)
+const editingCliente = ref<Cliente | null>(null)
 
 // Computed
 const filteredClientes = computed(() => {
@@ -1223,6 +1266,7 @@ async function loadClientes() {
 function openCreateModal() {
   formData.value = getEmptyForm()
   editingId.value = null
+  editingCliente.value = null
   isEditing.value = false
   activeTab.value = 'dados-gerais'
   showModal.value = true
@@ -1273,6 +1317,7 @@ function openEditModal(cliente: Cliente) {
     observacoes_entrega: cliente.observacoes_entrega || ''
   }
   editingId.value = cliente.id
+  editingCliente.value = cliente
   isEditing.value = true
   activeTab.value = 'dados-gerais'
   showModal.value = true
@@ -1380,17 +1425,17 @@ async function saveCliente() {
   }
 }
 
-// Slideover
-function openDetailsSlideover(cliente: Cliente) {
+// Modal de Detalhes
+function openDetailsModal(cliente: Cliente) {
   selectedCliente.value = cliente
-  showDetailsSlideover.value = true
+  showDetailsModal.value = true
 }
 
-function closeDetailsSlideover() {
-  showDetailsSlideover.value = false
+function closeDetailsModal() {
+  showDetailsModal.value = false
 }
 
-function openEditFromSlideover() {
+function openEditFromDetails() {
   if (selectedCliente.value) {
     openEditModal(selectedCliente.value)
   }
@@ -1398,11 +1443,13 @@ function openEditFromSlideover() {
 
 async function toggleStatus() {
   if (!selectedCliente.value || !currentCompany.value?.id) return
+  const newStatus = !selectedCliente.value.ativo
+  const label = newStatus ? 'ativar' : 'desativar'
+
+  if (!confirm(`Tem certeza que deseja ${label} este cliente?`)) return
 
   saving.value = true
   try {
-    const newStatus = !selectedCliente.value.ativo
-
     const { error } = await supabase
       .from('clientes')
       .update({ ativo: newStatus })
@@ -1413,6 +1460,36 @@ async function toggleStatus() {
 
     selectedCliente.value.ativo = newStatus
     toast.success(`Cliente ${newStatus ? 'ativado' : 'desativado'} com sucesso`)
+    closeDetailsModal()
+    await loadClientes()
+  } catch (e: any) {
+    console.error('Erro ao alterar status:', e)
+    toast.error('Erro ao alterar status do cliente')
+  } finally {
+    saving.value = false
+  }
+}
+
+async function toggleStatusFromModal() {
+  if (!editingCliente.value || !currentCompany.value?.id) return
+  const newStatus = !editingCliente.value.ativo
+  const label = newStatus ? 'ativar' : 'desativar'
+
+  if (!confirm(`Tem certeza que deseja ${label} este cliente?`)) return
+
+  saving.value = true
+  try {
+    const { error } = await supabase
+      .from('clientes')
+      .update({ ativo: newStatus })
+      .eq('id', editingCliente.value.id)
+      .eq('empresa_id', currentCompany.value.id)
+
+    if (error) throw error
+
+    editingCliente.value.ativo = newStatus
+    toast.success(`Cliente ${newStatus ? 'ativado' : 'desativado'} com sucesso`)
+    closeModal()
     await loadClientes()
   } catch (e: any) {
     console.error('Erro ao alterar status:', e)

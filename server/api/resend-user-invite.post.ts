@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
     const { data, error } = await resend.emails.send({
       from: 'Bioma OS <noreply@biomaos.com.br>',
       to: convite.email,
-      subject: 'Voce foi convidado para o Bioma OS',
+      subject: 'Você foi convidado para o Bioma OS',
       html: `
         <!DOCTYPE html>
         <html>

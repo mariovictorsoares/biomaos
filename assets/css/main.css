@@ -29,7 +29,7 @@
 
   /* Inputs */
   .input {
-    @apply w-full px-3 py-2 text-sm border border-border-light dark:border-border-dark rounded bg-white dark:bg-gray-800 text-text-light dark:text-text-dark focus:ring-1 focus:ring-primary focus:border-primary placeholder-gray-400 outline-none transition-all;
+    @apply w-full px-3 py-2 h-[38px] text-sm border border-border-light dark:border-border-dark rounded bg-white dark:bg-gray-800 text-text-light dark:text-text-dark focus:ring-1 focus:ring-primary focus:border-primary placeholder-gray-400 outline-none transition-all;
   }
 
   /* Table */
@@ -38,7 +38,7 @@
   }
 
   .table-cell {
-    @apply px-6 py-4 text-sm text-text-light dark:text-text-dark;
+    @apply px-6 py-3 text-sm text-text-light dark:text-text-dark whitespace-nowrap;
   }
 
   /* Status Badge */

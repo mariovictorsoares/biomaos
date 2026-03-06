@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
                   <tr>
                     <td style="padding: 32px;">
                       <h1 style="margin: 0 0 16px; font-size: 20px; font-weight: 600; color: #333333;">
-                        Voce foi convidado!
+                        Você foi convidado!
                       </h1>
 
                       <p style="margin: 0 0 24px; font-size: 14px; line-height: 1.6; color: #666666;">

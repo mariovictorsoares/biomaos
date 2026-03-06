@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
   const token = crypto.randomUUID()
 
   // Salvar convite na tabela convites_usuario
-  const { error: insertError } = await supabase.from('convites_usuario').insert({
+  const { data: insertData, error: insertError } = await supabase.from('convites_usuario').insert({
     email,
     nome,
     perfil,
@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
     token,
     status: 'pending',
     expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 dias
-  })
+  }).select('id').single()
 
   if (insertError) {
     console.error('Erro ao criar convite:', insertError)
@@ -74,7 +74,7 @@ export default defineEventHandler(async (event) => {
     const { data, error } = await resend.emails.send({
       from: 'Bioma OS <noreply@biomaos.com.br>',
       to: email,
-      subject: 'Voce foi convidado para o Bioma OS',
+      subject: 'Você foi convidado para o Bioma OS',
       html: `
         <!DOCTYPE html>
         <html>
@@ -155,16 +155,18 @@ export default defineEventHandler(async (event) => {
       console.error('Erro ao enviar email:', error)
       return {
         success: true,
+        conviteId: insertData?.id,
         emailSent: false,
         emailError: error.message || 'Domínio não verificado no Resend'
       }
     }
 
-    return { success: true, emailSent: true, data }
+    return { success: true, conviteId: insertData?.id, emailSent: true, data }
   } catch (error: any) {
     console.error('Erro ao enviar email:', error)
     return {
       success: true,
+      conviteId: insertData?.id,
       emailSent: false,
       emailError: error.message || 'Erro ao enviar email'
     }

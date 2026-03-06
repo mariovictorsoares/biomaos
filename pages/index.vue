@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-screen">
     <!-- Header -->
-    <div class="flex flex-col gap-4 mb-6">
+    <div class="flex flex-col gap-4 mb-12">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 class="text-2xl font-bold text-text-light dark:text-text-dark">Dashboard</h1>
+        <h1 class="text-lg font-medium text-text-light/70 dark:text-text-dark/70 tracking-wide uppercase">Dashboard</h1>
 
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           <!-- Dropdown Multi-Select de Empresas -->
@@ -148,6 +148,114 @@
             <span class="text-sm text-subtext-light dark:text-subtext-dark">Faturamento Previsto do Período</span>
           </div>
           <p class="text-3xl font-semibold text-text-light dark:text-text-dark">{{ formatarMoeda(metricas.faturamentoPrevisto) }}</p>
+        </div>
+      </div>
+
+      <!-- Produção Ativa: Tarefas Hoje, Colheitas Próximas, Atrasados -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Tarefas de Hoje -->
+        <div class="card p-4 sm:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-medium text-text-light dark:text-text-dark">Tarefas de Hoje</h2>
+            <span class="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium">
+              {{ tarefasHoje.length }}
+            </span>
+          </div>
+          <div v-if="tarefasHoje.length > 0" class="space-y-2 max-h-48 overflow-y-auto">
+            <div
+              v-for="t in tarefasHoje"
+              :key="t.id"
+              class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800"
+            >
+              <span
+                class="w-2 h-2 rounded-full flex-shrink-0"
+                :class="t.concluida ? 'bg-green-500' : 'bg-yellow-500'"
+              ></span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-text-light dark:text-text-dark truncate">{{ t.nome }}</p>
+                <p class="text-xs text-subtext-light dark:text-subtext-dark truncate">
+                  {{ t.especie_nome || 'Tarefa manual' }}
+                  <span v-if="t.bandejas"> &middot; {{ t.bandejas }} bdj</span>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div v-else class="py-6 text-center text-subtext-light dark:text-subtext-dark text-sm">
+            Nenhuma tarefa para hoje
+          </div>
+        </div>
+
+        <!-- Próximas Colheitas (7 dias) -->
+        <div class="card p-4 sm:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-medium text-text-light dark:text-text-dark">Colheitas (7 dias)</h2>
+            <span class="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-medium">
+              {{ proximasColheitas.length }}
+            </span>
+          </div>
+          <div v-if="proximasColheitas.length > 0" class="space-y-2 max-h-48 overflow-y-auto">
+            <div
+              v-for="c in proximasColheitas"
+              :key="c.data_colheita"
+              class="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800"
+            >
+              <div>
+                <p class="text-sm font-medium text-text-light dark:text-text-dark">
+                  {{ formatarDataCurta(c.data_colheita) }}
+                </p>
+                <p class="text-xs text-subtext-light dark:text-subtext-dark">
+                  {{ c.status === 'concluida' ? 'Concluída' : c.status === 'parcial' ? 'Parcial' : 'Pendente' }}
+                </p>
+              </div>
+              <span
+                class="text-xs px-2 py-1 rounded-full font-medium"
+                :class="{
+                  'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300': c.status === 'concluida',
+                  'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300': c.status === 'parcial',
+                  'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300': c.status === 'pendente'
+                }"
+              >
+                {{ c.status }}
+              </span>
+            </div>
+          </div>
+          <div v-else class="py-6 text-center text-subtext-light dark:text-subtext-dark text-sm">
+            Nenhuma colheita nos próximos 7 dias
+          </div>
+        </div>
+
+        <!-- Tarefas Atrasadas -->
+        <div class="card p-4 sm:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-medium text-text-light dark:text-text-dark">Tarefas Atrasadas</h2>
+            <span
+              class="text-xs px-2 py-1 rounded-full font-medium"
+              :class="tarefasAtrasadas.length > 0
+                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'"
+            >
+              {{ tarefasAtrasadas.length }}
+            </span>
+          </div>
+          <div v-if="tarefasAtrasadas.length > 0" class="space-y-2 max-h-48 overflow-y-auto">
+            <div
+              v-for="t in tarefasAtrasadas"
+              :key="t.id"
+              class="flex items-center gap-3 p-2 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/30"
+            >
+              <span class="material-icons text-red-500 text-lg">warning</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-text-light dark:text-text-dark truncate">{{ t.nome }}</p>
+                <p class="text-xs text-red-600 dark:text-red-400">
+                  {{ formatarDataCurta(t.data_prevista) }}
+                  <span v-if="t.especie_nome"> &middot; {{ t.especie_nome }}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div v-else class="py-6 text-center text-green-600 dark:text-green-400 text-sm">
+            Nenhuma tarefa atrasada
+          </div>
         </div>
       </div>
 
@@ -585,6 +693,11 @@ const maisVendidos = ref<any[]>([])
 const margemPorEspecie = ref<any[]>([])
 const vendasMensais = ref<any[]>([])
 
+// Dados novos (módulo produção reestruturado)
+const tarefasHoje = ref<any[]>([])
+const tarefasAtrasadas = ref<any[]>([])
+const proximasColheitas = ref<any[]>([])
+
 // Computed
 const empresasSelecionadasLabel = computed(() => {
   if (selectedCompanyIds.value.length === 0) return 'Selecione empresas'
@@ -759,6 +872,12 @@ function calcularPercentual(valor: number, total: number): number {
   return Math.round((valor / total) * 100)
 }
 
+function formatarDataCurta(dateStr: string) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr + 'T12:00:00')
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+}
+
 function getOcupacaoClass(ocupacao: number) {
   if (ocupacao >= 90) return 'text-red-600'
   if (ocupacao >= 70) return 'text-yellow-600'
@@ -854,6 +973,43 @@ async function loadDashboard() {
         .select('*')
         .in('empresa_id', empresaIds)
     ])
+
+    // Carregar dados do novo módulo de produção (tarefas, colheitas)
+    const [tarefasHojeRes, tarefasAtrasadasRes, colheitasProximasRes] = await Promise.all([
+      supabase
+        .from('tarefas')
+        .select('id, nome, bandejas, concluida, data_prevista, especies:especie_id (nome)')
+        .in('empresa_id', empresaIds)
+        .eq('data_prevista', hojeStr)
+        .order('concluida')
+        .limit(20),
+      supabase
+        .from('tarefas')
+        .select('id, nome, bandejas, data_prevista, especies:especie_id (nome)')
+        .in('empresa_id', empresaIds)
+        .eq('concluida', false)
+        .lt('data_prevista', hojeStr)
+        .order('data_prevista')
+        .limit(20),
+      supabase
+        .from('colheitas')
+        .select('id, data_colheita, status')
+        .in('empresa_id', empresaIds)
+        .gte('data_colheita', hojeStr)
+        .lte('data_colheita', new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0])
+        .order('data_colheita')
+        .limit(10)
+    ])
+
+    tarefasHoje.value = (tarefasHojeRes.data || []).map(t => ({
+      ...t,
+      especie_nome: t.especies?.nome || null
+    }))
+    tarefasAtrasadas.value = (tarefasAtrasadasRes.data || []).map(t => ({
+      ...t,
+      especie_nome: t.especies?.nome || null
+    }))
+    proximasColheitas.value = colheitasProximasRes.data || []
 
     // Processar contratos
     metricas.value.contratosAtivos = contratosRes.count || 0
@@ -1032,6 +1188,9 @@ function resetData() {
   maisVendidos.value = []
   margemPorEspecie.value = []
   vendasMensais.value = []
+  tarefasHoje.value = []
+  tarefasAtrasadas.value = []
+  proximasColheitas.value = []
 }
 
 // Watch

@@ -1,85 +1,77 @@
 <template>
   <div>
-    <h1 class="text-xl sm:text-2xl font-bold text-text-light dark:text-text-dark mb-4 sm:mb-6">Lotes de Sementes</h1>
+    <!-- Toolbar: Filtros + Ação -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+      <!-- Esquerda: Busca + Filtros -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+        <!-- Busca -->
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base">search</span>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Buscar lotes..."
+            class="input w-full sm:w-64 text-sm pl-9"
+          />
+        </div>
+        <!-- Filtro por Especie -->
+        <select v-model="filterEspecie" class="input text-sm w-full sm:w-auto shrink-0">
+          <option value="">Todas espécies</option>
+          <option v-for="especie in especies" :key="especie.id" :value="especie.id">
+            {{ especie.codigo }} - {{ especie.nome }}
+          </option>
+        </select>
+        <!-- Filtro por Status -->
+        <select v-model="filterStatus" class="input text-sm w-full sm:w-auto shrink-0">
+          <option value="">Todos</option>
+          <option value="ativo">Ativos</option>
+          <option value="inativo">Inativos</option>
+        </select>
+        <!-- Filtro Validade De -->
+        <div class="flex items-center gap-1 shrink-0">
+          <span class="text-xs text-subtext-light dark:text-subtext-dark hidden sm:inline">Val. de</span>
+          <input type="date" v-model="validadeInicio" class="input text-sm w-full sm:w-36" placeholder="De" />
+        </div>
+        <!-- Filtro Validade Ate -->
+        <div class="flex items-center gap-1 shrink-0">
+          <span class="text-xs text-subtext-light dark:text-subtext-dark hidden sm:inline">ate</span>
+          <input type="date" v-model="validadeFim" class="input text-sm w-full sm:w-36" placeholder="Ate" />
+        </div>
+        <!-- Limpar Filtros -->
+        <button
+          v-if="hasActiveFilters"
+          @click="clearFilters"
+          class="hidden sm:flex btn btn-secondary text-sm shrink-0"
+          title="Limpar filtros"
+        >
+          <span class="material-icons text-sm">clear</span>
+        </button>
+      </div>
+      <!-- Direita: Botão -->
+      <button @click="openCreateModal" class="btn btn-primary shrink-0 justify-center sm:justify-start">
+        <span class="material-icons text-sm">add</span>
+        Novo lote
+      </button>
+    </div>
 
     <!-- Card da Tabela -->
     <div class="card">
-      <!-- Header do Card -->
-      <div class="p-3 sm:p-4 border-b border-border-light dark:border-border-dark">
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xs sm:text-sm font-medium text-subtext-light dark:text-subtext-dark uppercase tracking-wider">Lista de Lotes</h2>
-            <!-- Botao Novo Lote - Desktop -->
-            <button @click="openCreateModal" class="hidden sm:flex btn btn-primary shrink-0">
-              <span class="material-icons text-sm">add</span>
-              Novo lote
-            </button>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
-            <!-- Filtro por Especie -->
-            <select v-model="filterEspecie" class="input text-sm w-full sm:w-48 shrink-0">
-              <option value="">Todas especies</option>
-              <option v-for="especie in especies" :key="especie.id" :value="especie.id">
-                {{ especie.codigo }} - {{ especie.nome }}
-              </option>
-            </select>
-            <!-- Filtro por Status -->
-            <select v-model="filterStatus" class="input text-sm w-full sm:w-28 shrink-0">
-              <option value="">Todos</option>
-              <option value="ativo">Ativos</option>
-              <option value="inativo">Inativos</option>
-            </select>
-            <!-- Filtro Validade De -->
-            <div class="flex items-center gap-1 shrink-0">
-              <span class="text-xs text-subtext-light dark:text-subtext-dark hidden sm:inline">Val. de</span>
-              <input type="date" v-model="validadeInicio" class="input text-sm w-full sm:w-36" placeholder="De" />
-            </div>
-            <!-- Filtro Validade Ate -->
-            <div class="flex items-center gap-1 shrink-0">
-              <span class="text-xs text-subtext-light dark:text-subtext-dark hidden sm:inline">ate</span>
-              <input type="date" v-model="validadeFim" class="input text-sm w-full sm:w-36" placeholder="Ate" />
-            </div>
-            <!-- Limpar Filtros -->
-            <button
-              v-if="hasActiveFilters"
-              @click="clearFilters"
-              class="hidden sm:flex btn btn-secondary text-sm shrink-0"
-              title="Limpar filtros"
-            >
-              <span class="material-icons text-sm">clear</span>
-            </button>
-            <!-- Busca -->
-            <div class="relative flex-1">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base sm:text-lg">search</span>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Pesquise aqui..."
-                class="input w-full text-sm pl-9 sm:pl-10"
-              />
-            </div>
-            <!-- Botao Novo Lote - Mobile -->
-            <button @click="openCreateModal" class="sm:hidden btn btn-primary w-full justify-center">
-              <span class="material-icons text-sm">add</span>
-              Novo lote
-            </button>
-          </div>
-        </div>
-      </div>
 
       <!-- Tabela - Desktop -->
       <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-gray-50 dark:bg-gray-800 border-b border-border-light dark:border-border-dark">
+            <tr class="bg-gray-100 dark:bg-gray-700/50 border-b border-border-light dark:border-border-dark">
               <th class="table-header">
                 <button class="flex items-center gap-1 hover:text-text-light dark:hover:text-text-dark" @click="toggleSort('numero')">
-                  Numero do lote
+                  Número do lote
                   <span class="material-icons text-xs">{{ getSortIcon('numero') }}</span>
                 </button>
               </th>
-              <th class="table-header">Especie</th>
+              <th class="table-header">Espécie</th>
               <th class="table-header text-right">Estoque Atual (g)</th>
+              <th class="table-header text-right">Rend./Bandeja (g)</th>
+              <th class="table-header text-right">Margem Seg. (%)</th>
               <th class="table-header text-center">
                 <button class="flex items-center gap-1 hover:text-text-light dark:hover:text-text-dark mx-auto" @click="toggleSort('validade')">
                   Validade
@@ -88,7 +80,7 @@
               </th>
               <th class="table-header text-center">Safra</th>
               <th class="table-header text-center w-28">Status</th>
-              <th class="table-header text-center w-24">Acoes</th>
+              <th class="table-header text-center w-24">Ações</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-border-light dark:divide-border-dark">
@@ -106,6 +98,8 @@
                 <span v-else class="text-gray-400">-</span>
               </td>
               <td class="table-cell text-right text-subtext-light dark:text-subtext-dark">{{ formatNumber(lote.estoque_atual) }}</td>
+              <td class="table-cell text-right text-subtext-light dark:text-subtext-dark">{{ lote.rendimento_por_bandeja != null ? formatNumber(lote.rendimento_por_bandeja) : '-' }}</td>
+              <td class="table-cell text-right text-subtext-light dark:text-subtext-dark">{{ lote.margem_seguranca != null ? lote.margem_seguranca : '-' }}</td>
               <td class="table-cell text-center">
                 <span :class="getValidadeClass(lote.validade)">{{ formatDate(lote.validade) }}</span>
               </td>
@@ -189,7 +183,7 @@
         </button>
       </div>
 
-      <!-- Paginacao -->
+      <!-- Páginacao -->
       <div v-if="filteredLotes.length > 0" class="p-3 sm:p-4 border-t border-border-light dark:border-border-dark text-xs text-subtext-light dark:text-subtext-dark">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           <div class="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
@@ -211,7 +205,7 @@
             >
               <span class="material-icons text-sm">chevron_left</span>
             </button>
-            <span class="hidden xs:inline">Pagina</span>
+            <span class="hidden xs:inline">Página</span>
             <input
               v-model="pageInput"
               type="text"
@@ -266,38 +260,43 @@
             <div class="p-6">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Especie *</label>
-                  <select v-model="newLote.especie_id" class="input" required>
-                    <option value="">Selecione a especie</option>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Espécie *</label>
+                  <select v-model="newLote.especie_id" :class="['input', createAttempted && !newLote.especie_id ? 'border-red-500 dark:border-red-500' : '']" required>
+                    <option value="">Selecione a espécie</option>
                     <option v-for="especie in especies" :key="especie.id" :value="especie.id">
                       {{ especie.codigo }} - {{ especie.nome }}
                     </option>
                   </select>
+                  <span v-if="createAttempted && !newLote.especie_id" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Numero do lote *</label>
-                  <input type="text" v-model="newLote.numero" class="input" required />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Número do lote *</label>
+                  <input type="text" v-model="newLote.numero" :class="['input', createAttempted && !newLote.numero ? 'border-red-500 dark:border-red-500' : '']" required />
+                  <span v-if="createAttempted && !newLote.numero" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Data de validade *</label>
-                  <input type="date" v-model="newLote.validade" class="input" required />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Data de validade</label>
+                  <input type="date" v-model="newLote.validade" class="input" />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Estoque inicial (g)</label>
-                  <input type="number" v-model.number="newLote.estoque_inicial" class="input" step="0.01" />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Estoque inicial (g) *</label>
+                  <input type="number" v-model.number="newLote.estoque_inicial" :class="['input', createAttempted && (newLote.estoque_inicial === null || newLote.estoque_inicial === undefined) ? 'border-red-500 dark:border-red-500' : '']" step="0.01" />
+                  <span v-if="createAttempted && (newLote.estoque_inicial === null || newLote.estoque_inicial === undefined)" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tempo de germinacao (dias)</label>
-                  <input type="number" v-model.number="newLote.tempo_germinacao" class="input" />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tempo de germinação (dias) *</label>
+                  <input type="number" v-model.number="newLote.tempo_germinacao" :class="['input', createAttempted && (newLote.tempo_germinacao === null || newLote.tempo_germinacao === undefined) ? 'border-red-500 dark:border-red-500' : '']" />
+                  <span v-if="createAttempted && (newLote.tempo_germinacao === null || newLote.tempo_germinacao === undefined)" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tempo de luz (dias)</label>
-                  <input type="number" v-model.number="newLote.tempo_luz" class="input" />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tempo de luz (dias) *</label>
+                  <input type="number" v-model.number="newLote.tempo_luz" :class="['input', createAttempted && (newLote.tempo_luz === null || newLote.tempo_luz === undefined) ? 'border-red-500 dark:border-red-500' : '']" />
+                  <span v-if="createAttempted && (newLote.tempo_luz === null || newLote.tempo_luz === undefined)" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
 
                 <div>
@@ -306,8 +305,19 @@
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Densidade Semeadura (g)</label>
-                  <input type="number" v-model.number="newLote.densidade_semeadura" class="input" step="0.01" />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Densidade Semeadura (g) *</label>
+                  <input type="number" v-model.number="newLote.densidade_semeadura" :class="['input', createAttempted && (newLote.densidade_semeadura === null || newLote.densidade_semeadura === undefined) ? 'border-red-500 dark:border-red-500' : '']" step="0.01" />
+                  <span v-if="createAttempted && (newLote.densidade_semeadura === null || newLote.densidade_semeadura === undefined)" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Rendimento por bandeja (g)</label>
+                  <input type="number" v-model.number="newLote.rendimento_por_bandeja" class="input" step="0.01" />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Margem de segurança (%)</label>
+                  <input type="number" v-model.number="newLote.margem_seguranca" class="input" step="0.01" placeholder="ex: 0.10 para 10%" />
                 </div>
 
                 <div>
@@ -316,12 +326,13 @@
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Eficiencia (%)</label>
-                  <input type="number" v-model.number="newLote.eficiencia" class="input" step="0.01" min="0" max="100" />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Eficiência (%) *</label>
+                  <input type="number" v-model.number="newLote.eficiencia" :class="['input', createAttempted && (newLote.eficiencia === null || newLote.eficiencia === undefined) ? 'border-red-500 dark:border-red-500' : '']" step="0.01" min="0" max="100" />
+                  <span v-if="createAttempted && (newLote.eficiencia === null || newLote.eficiencia === undefined)" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Taxa de Germinacao (%)</label>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Taxa de Germinação (%)</label>
                   <input type="number" v-model.number="newLote.taxa_germinacao" class="input" step="0.01" min="0" max="100" />
                 </div>
 
@@ -331,7 +342,7 @@
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Pais de Origem</label>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">País de Origem</label>
                   <input type="text" v-model="newLote.pais_origem" class="input" />
                 </div>
 
@@ -341,13 +352,14 @@
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Valor da semente (R$/kg)</label>
-                  <input type="number" v-model.number="newLote.valor_semente" class="input" step="0.01" />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Valor da semente (R$/kg) *</label>
+                  <input type="number" v-model.number="newLote.valor_semente" :class="['input', createAttempted && (newLote.valor_semente === null || newLote.valor_semente === undefined) ? 'border-red-500 dark:border-red-500' : '']" step="0.01" />
+                  <span v-if="createAttempted && (newLote.valor_semente === null || newLote.valor_semente === undefined)" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
 
                 <div class="md:col-span-3">
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observacoes</label>
-                  <textarea v-model="newLote.observacoes" class="input min-h-[80px] resize-y" placeholder="Observacoes sobre o lote"></textarea>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observações</label>
+                  <textarea v-model="newLote.observacoes" class="input min-h-[80px] resize-y" placeholder="Observações sobre o lote"></textarea>
                 </div>
               </div>
             </div>
@@ -355,7 +367,7 @@
             <!-- Modal Footer -->
             <div class="sticky bottom-0 glass-panel border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
               <button @click="closeCreateModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
-              <button @click="saveLote" class="btn btn-primary" :disabled="saving || !isCreateFormValid">
+              <button @click="saveLote" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
                 {{ saving ? 'Salvando...' : 'Salvar lote' }}
               </button>
@@ -399,14 +411,14 @@
 
             <!-- Modal Body -->
             <div class="p-6 space-y-4">
-              <!-- Linha 1: Especie | Numero do lote + Ativo -->
+              <!-- Linha 1: Especie | Número do lote + Ativo -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Especie</label>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Espécie *</label>
                   <input type="text" :value="getEspecieNome(editLote.especie_id)" class="input bg-gray-100 dark:bg-gray-700" disabled />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Numero do lote</label>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Número do lote *</label>
                   <div class="flex items-center gap-3">
                     <input type="text" v-model="editLote.numero" class="input flex-1 bg-gray-100 dark:bg-gray-700" disabled />
                     <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark whitespace-nowrap">
@@ -420,8 +432,9 @@
               <!-- Linha 2: Quantidade em Estoque | Data de validade -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Quantidade em Estoque</label>
-                  <input type="number" v-model.number="editLote.estoque_atual" class="input bg-gray-100 dark:bg-gray-700" step="0.01" disabled />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Quantidade em Estoque *</label>
+                  <input type="number" v-model.number="editLote.estoque_atual" :class="['input', editAttempted && (editLote.estoque_atual === null || editLote.estoque_atual === undefined) ? 'border-red-500 dark:border-red-500' : '']" step="0.01" />
+                  <span v-if="editAttempted && (editLote.estoque_atual === null || editLote.estoque_atual === undefined)" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Data de validade</label>
@@ -432,12 +445,14 @@
               <!-- Linha 3: Tempo germinacao | Tempo luz | Tempo total -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tempo de germinacao (dias)</label>
-                  <input type="number" v-model.number="editLote.tempo_germinacao" class="input" />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tempo de germinação (dias) *</label>
+                  <input type="number" v-model.number="editLote.tempo_germinacao" :class="['input', editAttempted && (editLote.tempo_germinacao === null || editLote.tempo_germinacao === undefined) ? 'border-red-500 dark:border-red-500' : '']" />
+                  <span v-if="editAttempted && (editLote.tempo_germinacao === null || editLote.tempo_germinacao === undefined)" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tempo de luz (dias)</label>
-                  <input type="number" v-model.number="editLote.tempo_luz" class="input" />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tempo de luz (dias) *</label>
+                  <input type="number" v-model.number="editLote.tempo_luz" :class="['input', editAttempted && (editLote.tempo_luz === null || editLote.tempo_luz === undefined) ? 'border-red-500 dark:border-red-500' : '']" />
+                  <span v-if="editAttempted && (editLote.tempo_luz === null || editLote.tempo_luz === undefined)" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tempo total (dias)</label>
@@ -448,8 +463,9 @@
               <!-- Linha 4: Densidade Semeadura | Safra -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Densidade Semeadura (g)</label>
-                  <input type="number" v-model.number="editLote.densidade_semeadura" class="input" step="0.01" />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Densidade Semeadura (g) *</label>
+                  <input type="number" v-model.number="editLote.densidade_semeadura" :class="['input', editAttempted && (editLote.densidade_semeadura === null || editLote.densidade_semeadura === undefined) ? 'border-red-500 dark:border-red-500' : '']" step="0.01" />
+                  <span v-if="editAttempted && (editLote.densidade_semeadura === null || editLote.densidade_semeadura === undefined)" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Safra (ano/ano)</label>
@@ -457,26 +473,39 @@
                 </div>
               </div>
 
-              <!-- Linha 5: Eficiencia | Taxa de Germinacao -->
+              <!-- Linha 4b: Rendimento por bandeja | Margem de segurança -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Eficiencia (%)</label>
-                  <input type="text" v-model="editLote.eficiencia" class="input" placeholder="90%" />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Rendimento por bandeja (g)</label>
+                  <input type="number" v-model.number="editLote.rendimento_por_bandeja" class="input" step="0.01" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Taxa de Germinacao (%)</label>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Margem de segurança (%)</label>
+                  <input type="number" v-model.number="editLote.margem_seguranca" class="input" step="0.01" placeholder="ex: 0.10 para 10%" />
+                </div>
+              </div>
+
+              <!-- Linha 5: Eficiência | Taxa de Germinação -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Eficiência (%) *</label>
+                  <input type="text" v-model="editLote.eficiencia" :class="['input', editAttempted && !editLote.eficiencia ? 'border-red-500 dark:border-red-500' : '']" placeholder="90%" />
+                  <span v-if="editAttempted && !editLote.eficiencia" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Taxa de Germinação (%)</label>
                   <input type="text" v-model="editLote.taxa_germinacao" class="input" placeholder="90%" />
                 </div>
               </div>
 
-              <!-- Linha 6: Taxa de Pureza | Pais de Origem -->
+              <!-- Linha 6: Taxa de Pureza | País de Origem -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Taxa de Pureza (%)</label>
                   <input type="text" v-model="editLote.taxa_pureza" class="input" placeholder="99%" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Pais de Origem</label>
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">País de Origem</label>
                   <input type="text" v-model="editLote.pais_origem" class="input" placeholder="BR" />
                 </div>
               </div>
@@ -488,24 +517,25 @@
                   <input type="text" v-model="editLote.fornecedor" class="input" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Valor da semente (R$/kg)</label>
-                  <input type="text" v-model="editLote.valor_semente" class="input" />
+                  <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Valor da semente (R$/kg) *</label>
+                  <input type="text" v-model="editLote.valor_semente" :class="['input', editAttempted && !editLote.valor_semente ? 'border-red-500 dark:border-red-500' : '']" />
+                  <span v-if="editAttempted && !editLote.valor_semente" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
                 </div>
               </div>
 
-              <!-- Linha 8: Observacoes -->
+              <!-- Linha 8: Observações -->
               <div>
-                <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observacoes</label>
-                <textarea v-model="editLote.observacoes" class="input min-h-[80px] resize-y" placeholder="Observacoes"></textarea>
+                <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observações</label>
+                <textarea v-model="editLote.observacoes" class="input min-h-[80px] resize-y" placeholder="Observações"></textarea>
               </div>
             </div>
 
             <!-- Modal Footer -->
             <div class="sticky bottom-0 glass-panel border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
               <button @click="closeEditModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
-              <button @click="updateLote" class="btn btn-primary" :disabled="saving || !isEditFormValid">
+              <button @click="updateLote" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
-                {{ saving ? 'Salvando...' : 'Salvar alteracoes' }}
+                {{ saving ? 'Salvando...' : 'Salvar alterações' }}
               </button>
             </div>
             </div>
@@ -558,7 +588,7 @@
                   <!-- Body -->
                   <div class="flex-1 overflow-y-auto" v-if="selectedLote">
                     <div class="p-4 sm:p-6 space-y-5 sm:space-y-6">
-                      <!-- Status e Acoes Rapidas -->
+                      <!-- Status e Ações Rapidas -->
                       <div class="flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                           <span :class="['inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium', selectedLote.status === 'ativo' ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400']">
@@ -578,12 +608,12 @@
                         </button>
                       </div>
 
-                      <!-- Informacoes Basicas -->
+                      <!-- Informações Básicas -->
                       <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Informacoes Basicas</h3>
+                        <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Informações Básicas</h3>
                         <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
                           <div>
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Numero do Lote</p>
+                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Número do Lote</p>
                             <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedLote.numero }}</p>
                           </div>
                           <div>
@@ -625,7 +655,7 @@
                         <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Tempos de Cultivo</h3>
                         <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
                           <div>
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Germinacao</p>
+                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Germinação</p>
                             <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedLote.tempo_germinacao || '-' }} dias</p>
                           </div>
                           <div>
@@ -640,19 +670,27 @@
                             <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Densidade Semeadura</p>
                             <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedLote.densidade_semeadura || '-' }} g</p>
                           </div>
+                          <div>
+                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Rendimento por Bandeja</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedLote.rendimento_por_bandeja != null ? `${selectedLote.rendimento_por_bandeja} g` : '-' }}</p>
+                          </div>
+                          <div>
+                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Margem de Segurança</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedLote.margem_seguranca != null ? `${selectedLote.margem_seguranca}%` : '-' }}</p>
+                          </div>
                         </div>
                       </div>
 
-                      <!-- Taxas e Eficiencia -->
+                      <!-- Taxas e Eficiência -->
                       <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Taxas e Eficiencia</h3>
+                        <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Taxas e Eficiência</h3>
                         <div class="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4">
                           <div>
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Eficiencia</p>
+                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Eficiência</p>
                             <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedLote.eficiencia ? `${selectedLote.eficiencia}%` : '-' }}</p>
                           </div>
                           <div>
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Taxa Germinacao</p>
+                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Taxa Germinação</p>
                             <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedLote.taxa_germinacao ? `${selectedLote.taxa_germinacao}%` : '-' }}</p>
                           </div>
                           <div>
@@ -667,7 +705,7 @@
                         <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Origem e Valor</h3>
                         <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
                           <div>
-                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Pais de Origem</p>
+                            <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">País de Origem</p>
                             <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ selectedLote.pais_origem || '-' }}</p>
                           </div>
                           <div>
@@ -677,9 +715,9 @@
                         </div>
                       </div>
 
-                      <!-- Observacoes -->
+                      <!-- Observações -->
                       <div v-if="selectedLote.observacoes" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Observacoes</h3>
+                        <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Observações</h3>
                         <p class="text-sm text-gray-900 dark:text-text-dark whitespace-pre-wrap">{{ selectedLote.observacoes }}</p>
                       </div>
                     </div>
@@ -723,6 +761,8 @@ interface Lote {
   tempo_germinacao: number | null
   tempo_luz: number | null
   densidade_semeadura: number | null
+  rendimento_por_bandeja: number | null
+  margem_seguranca: number | null
   safra: string | null
   eficiencia: number | null
   taxa_germinacao: number | null
@@ -753,7 +793,7 @@ const showEditModal = ref(false)
 const showSlideover = ref(false)
 const selectedLote = ref<Lote | null>(null)
 
-// Paginacao
+// Páginacao
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const pageInput = ref('1')
@@ -761,7 +801,7 @@ const pageInput = ref('1')
 // Filtros
 const searchQuery = ref('')
 const filterEspecie = ref('')
-const filterStatus = ref('')
+const filterStatus = ref('ativo')
 const validadeInicio = ref('')
 const validadeFim = ref('')
 
@@ -778,6 +818,8 @@ const newLote = ref({
   tempo_germinacao: null as number | null,
   tempo_luz: null as number | null,
   densidade_semeadura: null as number | null,
+  rendimento_por_bandeja: null as number | null,
+  margem_seguranca: null as number | null,
   safra: '',
   eficiencia: null as number | null,
   taxa_germinacao: null as number | null,
@@ -790,6 +832,10 @@ const newLote = ref({
 
 const editLote = ref<Partial<Lote>>({})
 const editLoteAtivo = ref(true)
+
+// Validacao visual
+const createAttempted = ref(false)
+const editAttempted = ref(false)
 
 // Computed
 const hasActiveFilters = computed(() => {
@@ -886,11 +932,25 @@ const tempoTotalEdit = computed(() => {
 })
 
 const isCreateFormValid = computed(() => {
-  return newLote.value.especie_id && newLote.value.numero && newLote.value.validade
+  return newLote.value.especie_id &&
+    newLote.value.numero &&
+    newLote.value.estoque_inicial !== null && newLote.value.estoque_inicial !== undefined &&
+    newLote.value.tempo_germinacao !== null && newLote.value.tempo_germinacao !== undefined &&
+    newLote.value.tempo_luz !== null && newLote.value.tempo_luz !== undefined &&
+    newLote.value.densidade_semeadura !== null && newLote.value.densidade_semeadura !== undefined &&
+    newLote.value.eficiencia !== null && newLote.value.eficiencia !== undefined &&
+    newLote.value.valor_semente !== null && newLote.value.valor_semente !== undefined
 })
 
 const isEditFormValid = computed(() => {
-  return editLote.value.especie_id && editLote.value.numero && editLote.value.validade
+  return editLote.value.especie_id &&
+    editLote.value.numero &&
+    editLote.value.estoque_atual !== null && editLote.value.estoque_atual !== undefined &&
+    editLote.value.tempo_germinacao !== null && editLote.value.tempo_germinacao !== undefined &&
+    editLote.value.tempo_luz !== null && editLote.value.tempo_luz !== undefined &&
+    editLote.value.densidade_semeadura !== null && editLote.value.densidade_semeadura !== undefined &&
+    editLote.value.eficiencia !== null && editLote.value.eficiencia !== undefined &&
+    editLote.value.valor_semente !== null && editLote.value.valor_semente !== undefined
 })
 
 // Funcoes auxiliares
@@ -1009,6 +1069,8 @@ function openCreateModal() {
     tempo_germinacao: null,
     tempo_luz: null,
     densidade_semeadura: null,
+    rendimento_por_bandeja: null,
+    margem_seguranca: null,
     safra: '',
     eficiencia: null,
     taxa_germinacao: null,
@@ -1018,11 +1080,13 @@ function openCreateModal() {
     valor_semente: null,
     observacoes: ''
   }
+  createAttempted.value = false
   showCreateModal.value = true
 }
 
 function closeCreateModal() {
   showCreateModal.value = false
+  createAttempted.value = false
 }
 
 async function saveLote() {
@@ -1031,8 +1095,9 @@ async function saveLote() {
     return
   }
 
+  createAttempted.value = true
   if (!isCreateFormValid.value) {
-    showError('Preencha todos os campos obrigatorios')
+    showError('Preencha todos os campos obrigatórios')
     return
   }
 
@@ -1050,6 +1115,8 @@ async function saveLote() {
         tempo_germinacao: newLote.value.tempo_germinacao,
         tempo_luz: newLote.value.tempo_luz,
         densidade_semeadura: newLote.value.densidade_semeadura,
+        rendimento_por_bandeja: newLote.value.rendimento_por_bandeja,
+        margem_seguranca: newLote.value.margem_seguranca,
         safra: newLote.value.safra || null,
         eficiencia: newLote.value.eficiencia,
         taxa_germinacao: newLote.value.taxa_germinacao,
@@ -1081,11 +1148,13 @@ function openEditModal(lote: Lote) {
     validade: lote.validade || ''
   }
   editLoteAtivo.value = lote.status === 'ativo'
+  editAttempted.value = false
   showEditModal.value = true
 }
 
 function closeEditModal() {
   showEditModal.value = false
+  editAttempted.value = false
 }
 
 function openEditFromSlideover() {
@@ -1100,8 +1169,9 @@ async function updateLote() {
     return
   }
 
+  editAttempted.value = true
   if (!isEditFormValid.value) {
-    showError('Preencha todos os campos obrigatorios')
+    showError('Preencha todos os campos obrigatórios')
     return
   }
 
@@ -1118,6 +1188,8 @@ async function updateLote() {
         tempo_germinacao: editLote.value.tempo_germinacao,
         tempo_luz: editLote.value.tempo_luz,
         densidade_semeadura: editLote.value.densidade_semeadura,
+        rendimento_por_bandeja: editLote.value.rendimento_por_bandeja,
+        margem_seguranca: editLote.value.margem_seguranca,
         safra: editLote.value.safra || null,
         eficiencia: editLote.value.eficiencia,
         taxa_germinacao: editLote.value.taxa_germinacao,

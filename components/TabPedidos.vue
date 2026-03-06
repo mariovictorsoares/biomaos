@@ -1,90 +1,67 @@
 <template>
   <div>
-    <h1 class="text-xl sm:text-2xl font-bold text-text-light dark:text-text-dark mb-4 sm:mb-6">Pedidos</h1>
+    <!-- Toolbar: Filtros + Ação -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+      <!-- Esquerda: Busca + Filtros -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+        <!-- Busca -->
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base">search</span>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Buscar pedidos..."
+            class="input w-full sm:w-64 text-sm pl-9"
+          />
+        </div>
+        <!-- Data Inicial -->
+        <input
+          type="date"
+          v-model="filterDataInicial"
+          class="input text-sm w-full sm:w-auto shrink-0"
+          placeholder="Data inicial"
+        />
+        <!-- Data Final -->
+        <input
+          type="date"
+          v-model="filterDataFinal"
+          class="input text-sm w-full sm:w-auto shrink-0"
+          placeholder="Data final"
+        />
+        <!-- Filtro Status -->
+        <select v-model="filterStatus" class="input text-sm w-full sm:w-auto shrink-0">
+          <option value="">Todos status</option>
+          <option value="previsto">Previsto</option>
+          <option value="reservado">Reservado</option>
+          <option value="confirmado">Confirmado</option>
+          <option value="finalizado">Finalizado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+        <!-- Checkbox Mostrar Finalizados -->
+        <label class="flex items-center gap-2 cursor-pointer shrink-0">
+          <input
+            type="checkbox"
+            v-model="mostrarFinalizados"
+            class="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary dark:bg-gray-800 dark:border-gray-600"
+          />
+          <span class="text-sm text-subtext-light dark:text-subtext-dark whitespace-nowrap">Mostrar finalizados</span>
+        </label>
+      </div>
+      <!-- Direita: Botão -->
+      <button @click="openCadastro" class="btn btn-primary shrink-0 justify-center sm:justify-start">
+        <span class="material-icons text-sm">add</span>
+        Novo pedido
+      </button>
+    </div>
 
     <!-- Card da Tabela -->
     <div class="card">
-      <!-- Header do Card -->
-      <div class="p-3 sm:p-4 border-b border-border-light dark:border-border-dark">
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xs sm:text-sm font-medium text-subtext-light dark:text-subtext-dark uppercase tracking-wider">Lista Pedidos</h2>
-            <!-- Botao Novo Pedido - Desktop -->
-            <button @click="openCadastro" class="hidden sm:flex btn btn-primary shrink-0">
-              <span class="material-icons text-sm">add</span>
-              Novo pedido
-            </button>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:items-center">
-            <!-- Filtros em linha -->
-            <div class="flex flex-wrap gap-2 flex-1 items-center">
-              <!-- Data Inicial -->
-              <input
-                type="date"
-                v-model="filterDataInicial"
-                class="input text-sm w-full xs:w-auto xs:flex-1 sm:w-32"
-                placeholder="Data inicial"
-              />
-              <!-- Data Final -->
-              <input
-                type="date"
-                v-model="filterDataFinal"
-                class="input text-sm w-full xs:w-auto xs:flex-1 sm:w-32"
-                placeholder="Data final"
-              />
-              <!-- Filtro Status -->
-              <select v-model="filterStatus" class="input text-sm w-full xs:w-auto sm:w-36 shrink-0">
-                <option value="">Todos status</option>
-                <option value="previsto">Previsto</option>
-                <option value="reservado">Reservado</option>
-                <option value="confirmado">Confirmado</option>
-                <option value="finalizado">Finalizado</option>
-                <option value="cancelado">Cancelado</option>
-              </select>
-              <!-- Checkbox Mostrar Finalizados -->
-              <label class="hidden sm:flex items-center gap-2 cursor-pointer shrink-0">
-                <input
-                  type="checkbox"
-                  v-model="mostrarFinalizados"
-                  class="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary dark:bg-gray-800 dark:border-gray-600"
-                />
-                <span class="text-sm text-subtext-light dark:text-subtext-dark whitespace-nowrap">Mostrar finalizados</span>
-              </label>
-            </div>
-            <!-- Busca -->
-            <div class="relative flex-1 sm:max-w-xs">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base sm:text-lg">search</span>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Buscar cliente..."
-                class="input w-full text-sm pl-9 sm:pl-10"
-              />
-            </div>
-          </div>
-          <!-- Mobile: Checkbox e Botao -->
-          <div class="flex sm:hidden items-center justify-between gap-3">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                v-model="mostrarFinalizados"
-                class="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary dark:bg-gray-800 dark:border-gray-600"
-              />
-              <span class="text-sm text-subtext-light dark:text-subtext-dark">Mostrar finalizados</span>
-            </label>
-            <button @click="openCadastro" class="btn btn-primary shrink-0">
-              <span class="material-icons text-sm">add</span>
-              Novo pedido
-            </button>
-          </div>
-        </div>
-      </div>
 
       <!-- Tabela - Desktop -->
       <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-gray-50 dark:bg-gray-800 border-b border-border-light dark:border-border-dark">
+            <tr class="bg-gray-100 dark:bg-gray-700/50 border-b border-border-light dark:border-border-dark">
               <th class="table-header">Código</th>
               <th class="table-header">Data Abertura</th>
               <th class="table-header">Previsão Entrega</th>
@@ -119,9 +96,12 @@
                 </div>
               </td>
               <td class="table-cell text-center">
-                <span :class="getStatusBadgeClass(pedido.status)">
-                  {{ getStatusLabel(pedido.status) }}
-                </span>
+                <div class="flex items-center justify-center gap-1">
+                  <span :class="getStatusBadgeClass(pedido.status)">
+                    {{ getStatusLabel(pedido.status) }}
+                  </span>
+                  <span v-if="pedidosComProducao.has(pedido.id)" class="material-icons text-xs text-green-500" title="Produção gerada">agriculture</span>
+                </div>
               </td>
               <td class="table-cell text-center" @click.stop>
                 <button
@@ -154,6 +134,7 @@
                 <span :class="getStatusBadgeClass(pedido.status)" class="text-[10px] px-1.5 py-0.5">
                   {{ getStatusLabel(pedido.status) }}
                 </span>
+                <span v-if="pedidosComProducao.has(pedido.id)" class="material-icons text-xs text-green-500" title="Produção gerada">agriculture</span>
               </div>
               <p class="text-sm font-medium text-text-light dark:text-text-dark truncate">
                 {{ pedido.clientes?.razao_social || pedido.clientes?.nome_fantasia || 'Sem cliente' }}
@@ -214,7 +195,7 @@
             >
               <span class="material-icons text-sm">chevron_left</span>
             </button>
-            <span class="hidden xs:inline">Pagina</span>
+            <span class="hidden xs:inline">Página</span>
             <input
               v-model="pageInput"
               type="text"
@@ -348,6 +329,11 @@
                         </button>
                       </div>
 
+                      <div v-if="selectedPedido && pedidosComProducao.has(selectedPedido.id)" class="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <span class="material-icons text-sm text-green-600">agriculture</span>
+                        <span class="text-xs text-green-700 dark:text-green-400 font-medium">Produção já gerada para este pedido</span>
+                      </div>
+
                       <!-- Informações do Pedido -->
                       <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
                         <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Informações</h3>
@@ -434,6 +420,17 @@
                       <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 sm:p-5">
                         <h3 class="text-xs font-semibold text-gray-500 dark:text-subtext-dark uppercase tracking-wider mb-3 sm:mb-4">Ações</h3>
                         <div class="space-y-2">
+                          <button
+                            v-if="selectedPedido?.status === 'confirmado'"
+                            @click="openGerarProducao"
+                            class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors text-left"
+                          >
+                            <span class="material-icons-outlined text-green-600">agriculture</span>
+                            <div class="flex-1">
+                              <span class="text-sm text-green-700 dark:text-green-400 font-medium">Gerar Produção</span>
+                              <p class="text-[10px] text-gray-500 dark:text-gray-400">Criar planos de produção para este pedido</p>
+                            </div>
+                          </button>
                           <button
                             @click="openAlteracao"
                             class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-colors text-left"
@@ -730,12 +727,22 @@
       @close="showConfirmDelete = false"
       @confirm="handleDelete"
     />
+
+    <!-- Modal Gerar Produção -->
+    <ModalCadastroProducao
+      v-if="showProducaoModal"
+      :pedido-id="producaoParaPedido"
+      @close="closeGerarProducao"
+      @save="handleProducaoGerada"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useCurrentCompany } from '~/composables/useCurrentCompany'
+
+const { gerarCascadeFromPedido, cancelarCascadePedido } = useAutoCascade()
 
 interface Cliente {
   id: string
@@ -848,6 +855,9 @@ const showCadastro = ref(false)
 const showAlteracao = ref(false)
 const showAlterarStatus = ref(false)
 const showConfirmDelete = ref(false)
+const showProducaoModal = ref(false)
+const producaoParaPedido = ref<string | null>(null)
+const pedidosComProducao = ref<Set<string>>(new Set())
 const selectedPedido = ref<Pedido | null>(null)
 
 // Aba ativa no slideover de detalhes
@@ -1223,6 +1233,14 @@ async function handleSavePedido(pedidoData: any) {
       if (itensError) throw itensError
     }
 
+    // Auto-gerar plantios, tarefas e colheitas
+    try {
+      await gerarCascadeFromPedido(novoPedido.id)
+    } catch (err) {
+      console.error('Erro ao gerar cascade:', err)
+      // Don't block the order save - cascade is supplementary
+    }
+
     success('Pedido criado com sucesso')
     closeCadastro()
     await loadPedidos()
@@ -1298,6 +1316,14 @@ async function handleUpdatePedido(pedidoData: any) {
       if (itensError) throw itensError
     }
 
+    // Recriar cascade (cancela antigo e gera novo)
+    try {
+      await cancelarCascadePedido(selectedPedido.value!.id)
+      await gerarCascadeFromPedido(selectedPedido.value!.id)
+    } catch (err) {
+      console.error('Erro ao atualizar cascade:', err)
+    }
+
     success('Pedido atualizado com sucesso')
     closeAlteracao()
     await loadPedidos()
@@ -1350,7 +1376,7 @@ async function handleChangeStatus(novoStatus: string) {
 
 // Emitir NF (placeholder)
 function emitirNF() {
-  showError('Funcionalidade de emissao de NF em desenvolvimento')
+  showError('Funcionalidade de emissão de NF em desenvolvimento')
 }
 
 // Excluir
@@ -1378,7 +1404,7 @@ async function handleDelete() {
 
     if (error) throw error
 
-    success('Pedido excluido com sucesso')
+    success('Pedido excluído com sucesso')
     showConfirmDelete.value = false
     closeDetalhes()
     await loadPedidos()
@@ -1387,6 +1413,46 @@ async function handleDelete() {
     showError('Erro ao excluir pedido')
   } finally {
     saving.value = false
+  }
+}
+
+// Gerar Produção
+function openGerarProducao() {
+  if (!selectedPedido.value) return
+  producaoParaPedido.value = selectedPedido.value.id
+  showDetalhes.value = false
+  showProducaoModal.value = true
+}
+
+function closeGerarProducao() {
+  showProducaoModal.value = false
+  producaoParaPedido.value = null
+}
+
+async function handleProducaoGerada() {
+  closeGerarProducao()
+  success('Produção gerada com sucesso!')
+  await loadPedidosComProducao()
+}
+
+async function loadPedidosComProducao() {
+  if (!currentCompany.value?.id) return
+  try {
+    const { data } = await supabase
+      .from('producao_pedidos')
+      .select('pedido_item_id, pedido_itens!inner(pedido_id)')
+
+    if (data) {
+      const ids = new Set<string>()
+      data.forEach((pp: any) => {
+        if (pp.pedido_itens?.pedido_id) {
+          ids.add(pp.pedido_itens.pedido_id)
+        }
+      })
+      pedidosComProducao.value = ids
+    }
+  } catch (e) {
+    console.error('Erro ao carregar produção dos pedidos:', e)
   }
 }
 
@@ -1401,6 +1467,7 @@ watch(
       loadClientes()
       loadProdutos()
       loadTabelasPreco()
+      loadPedidosComProducao()
     }
   },
   { immediate: true }

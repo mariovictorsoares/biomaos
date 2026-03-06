@@ -49,8 +49,9 @@
               type="text"
               v-model="form.nome"
               placeholder="Digite o nome completo"
-              class="input"
+              :class="['input', attempted && !form.nome ? 'border-red-500' : '']"
             />
+            <span v-if="attempted && !form.nome" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
           </div>
 
           <!-- Email -->
@@ -62,8 +63,9 @@
               type="email"
               v-model="form.email"
               placeholder="Digite o e-mail"
-              class="input"
+              :class="['input', attempted && !form.email ? 'border-red-500' : '']"
             />
+            <span v-if="attempted && !form.email" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
           </div>
 
           <!-- Grid 2 colunas -->
@@ -73,13 +75,14 @@
               <label class="block text-sm font-medium text-gray-700 mb-1.5">
                 Perfil <span class="text-red-500">*</span>
               </label>
-              <select v-model="form.role" class="input">
+              <select v-model="form.role" :class="['input', attempted && !form.role ? 'border-red-500' : '']">
                 <option value="">Selecione...</option>
                 <option value="admin">Administrador</option>
                 <option value="manager">Gerente</option>
                 <option value="operator">Operador</option>
                 <option value="viewer">Visualizador</option>
               </select>
+              <span v-if="attempted && !form.role" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
             </div>
 
             <!-- Status -->
@@ -99,7 +102,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1.5">
               Empresa <span class="text-red-500">*</span>
             </label>
-            <select v-model="form.empresa" class="input">
+            <select v-model="form.empresa" :class="['input', attempted && !form.empresa ? 'border-red-500' : '']">
               <option value="">Selecione uma empresa...</option>
               <option value="Fazendas Bioma">Fazendas Bioma</option>
               <option value="AgroVerde Sustentável">AgroVerde Sustentável</option>
@@ -108,6 +111,7 @@
               <option value="Grupo Natureza">Grupo Natureza</option>
               <option value="Campos Verdes Ltda">Campos Verdes Ltda</option>
             </select>
+            <span v-if="attempted && !form.empresa" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
           </div>
 
           <!-- Senha -->
@@ -120,7 +124,7 @@
                 :type="showPassword ? 'text' : 'password'"
                 v-model="form.senha"
                 placeholder="Digite uma senha"
-                class="input pr-10"
+                :class="['input pr-10', attempted && !form.senha ? 'border-red-500' : '']"
               />
               <button
                 type="button"
@@ -136,7 +140,8 @@
                 </svg>
               </button>
             </div>
-            <p class="text-xs text-gray-500 mt-1.5">Mínimo de 8 caracteres</p>
+            <span v-if="attempted && !form.senha" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
+            <p v-else class="text-xs text-gray-500 mt-1.5">Mínimo de 8 caracteres</p>
           </div>
 
           <!-- Notificações -->
@@ -162,7 +167,7 @@
           >
             Cancelar
           </button>
-          <button class="btn btn-primary">
+          <button @click="handleSave" class="btn btn-primary">
             Criar Usuário
           </button>
         </div>
@@ -177,6 +182,7 @@ import { ref, computed } from 'vue'
 defineEmits(['close'])
 
 const showPassword = ref(false)
+const attempted = ref(false)
 
 const form = ref({
   nome: '',
@@ -187,6 +193,14 @@ const form = ref({
   senha: '',
   sendInvite: true
 })
+
+const handleSave = () => {
+  attempted.value = true
+  if (!form.value.nome || !form.value.email || !form.value.role || !form.value.empresa || !form.value.senha) {
+    return
+  }
+  // TODO: implementar lógica de criação de usuário
+}
 
 const avatarInitials = computed(() => {
   if (!form.value.nome) return 'NU'

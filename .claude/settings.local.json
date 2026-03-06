@@ -23,7 +23,25 @@
       "Bash(git config:*)",
       "Bash(git reset:*)",
       "Bash(git add:*)",
-      "Bash(Remove-Item -Force \"\\\\?\\\\C:\\\\Users\\\\mario\\\\Desktop\\\\fazenda_biomas\\\\nul\")"
+      "Bash(Remove-Item -Force \"\\\\?\\\\C:\\\\Users\\\\mario\\\\Desktop\\\\fazenda_biomas\\\\nul\")",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npx nuxt dev)",
+      "Bash(npx nuxt build)",
+      "Bash(netstat -ano)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_fill_form",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "WebFetch(domain:microgreenmanager.com)",
+      "mcp__plugin_playwright_playwright__browser_press_key",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_type",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "mcp__Claude_in_Chrome__switch_browser",
+      "mcp__plugin_playwright_playwright__browser_tabs",
+      "WebFetch(domain:help.featurebase.app)",
+      "WebFetch(domain:docs.featurebase.app)"
     ]
   }
 }

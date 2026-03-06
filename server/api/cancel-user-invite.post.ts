@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   if (!conviteId) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'ID do convite e obrigatorio'
+      statusMessage: 'ID do convite é obrigatório'
     })
   }
 

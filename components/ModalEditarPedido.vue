@@ -44,7 +44,7 @@
               <!-- Codigo do Pedido -->
               <div class="col-span-1 sm:col-span-2">
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-1.5">
-                  Codigo
+                  Código
                 </label>
                 <input
                   type="text"
@@ -71,12 +71,13 @@
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-1.5">
                   Cliente
                 </label>
-                <select v-model="form.clienteId" class="input w-full text-sm">
+                <select v-model="form.clienteId" :class="['input w-full text-sm', attempted && !form.clienteId ? 'border-red-500' : '']">
                   <option value="">Selecione...</option>
                   <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.id">
                     {{ cliente.razao_social || cliente.nome_fantasia }}
                   </option>
                 </select>
+                <span v-if="attempted && !form.clienteId" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
               </div>
             </div>
 
@@ -84,7 +85,7 @@
             <div class="flex items-end gap-2 sm:gap-3 mb-6 sm:mb-8">
               <div class="flex-1">
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-1.5">
-                  Tabela de preco
+                  Tabela de preço
                 </label>
                 <select v-model="form.tabelaPrecoId" class="input text-sm" @change="onTabelaPrecoChange">
                   <option value="">Selecione...</option>
@@ -97,7 +98,7 @@
                 type="button"
                 @click="openModalListaTabelas"
                 class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-primary text-white rounded-full hover:bg-primary-dark transition-colors flex-shrink-0"
-                title="Gerenciar tabelas de preco"
+                title="Gerenciar tabelas de preço"
               >
                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -302,7 +303,7 @@
                 <!-- Logistica -->
                 <div>
                   <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-1.5">
-                    Logistica
+                    Logística
                   </label>
                   <select v-model="form.logistica" class="input w-full text-sm">
                     <option value="">Selecione...</option>
@@ -347,8 +348,8 @@
                     <select v-model="form.tipo" class="input w-full text-sm">
                       <option value="">Selecione...</option>
                       <option value="venda">Venda</option>
-                      <option value="consignacao">Consignacao</option>
-                      <option value="bonificacao">Bonificacao</option>
+                      <option value="consignacao">Consignação</option>
+                      <option value="bonificacao">Bonificação</option>
                     </select>
                   </div>
                 </div>
@@ -363,7 +364,7 @@
                       type="text"
                       v-model="form.notaFiscal"
                       class="input w-full text-sm"
-                      placeholder="Numero da NF"
+                      placeholder="Número da NF"
                     />
                   </div>
                   <div>
@@ -496,6 +497,8 @@ const supabase = useSupabaseClient()
 const { currentCompany } = useCurrentCompany()
 const { success, error: showError } = useToast()
 
+const attempted = ref(false)
+
 // Lista local de tabelas (pode ser atualizada quando criar nova)
 const tabelasPrecoLocal = ref<TabelaPreco[]>([])
 
@@ -533,6 +536,7 @@ const savingTabela = ref(false)
 
 // Inicializar dados
 onMounted(() => {
+  attempted.value = false
   tabelasPrecoLocal.value = [...props.tabelasPreco]
 
   // Carregar dados do pedido
@@ -665,6 +669,7 @@ function removerItem(index: number) {
 }
 
 function handleSave() {
+  attempted.value = true
   if (!isFormValid.value) return
 
   emit('save', {
@@ -778,7 +783,7 @@ async function handleSaveTabelaPreco(tabelaData: any) {
         tabelasPrecoLocal.value[index].nome = tabelaData.nome
       }
 
-      success('Tabela de preco atualizada')
+      success('Tabela de preço atualizada')
     } else {
       // Criar nova tabela
       const { data: novaTabela, error: insertError } = await supabase
@@ -814,7 +819,7 @@ async function handleSaveTabelaPreco(tabelaData: any) {
       // Selecionar a nova tabela automaticamente
       form.value.tabelaPrecoId = novaTabela.id
 
-      success('Tabela de preco criada')
+      success('Tabela de preço criada')
     }
 
     // Recarregar tabela de precos e itens
@@ -822,8 +827,8 @@ async function handleSaveTabelaPreco(tabelaData: any) {
     await onTabelaPrecoChange()
     closeModalTabelaPreco()
   } catch (e: any) {
-    console.error('Erro ao salvar tabela de preco:', e)
-    showError(e.message || 'Erro ao salvar tabela de preco')
+    console.error('Erro ao salvar tabela de preço:', e)
+    showError(e.message || 'Erro ao salvar tabela de preço')
   } finally {
     savingTabela.value = false
   }

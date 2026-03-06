@@ -29,42 +29,45 @@
             <!-- Código -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                Código
+                Código <span class="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 v-model="form.codigo"
                 placeholder=""
-                class="input"
+                :class="['input', attempted && !form.codigo ? 'border-red-500' : '']"
                 maxlength="10"
               />
+              <span v-if="attempted && !form.codigo" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
             </div>
 
             <!-- Unidade -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                Unidade
+                Unidade <span class="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 v-model="form.unidade"
                 placeholder=""
-                class="input"
+                :class="['input', attempted && !form.unidade ? 'border-red-500' : '']"
               />
+              <span v-if="attempted && !form.unidade" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
             </div>
           </div>
 
           <!-- Produto -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1.5">
-              Produto
+              Produto <span class="text-red-500">*</span>
             </label>
             <input
               type="text"
               v-model="form.nome"
               placeholder=""
-              class="input"
+              :class="['input', attempted && !form.nome ? 'border-red-500' : '']"
             />
+            <span v-if="attempted && !form.nome" class="text-xs text-red-500 mt-1">Campo obrigatório</span>
           </div>
         </div>
 
@@ -114,6 +117,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'save', 'delete'])
 
+const attempted = ref(false)
+
 const form = ref({
   codigo: '',
   nome: '',
@@ -128,12 +133,14 @@ watch(() => props.produto, (newProduto) => {
       nome: newProduto.nome || '',
       unidade: newProduto.unidade || ''
     }
+    attempted.value = false
   }
 }, { immediate: true })
 
 const handleSave = () => {
+  attempted.value = true
   if (!form.value.codigo || !form.value.nome || !form.value.unidade) {
-    showToast('Por favor, preencha todos os campos.', 'error')
+    showToast('Por favor, preencha todos os campos obrigatórios.', 'error')
     return
   }
 
