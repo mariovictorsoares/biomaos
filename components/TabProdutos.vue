@@ -17,11 +17,11 @@
       <!-- Direita: Botões -->
       <div class="flex items-center gap-2">
         <button @click="openMovimentacaoModal" class="btn btn-secondary shrink-0 justify-center sm:justify-start">
-          <span class="material-icons text-sm">swap_horiz</span>
+          <span class="material-icons-outlinedtext-sm">swap_horiz</span>
           Movimentação
         </button>
         <button @click="showListaTabelasPrecoModal = true" class="btn btn-secondary shrink-0 justify-center sm:justify-start">
-          <span class="material-icons text-sm">payments</span>
+          <span class="material-icons-outlinedtext-sm">payments</span>
           Tabelas de Preco
         </button>
         <button @click="openModal(null)" class="btn btn-primary shrink-0 justify-center sm:justify-start">
@@ -400,28 +400,6 @@
                       Máximo 2 espécies para produto vivo
                     </p>
 
-                    <!-- Percentuais do MIX (cortado) -->
-                    <div v-if="form.especie_ids.length > 0 && form.modalidade === 'cortado'" class="mt-3 space-y-2">
-                      <p class="text-xs font-medium text-subtext-light dark:text-subtext-dark">Proporção por espécie (deve somar 100%)</p>
-                      <div v-for="id in form.especie_ids" :key="'pct-'+id" class="flex items-center gap-2">
-                        <span class="text-sm text-text-light dark:text-text-dark flex-1 truncate">{{ getEspecieNome(id) }}</span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max="100"
-                          :value="form.especie_percentuais[id] || ''"
-                          @input="form.especie_percentuais[id] = parseFloat($event.target.value) || 0"
-                          class="input w-20 text-center text-sm"
-                          placeholder="0"
-                        />
-                        <span class="text-xs text-subtext-light dark:text-subtext-dark">%</span>
-                      </div>
-                      <p v-if="mixPercentualTotal !== 100" class="text-xs text-red-500">
-                        Total: {{ mixPercentualTotal.toFixed(1) }}% (deve ser 100%)
-                      </p>
-                      <p v-else class="text-xs text-green-600 dark:text-green-400">Total: 100%</p>
-                    </div>
                   </div>
 
                   <!-- Substrato e Embalagem -->
@@ -476,8 +454,7 @@
                       <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
                         Codigo <span class="text-red-500">*</span>
                       </label>
-                      <input type="text" v-model="form.codigo" class="input" maxlength="5" placeholder="Ex: RUC" />
-                      <p class="text-xs text-subtext-light dark:text-subtext-dark mt-1">Max. 5 caracteres</p>
+                      <input type="text" v-model="form.codigo" class="input" placeholder="Ex: RUC" />
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
@@ -491,7 +468,7 @@
                   <div class="border-t border-border-light dark:border-border-dark pt-4">
                     <div class="flex items-center justify-between mb-3">
                       <h3 class="text-sm font-semibold text-text-light dark:text-text-dark flex items-center gap-1.5">
-                        <span class="material-icons text-base text-primary">payments</span>
+                        <span class="material-icons-outlinedtext-base text-primary">payments</span>
                         Precos <span class="text-red-500">*</span>
                       </h3>
                       <button
@@ -532,7 +509,7 @@
                   <div v-if="isEditing && form.especie_ids.length > 0" class="border-t border-border-light dark:border-border-dark pt-4">
                     <div class="flex items-center justify-between mb-3">
                       <h3 class="text-sm font-semibold text-text-light dark:text-text-dark flex items-center gap-1.5">
-                        <span class="material-icons text-base text-primary">inventory</span>
+                        <span class="material-icons-outlinedtext-base text-primary">inventory</span>
                         Estoque por Espécie
                       </h3>
                       <button
@@ -540,7 +517,7 @@
                         @click="openMovimentacaoFromModal"
                         class="text-xs text-primary hover:text-primary/80 font-medium flex items-center gap-1"
                       >
-                        <span class="material-icons text-sm">swap_horiz</span>
+                        <span class="material-icons-outlinedtext-sm">swap_horiz</span>
                         Movimentação
                       </button>
                     </div>
@@ -555,7 +532,7 @@
                       >
                         <div class="flex items-center gap-3 min-w-0">
                           <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                            <span class="material-icons text-primary text-sm">eco</span>
+                            <span class="material-icons-outlinedtext-primary text-sm">eco</span>
                           </div>
                           <div class="min-w-0">
                             <p class="text-sm font-medium text-text-light dark:text-text-dark truncate">{{ getEspecieNome(especieId) }}</p>
@@ -569,7 +546,7 @@
                           <span :class="['inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium', getEstoqueBadgeForEspecie(especieId)]">
                             {{ getEstoqueLabelForEspecie(especieId) }}
                           </span>
-                          <span class="material-icons text-gray-400 text-sm">chevron_right</span>
+                          <span class="material-icons-outlinedtext-gray-400 text-sm">chevron_right</span>
                         </div>
                       </div>
                     </div>
@@ -701,7 +678,7 @@
                 <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
                   <button @click="closeMovimentacaoModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
                   <button @click="saveMovimentacao" class="btn btn-primary" :disabled="saving || !isMovimentacaoValid">
-                    <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
+                    <span v-if="saving" class="material-icons-outlinedanimate-spin text-sm">refresh</span>
                     {{ saving ? 'Salvando...' : 'Confirmar' }}
                   </button>
                 </div>
@@ -737,7 +714,7 @@
                 <!-- Modal Header -->
                 <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center gap-3">
                   <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <span class="material-icons text-primary text-xl">inventory_2</span>
+                    <span class="material-icons-outlinedtext-primary text-xl">inventory_2</span>
                   </div>
                   <div class="flex-1 min-w-0">
                     <h2 class="text-lg font-semibold text-text-light dark:text-text-dark truncate">
@@ -792,18 +769,18 @@
                           <input type="date" v-model="filterDataFim" class="input text-xs py-1 px-2" />
                         </div>
                         <button @click="aplicarFiltroData" class="btn btn-secondary text-xs py-1 px-2">
-                          <span class="material-icons text-sm">filter_alt</span>
+                          <span class="material-icons-outlinedtext-sm">filter_alt</span>
                           Filtrar
                         </button>
                         <button v-if="filterDataInicio || filterDataFim" @click="limparFiltroData" class="btn btn-secondary text-xs py-1 px-2">
-                          <span class="material-icons text-sm">clear</span>
+                          <span class="material-icons-outlinedtext-sm">clear</span>
                         </button>
                       </div>
                     </div>
 
                     <!-- Loading Movimentações -->
                     <div v-if="loadingMovimentacoes" class="text-center py-8">
-                      <span class="material-icons text-2xl text-gray-300 animate-spin">refresh</span>
+                      <span class="material-icons-outlinedtext-2xl text-gray-300 animate-spin">refresh</span>
                     </div>
 
                     <div v-else-if="movimentacoes.length > 0" class="space-y-2">
@@ -822,7 +799,7 @@
                               'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
                               mov.cancelado ? 'bg-gray-200 text-gray-400 dark:bg-gray-700' : mov.tipo === 'entrada' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                             ]">
-                              <span class="material-icons text-sm">{{ mov.cancelado ? 'block' : mov.tipo === 'entrada' ? 'add' : 'remove' }}</span>
+                              <span class="material-icons-outlinedtext-sm">{{ mov.cancelado ? 'block' : mov.tipo === 'entrada' ? 'add' : 'remove' }}</span>
                             </span>
                             <div class="min-w-0">
                               <div class="flex items-center gap-2">
@@ -857,7 +834,7 @@
                             :disabled="currentPageMovimentacoes === 1"
                             class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
                           >
-                            <span class="material-icons text-sm">chevron_left</span>
+                            <span class="material-icons-outlinedtext-sm">chevron_left</span>
                           </button>
                           <span class="text-xs text-subtext-light dark:text-subtext-dark">{{ currentPageMovimentacoes }} / {{ totalPagesMovimentacoes }}</span>
                           <button
@@ -865,7 +842,7 @@
                             :disabled="currentPageMovimentacoes === totalPagesMovimentacoes"
                             class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
                           >
-                            <span class="material-icons text-sm">chevron_right</span>
+                            <span class="material-icons-outlinedtext-sm">chevron_right</span>
                           </button>
                         </div>
                       </div>
@@ -881,7 +858,7 @@
                 <!-- Footer -->
                 <div class="border-t border-border-light dark:border-border-dark px-6 py-4">
                   <button @click="openMovimentacaoForEspecie()" class="w-full btn btn-primary justify-center">
-                    <span class="material-icons text-sm">swap_horiz</span>
+                    <span class="material-icons-outlinedtext-sm">swap_horiz</span>
                     Nova Movimentação
                   </button>
                 </div>
@@ -981,7 +958,7 @@
                   <div v-if="!selectedMovimentacao.cancelado" class="pt-4 border-t border-border-light dark:border-border-dark">
                     <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-4">
                       <p class="text-xs text-yellow-700 dark:text-yellow-400">
-                        <span class="material-icons text-sm align-middle mr-1">warning</span>
+                        <span class="material-icons-outlinedtext-sm align-middle mr-1">warning</span>
                         Ao cancelar, o estoque será revertido automaticamente. Esta ação não pode ser desfeita.
                       </p>
                     </div>
@@ -1006,7 +983,7 @@
                     class="btn btn-danger"
                     :disabled="!motivoCancelamento.trim() || saving"
                   >
-                    <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
+                    <span v-if="saving" class="material-icons-outlinedanimate-spin text-sm">refresh</span>
                     {{ saving ? 'Cancelando...' : 'Cancelar Movimentação' }}
                   </button>
                 </div>
@@ -1168,7 +1145,6 @@ const getEmptyForm = () => ({
   especie_ids: [],
   modalidade: 'cortado',
   peso_gramas: null,
-  especie_percentuais: {},
   ativo: true
 })
 
@@ -1181,11 +1157,6 @@ const isEditing = computed(() => !!form.value.id)
 // Validacao movimentacao
 const isMovimentacaoValid = computed(() => {
   return movimentacao.value.especie_id && movimentacao.value.quantidade > 0
-})
-
-// Percentuais MIX
-const mixPercentualTotal = computed(() => {
-  return (form.value.especie_ids || []).reduce((sum, id) => sum + (form.value.especie_percentuais?.[id] || 0), 0)
 })
 
 // Especies ativas
@@ -1267,12 +1238,22 @@ function formatCurrency(value) {
 
 function formatPrecoInput(value) {
   if (value === undefined || value === null || value === '') return ''
-  return Number(value).toFixed(2).replace('.', ',')
+  const cents = Math.round(Number(value) * 100)
+  return (cents / 100).toFixed(2).replace('.', ',')
 }
 
 function onPrecoInput(tabelaId, event) {
-  let val = event.target.value.replace(/[^\d,]/g, '').replace(',', '.')
-  formPrecos.value[tabelaId] = val ? parseFloat(val) : null
+  // Formatação estilo banco: só aceita dígitos, preenche da direita pra esquerda
+  const raw = event.target.value.replace(/\D/g, '')
+  if (!raw) {
+    formPrecos.value[tabelaId] = null
+    event.target.value = ''
+    return
+  }
+  const cents = parseInt(raw, 10)
+  const reais = cents / 100
+  formPrecos.value[tabelaId] = reais
+  event.target.value = reais.toFixed(2).replace('.', ',')
 }
 
 function formatDateTime(dateStr) {
@@ -1658,19 +1639,6 @@ async function openModal(produto) {
   if (produto) {
     const especieIds = (produto.especies || []).map(e => e.id)
 
-    const especie_percentuais = {}
-    if (produto.is_mix && especieIds.length > 0) {
-      const { data: rels } = await supabase
-        .from('produto_especies')
-        .select('especie_id, percentual')
-        .eq('produto_id', produto.id)
-      if (rels) {
-        rels.forEach(r => {
-          if (r.percentual) especie_percentuais[r.especie_id] = r.percentual
-        })
-      }
-    }
-
     form.value = {
       ...produto,
       is_mix: produto.is_mix || false,
@@ -1679,7 +1647,6 @@ async function openModal(produto) {
       especie_ids: especieIds,
       modalidade: produto.modalidade || 'cortado',
       peso_gramas: produto.peso_gramas || null,
-      especie_percentuais,
       ativo: produto.ativo !== false
     }
     await loadProdutoPrecos(produto.id)
@@ -1773,8 +1740,8 @@ async function saveOrUpdate() {
           .insert(especieIds.map(especieId => ({
             produto_id: form.value.id,
             especie_id: especieId,
-            percentual: form.value.is_mix && form.value.modalidade === 'cortado'
-              ? (form.value.especie_percentuais?.[especieId] || null)
+            percentual: form.value.is_mix && especieIds.length > 1
+              ? parseFloat((100 / especieIds.length).toFixed(2))
               : null
           })))
 
@@ -1820,8 +1787,8 @@ async function saveOrUpdate() {
           .insert(especieIds.map(especieId => ({
             produto_id: produtoData.id,
             especie_id: especieId,
-            percentual: form.value.is_mix && form.value.modalidade === 'cortado'
-              ? (form.value.especie_percentuais?.[especieId] || null)
+            percentual: form.value.is_mix && especieIds.length > 1
+              ? parseFloat((100 / especieIds.length).toFixed(2))
               : null
           })))
 

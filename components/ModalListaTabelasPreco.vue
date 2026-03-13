@@ -45,10 +45,10 @@
                   />
                   <div class="flex items-center gap-1 shrink-0">
                     <button @click="saveEdit(tabela.id)" class="w-8 h-8 flex items-center justify-center text-green-600 hover:text-green-700 transition-colors" title="Salvar">
-                      <span class="material-icons text-lg">check</span>
+                      <span class="material-icons-outlinedtext-lg">check</span>
                     </button>
                     <button @click="cancelEdit" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors" title="Cancelar">
-                      <span class="material-icons text-lg">close</span>
+                      <span class="material-icons-outlinedtext-lg">close</span>
                     </button>
                   </div>
                 </template>
@@ -58,10 +58,10 @@
                   <span class="text-sm font-medium text-gray-900 dark:text-white truncate pr-2">{{ tabela.nome }}</span>
                   <div class="flex items-center gap-1 shrink-0">
                     <button @click="startEdit(tabela)" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary transition-colors" title="Editar">
-                      <span class="material-icons text-lg">edit</span>
+                      <span class="material-icons-outlinedtext-lg">edit</span>
                     </button>
                     <button @click="confirmDelete(tabela)" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors" title="Excluir">
-                      <span class="material-icons text-lg">delete</span>
+                      <span class="material-icons-outlinedtext-lg">delete</span>
                     </button>
                   </div>
                 </template>
@@ -86,11 +86,11 @@
                 ref="createInput"
               />
               <button @click="createTabela" :disabled="!newNome.trim() || saving" class="btn btn-primary text-sm py-2 px-3">
-                <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
-                <span v-else class="material-icons text-sm">check</span>
+                <span v-if="saving" class="material-icons-outlinedanimate-spin text-sm">refresh</span>
+                <span v-else class="material-icons-outlinedtext-sm">check</span>
               </button>
               <button @click="showCreateForm = false" class="btn btn-secondary text-sm py-2 px-3">
-                <span class="material-icons text-sm">close</span>
+                <span class="material-icons-outlinedtext-sm">close</span>
               </button>
             </div>
           </template>
