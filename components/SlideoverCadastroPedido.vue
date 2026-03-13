@@ -239,6 +239,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 
+const supabase = useSupabaseClient()
+
 interface Cliente {
   id: string
   razao_social: string
@@ -255,6 +257,12 @@ interface Produto {
 interface TabelaPreco {
   id: string
   nome: string
+}
+
+interface TabelaPrecoItem {
+  tabela_preco_id: string
+  produto_id: string
+  preco: number
 }
 
 interface ItemPedido {
@@ -290,6 +298,9 @@ const itemForm = ref({
   valorUnitario: 0
 })
 
+// Tabela de preco itens
+const tabelaPrecoItens = ref<TabelaPrecoItem[]>([])
+
 // Computed
 const quantidadeTotal = computed(() => {
   return form.value.itens.reduce((total, item) => total + item.quantidade, 0)
@@ -313,10 +324,43 @@ function getProdutoNome(produtoId: string): string {
   return produto?.nome || '-'
 }
 
+async function loadTabelaPrecoItens() {
+  if (!form.value.tabelaPrecoId) {
+    tabelaPrecoItens.value = []
+    return
+  }
+  try {
+    const { data, error } = await supabase
+      .from('tabela_preco_itens')
+      .select('tabela_preco_id, produto_id, preco')
+      .eq('tabela_preco_id', form.value.tabelaPrecoId)
+    if (error) throw error
+    tabelaPrecoItens.value = data || []
+  } catch (e) {
+    console.error('Erro ao carregar itens da tabela de preco:', e)
+    tabelaPrecoItens.value = []
+  }
+}
+
+function getPrecoFromTabela(produtoId: string): number | null {
+  const item = tabelaPrecoItens.value.find(i => i.produto_id === produtoId)
+  return item ? item.preco : null
+}
+
+watch(() => form.value.tabelaPrecoId, () => {
+  loadTabelaPrecoItens()
+}, { immediate: true })
+
 function onProdutoChange() {
   const produto = props.produtos.find(p => p.id === itemForm.value.produtoId)
-  if (produto?.preco_padrao) {
+  const precoTabela = getPrecoFromTabela(itemForm.value.produtoId)
+
+  if (precoTabela !== null) {
+    itemForm.value.valorUnitario = precoTabela
+  } else if (produto?.preco_padrao) {
     itemForm.value.valorUnitario = produto.preco_padrao
+  } else {
+    itemForm.value.valorUnitario = 0
   }
 }
 
