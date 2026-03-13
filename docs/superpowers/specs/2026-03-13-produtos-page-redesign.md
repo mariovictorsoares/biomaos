@@ -6,24 +6,26 @@
 ## Summary
 
 Redesign the products page modal and add price table management. Key changes:
-- Remove `tipo_produto_id` field from product modal
+- Remove `tipo_produto_id` field from product modal AND listing table
 - Make `codigo` (max 5 chars) and `nome` manual inputs (no auto-generation)
 - Add price table CRUD modal accessible from page header and within product modal
 - Add mandatory price inputs per price table inside the product modal
 - Enforce MIX species limits by modalidade (vivo: max 2, cortado: unlimited)
+- Migrate downstream consumers (pedidos, vendas, contratos) from `preco_padrao` to `tabela_preco_itens`
 
 ## Current State
 
-`TabProdutos.vue` (1062 lines) handles product listing, creation, editing, and inventory management. Products have auto-generated `codigo` and `nome` based on species + tipo_produto. Price tables exist in the database (`tabelas_preco` + `tabela_preco_itens`) but are not managed from the products page.
+`TabProdutos.vue` (1062 lines) handles product listing, creation, editing, and inventory management. Products have auto-generated `codigo` and `nome` based on species + tipo_produto. Price tables exist in the database (`tabelas_preco` + `tabela_preco_itens`) but are not managed from the products page. `preco_padrao` is used as a price fallback in pedidos, vendas, and contratos components.
 
 ## Changes
 
 ### 1. Product Modal - Field Changes
 
 **Remove:**
-- `tipo_produto_id` select field
+- `tipo_produto_id` select field and its column from the listing table (desktop + mobile)
 - Auto-generation logic (`generateAutoCodigo`, `generateAutoNome`)
-- "Gerenciar Tipos de Produto" button/modal link (keep the `ModalListaTiposProduto` component for now but don't reference it)
+- "Gerenciar Tipos de Produto" button/modal link
+- Remove dead code: `loadTiposProduto()`, `getTipoNome()`, related watchers/data
 
 **Modify:**
 - `codigo`: free text input, `maxlength="5"`, required, user types manually
@@ -46,16 +48,16 @@ Redesign the products page modal and add price table management. Key changes:
 **Produto Vivo (`modalidade = 'vivo'`):**
 - MIX allows maximum 2 species
 - After selecting 2 species, disable the species dropdown
-- Show tooltip/message: "Maximo 2 especies para produto vivo"
+- Show message: "Maximo 2 especies para produto vivo"
+- No percentuais for vivo MIX (implicit 50/50 for 2 species)
 
 **Produto Cortado (`modalidade = 'cortado'`):**
 - MIX allows unlimited species (no change from current behavior)
+- Percentuais shown and must sum to 100% (existing behavior)
 
 **Modalidade switch (cortado -> vivo) with >2 species:**
-- Auto-remove excess species (keep first 2)
+- Auto-remove excess species (keep first 2 in selection order)
 - Show toast warning: "Especies excedentes removidas. Produto vivo permite no maximo 2 especies."
-
-**Percentuais:** continue working as today (must sum to 100%)
 
 ### 3. Price Table Management Modal
 
@@ -67,13 +69,12 @@ Redesign the products page modal and add price table management. Key changes:
 - List all `tabelas_preco` for the current `empresa_id`
 - Create new table: single `nome` field (required)
 - Edit table name (inline edit or simple sub-modal)
-- Delete table with confirmation dialog — cascades to delete all `tabela_preco_itens`
-- Visual pattern: same as existing `ModalListaTiposProduto`, `ModalListaSubstratos`, `ModalListaEmbalagens`
+- Delete table with confirmation dialog (DB cascade handles `tabela_preco_itens` automatically)
+- Visual pattern: same as existing `ModalListaSubstratos`, `ModalListaEmbalagens`
 
-**Database operations:**
-- INSERT into `tabelas_preco` (id, empresa_id, nome, ativo, created_at, updated_at)
-- UPDATE `tabelas_preco` SET nome WHERE id
-- DELETE FROM `tabela_preco_itens` WHERE tabela_preco_id, then DELETE FROM `tabelas_preco` WHERE id
+**Refresh flow:** When creating a price table from within the product modal, the "Precos" section refreshes to include the new table with an empty price input.
+
+**Component architecture:** `ModalListaTabelasPreco.vue` already exists but is a "dumb" emit-based component. Convert to self-contained component with internal Supabase calls (matching `ModalListaSubstratos` pattern). Add delete functionality with confirmation.
 
 ### 4. Price Inputs in Product Modal
 
@@ -82,42 +83,74 @@ Redesign the products page modal and add price table management. Key changes:
 2. If editing, fetch existing `tabela_preco_itens` for the product
 3. Display "Precos" section with one row per price table:
    - Layout: `[Table Name Label] [R$ ___.__]`
-   - Input uses Maska monetary mask (R$ format)
+   - Input uses Maska monetary mask (R$ format, Brazilian decimal separator `,`)
    - All fields required — cannot save product without filling all prices
 
 **On save:**
-- Upsert `tabela_preco_itens` for each price table (key: `tabela_preco_id` + `produto_id`)
+- Upsert `tabela_preco_itens` for each price table using `onConflict: 'tabela_preco_id, produto_id'`
 - Delete any `tabela_preco_itens` for tables that no longer exist
+
+**Editing existing products without prices:**
+- When editing a product that has no `tabela_preco_itens`, all price fields appear empty and must be filled before saving. The user cannot save any changes without filling all prices.
 
 **Empty state (no price tables exist):**
 - Show message: "Nenhuma tabela de preco cadastrada"
 - Show button: "Criar tabela de preco" that opens the price table management modal
-- Block product save until at least one price table exists and is filled
-
-**Legacy field:** `preco_padrao` column remains in DB but is not displayed in the modal.
+- Block product save until at least one price table exists and is filled (intentional UX)
 
 ### 5. Product Code Validation
 
 - Client-side: `maxlength="5"` on input
+- DB constraint: `produtos.codigo` is `VARCHAR(20)` in DB, UI enforces max 5
 - Uniqueness check: validate `codigo` is unique per `empresa_id` before saving (existing behavior)
 - No format restrictions (letters, numbers, symbols allowed)
+
+### 6. Migrate Downstream Consumers from `preco_padrao` to `tabela_preco_itens`
+
+Components that use `preco_padrao` need to use price tables instead. The `pedidos` table already has `tabela_preco_id` (migration 017), so the price table is selected at order level.
+
+**Already migrated (use tabela_preco first, fallback to preco_padrao):**
+- `components/ModalCadastroPedido.vue` — already looks up `precoTabela` first
+- `components/ModalEditarPedido.vue` — already looks up `precoTabela` first
+
+**Need migration (only use preco_padrao today):**
+- `components/SlideoverCadastroPedido.vue` — add tabela_preco lookup matching Modal pattern
+- `components/SlideoverAlteracaoPedido.vue` — add tabela_preco lookup matching Modal pattern
+- `components/TabVendas.vue` — add tabela_preco lookup for price resolution
+- `pages/contratos/index.vue` — contratos already have `tabela_preco_id` (migration 016), use it
+
+**Price resolution logic (for components being migrated):**
+1. Get `tabela_preco_id` from the pedido/contrato being created/edited
+2. Look up `tabela_preco_itens` WHERE `tabela_preco_id` AND `produto_id`
+3. If found, use that price
+4. If not found, fall back to `preco_padrao` (backward compat with legacy products)
+5. If neither exists, show price as 0
+
+**Note:** `clientes` does NOT have `tabela_preco_id`. Price table is assigned per pedido/contrato, not per customer. No new migration needed.
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `components/TabProdutos.vue` | Remove tipo_produto_id, auto-gen logic. Add manual codigo/nome. Add prices section. Add MIX validation by modalidade. Add price table modal trigger. |
-| `components/ModalListaTabelasPreco.vue` | **NEW** - Price table CRUD modal (list, create, edit, delete) |
+| `components/TabProdutos.vue` | Remove tipo_produto_id (field + listing column + dead code). Manual codigo/nome. Prices section. MIX validation by modalidade. Price table modal trigger. |
+| `components/ModalListaTabelasPreco.vue` | **MODIFY** - Convert from emit-based to self-contained. Add delete with confirmation. Add inline edit. |
+| `components/SlideoverCadastroPedido.vue` | Add tabela_preco lookup (same pattern as ModalCadastroPedido) |
+| `components/SlideoverAlteracaoPedido.vue` | Add tabela_preco lookup (same pattern as ModalEditarPedido) |
+| `components/TabVendas.vue` | Add tabela_preco lookup for price resolution |
+| `pages/contratos/index.vue` | Use existing `tabela_preco_id` for price lookup |
 
 ## Database Changes
 
 None required. Existing schema supports all changes:
 - `tabelas_preco` and `tabela_preco_itens` tables already exist
-- `produtos.codigo` is already TEXT type (no length constraint in DB, enforced in UI)
+- `pedidos.tabela_preco_id` already exists (migration 017)
+- `contratos.tabela_preco_id` already exists (migration 016)
 - `tipo_produto_id` column remains in DB (nullable) but is not set by the UI
+- `preco_padrao` column remains in DB for backward compatibility
 
 ## Migration Considerations
 
-- Existing products with `tipo_produto_id` set will keep their data (not cleared)
-- Existing products without prices in `tabela_preco_itens` will need prices added when edited
-- No breaking changes to other parts of the system that reference `tipo_produto_id`
+- Existing products with `tipo_produto_id` set keep their data (not cleared)
+- Existing products without prices in `tabela_preco_itens` must have prices added when edited
+- `preco_padrao` remains as fallback in downstream components for legacy products
+- No new DB migration needed
