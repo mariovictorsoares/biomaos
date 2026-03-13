@@ -416,29 +416,6 @@
                     </div>
                   </div>
 
-                  <!-- Tipo -->
-                  <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      Tipo
-                    </label>
-                    <div class="flex gap-2">
-                      <select v-model="form.tipo_produto_id" class="input flex-1">
-                        <option :value="null">Selecione...</option>
-                        <option v-for="tipo in tiposAtivos" :key="tipo.id" :value="tipo.id">
-                          {{ tipo.codigo ? `${tipo.codigo} - ${tipo.nome}` : tipo.nome }}
-                        </option>
-                      </select>
-                      <button
-                        type="button"
-                        @click="openListaTiposModal"
-                        class="w-[38px] h-[38px] flex items-center justify-center border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shrink-0"
-                        title="Gerenciar tipos"
-                      >
-                        <span class="material-icons-outlined text-sm text-subtext-light dark:text-subtext-dark">settings</span>
-                      </button>
-                    </div>
-                  </div>
-
                   <!-- Substrato e Embalagem -->
                   <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -993,27 +970,6 @@
       </Transition>
     </Teleport>
 
-    <!-- Modal Lista Tipos -->
-    <Teleport to="body">
-      <ModalListaTiposProduto
-        v-if="showListaTiposModal"
-        :tipos="tiposProduto"
-        @close="closeListaTiposModal"
-        @novo-tipo="openTipoModal(null)"
-        @editar-tipo="openTipoModal"
-      />
-    </Teleport>
-
-    <!-- Modal Tipo Produto (criar/editar) -->
-    <Teleport to="body">
-      <ModalTipoProduto
-        v-if="showTipoModal"
-        :tipo="editingTipo"
-        @close="closeTipoModal"
-        @save="saveTipo"
-      />
-    </Teleport>
-
     <!-- Modal Lista Substratos -->
     <Teleport to="body">
       <ModalListaSubstratos
@@ -1073,17 +1029,11 @@ const loading = ref(false)
 const saving = ref(false)
 const produtos = ref([])
 const especies = ref([])
-const tiposProduto = ref([])
 const substratos = ref([])
 const embalagens = ref([])
 
 // Modal unificado
 const showModal = ref(false)
-
-// Modais auxiliares - Tipos
-const showListaTiposModal = ref(false)
-const showTipoModal = ref(false)
-const editingTipo = ref(null)
 
 // Modais auxiliares - Substratos
 const showListaSubstratosModal = ref(false)
@@ -1151,7 +1101,6 @@ const getEmptyForm = () => ({
   id: null,
   codigo: '',
   nome: '',
-  tipo_produto_id: null,
   substrato_id: null,
   embalagem_id: null,
   is_mix: false,
@@ -1181,11 +1130,6 @@ const mixPercentualTotal = computed(() => {
 // Especies ativas
 const especiesAtivas = computed(() => {
   return especies.value.filter(e => e.ativo)
-})
-
-// Tipos ativos
-const tiposAtivos = computed(() => {
-  return tiposProduto.value.filter(t => t.ativo)
 })
 
 // Substratos ativos
@@ -1255,18 +1199,6 @@ function formatCurrency(value) {
 function formatDateTime(dateStr) {
   if (!dateStr) return ''
   return new Date(dateStr).toLocaleString('pt-BR')
-}
-
-function getTipoNome(tipoId) {
-  if (!tipoId) return '-'
-  const tipo = tiposProduto.value.find(t => t.id === tipoId)
-  return tipo?.nome || '-'
-}
-
-function getTipoCodigo(tipoId) {
-  if (!tipoId) return ''
-  const tipo = tiposProduto.value.find(t => t.id === tipoId)
-  return tipo?.codigo || ''
 }
 
 function getSubstratoNome(substratoId) {
@@ -1403,45 +1335,6 @@ function getEstoqueStatusClass(item) {
   return 'badge-success'
 }
 
-// === AUTO-GERAÇÃO DE NOME E CÓDIGO ===
-
-function generateAutoNome(produtoData) {
-  const especieIds = (produtoData.especie_ids || []).filter(id => id)
-  const tipoNome = getTipoNome(produtoData.tipo_produto_id)
-  const tipoStr = tipoNome !== '-' ? tipoNome : ''
-
-  if (produtoData.is_mix && especieIds.length > 0) {
-    const nomes = especieIds.map(id => getEspecieNome(id)).filter(n => n !== '-')
-    const especiesStr = nomes.join('/')
-    return ['MIX', especiesStr, tipoStr].filter(Boolean).join(' ')
-  } else if (especieIds.length > 0) {
-    const especieNome = getEspecieNome(especieIds[0])
-    return [especieNome !== '-' ? especieNome : '', tipoStr].filter(Boolean).join(' ')
-  }
-
-  return tipoStr || ''
-}
-
-function generateAutoCodigo(produtoData) {
-  const especieIds = (produtoData.especie_ids || []).filter(id => id)
-  const tipoCodigo = getTipoCodigo(produtoData.tipo_produto_id)
-
-  if (produtoData.is_mix && especieIds.length > 0) {
-    const prefixes = especieIds.map(id => {
-      const esp = getEspecie(id)
-      return esp ? esp.codigo || esp.nome.substring(0, 3).toUpperCase() : ''
-    }).filter(Boolean)
-    const base = 'MIX-' + prefixes.join('-')
-    return tipoCodigo ? `${base}-${tipoCodigo}` : base
-  } else if (especieIds.length > 0) {
-    const esp = getEspecie(especieIds[0])
-    const especieCodigo = esp ? (esp.codigo || esp.nome.substring(0, 3).toUpperCase()) : ''
-    return tipoCodigo ? `${especieCodigo}-${tipoCodigo}` : especieCodigo
-  }
-
-  return tipoCodigo || ''
-}
-
 // Fechar dropdown ao clicar fora
 function handleClickOutside(e) {
   if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
@@ -1473,23 +1366,6 @@ async function loadEspecies() {
     especies.value = data || []
   } catch (e) {
     console.error('Erro ao carregar espécies:', e)
-  }
-}
-
-async function loadTiposProduto() {
-  if (!currentCompany.value?.id) return
-
-  try {
-    const { data, error } = await supabase
-      .from('tipos_produto')
-      .select('*')
-      .eq('empresa_id', currentCompany.value.id)
-      .order('nome')
-
-    if (error) throw error
-    tiposProduto.value = data || []
-  } catch (e) {
-    console.error('Erro ao carregar tipos de produto:', e)
   }
 }
 
@@ -1683,7 +1559,6 @@ async function openModal(produto) {
     form.value = {
       ...produto,
       is_mix: produto.is_mix || false,
-      tipo_produto_id: produto.tipo_produto_id || null,
       substrato_id: produto.substrato_id || null,
       embalagem_id: produto.embalagem_id || null,
       especie_ids: especieIds,
@@ -1720,7 +1595,6 @@ async function saveOrUpdate() {
         .update({
           codigo: form.value.codigo || null,
           nome: form.value.nome || null,
-          tipo_produto_id: form.value.tipo_produto_id || null,
           substrato_id: form.value.substrato_id || null,
           embalagem_id: form.value.embalagem_id || null,
           is_mix: form.value.is_mix,
@@ -1762,7 +1636,6 @@ async function saveOrUpdate() {
           empresa_id: currentCompany.value.id,
           codigo: form.value.codigo || null,
           nome: form.value.nome || null,
-          tipo_produto_id: form.value.tipo_produto_id || null,
           substrato_id: form.value.substrato_id || null,
           embalagem_id: form.value.embalagem_id || null,
           is_mix: form.value.is_mix,
@@ -2117,59 +1990,6 @@ function limparFiltroData() {
   }
 }
 
-// === TIPOS PRODUTO ===
-
-function openListaTiposModal() {
-  showListaTiposModal.value = true
-}
-
-function closeListaTiposModal() {
-  showListaTiposModal.value = false
-}
-
-function openTipoModal(tipo) {
-  editingTipo.value = tipo
-  showTipoModal.value = true
-}
-
-function closeTipoModal() {
-  showTipoModal.value = false
-  editingTipo.value = null
-}
-
-async function saveTipo(data) {
-  if (!currentCompany.value?.id) return
-
-  try {
-    if (data.id) {
-      const { error } = await supabase
-        .from('tipos_produto')
-        .update({ nome: data.nome, codigo: data.codigo })
-        .eq('id', data.id)
-
-      if (error) throw error
-      success('Tipo atualizado com sucesso')
-    } else {
-      const { error } = await supabase
-        .from('tipos_produto')
-        .insert({
-          empresa_id: currentCompany.value.id,
-          nome: data.nome,
-          codigo: data.codigo
-        })
-
-      if (error) throw error
-      success('Tipo criado com sucesso')
-    }
-
-    closeTipoModal()
-    await loadTiposProduto()
-  } catch (e) {
-    console.error('Erro ao salvar tipo:', e)
-    showError(e.message || 'Erro ao salvar tipo')
-  }
-}
-
 // === SUBSTRATOS ===
 
 function openListaSubstratosModal() {
@@ -2278,20 +2098,6 @@ async function saveEmbalagem(data) {
 
 // === WATCHERS ===
 
-// Auto-gerar nome e código ao alterar seleções
-watch(
-  () => [form.value.is_mix, form.value.especie_ids, form.value.tipo_produto_id],
-  (newVals, oldVals) => {
-    if (oldVals && JSON.stringify(newVals) !== JSON.stringify(oldVals)) {
-      const autoNome = generateAutoNome(form.value)
-      const autoCodigo = generateAutoCodigo(form.value)
-      if (autoNome) form.value.nome = autoNome
-      if (autoCodigo) form.value.codigo = autoCodigo
-    }
-  },
-  { deep: true }
-)
-
 // Limpar especie_ids quando toggle MIX muda
 watch(() => form.value.is_mix, (newVal, oldVal) => {
   if (oldVal !== undefined && newVal !== oldVal) {
@@ -2305,7 +2111,6 @@ watch(
   (newId) => {
     if (newId) {
       loadEspecies()
-      loadTiposProduto()
       loadSubstratos()
       loadEmbalagens()
       loadProdutos()
