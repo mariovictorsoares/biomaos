@@ -1727,6 +1727,21 @@ async function saveOrUpdate() {
       }
     }
 
+    // Validate prices
+    if (tabelasPreco.value.length > 0) {
+      const missingPrices = tabelasPreco.value.filter(t => !formPrecos.value[t.id] && formPrecos.value[t.id] !== 0)
+      if (missingPrices.length > 0) {
+        showError('Preencha o preco em todas as tabelas de preco')
+        saving.value = false
+        return
+      }
+    }
+    if (tabelasPreco.value.length === 0) {
+      showError('Cadastre pelo menos uma tabela de preco antes de salvar o produto')
+      saving.value = false
+      return
+    }
+
     if (isEditing.value) {
       const { error: updateError } = await supabase
         .from('produtos')
@@ -1766,6 +1781,19 @@ async function saveOrUpdate() {
         if (relError) throw relError
       }
 
+      // Save prices (update path)
+      if (tabelasPreco.value.length > 0) {
+        const precoRows = tabelasPreco.value.map(t => ({
+          tabela_preco_id: t.id,
+          produto_id: form.value.id,
+          preco: formPrecos.value[t.id] || 0
+        }))
+        const { error: precoError } = await supabase
+          .from('tabela_preco_itens')
+          .upsert(precoRows, { onConflict: 'tabela_preco_id,produto_id' })
+        if (precoError) throw precoError
+      }
+
       success('Produto atualizado com sucesso')
     } else {
       const { data: produtoData, error: produtoError } = await supabase
@@ -1798,6 +1826,19 @@ async function saveOrUpdate() {
           })))
 
         if (relError) throw relError
+      }
+
+      // Save prices (create path)
+      if (tabelasPreco.value.length > 0) {
+        const precoRows = tabelasPreco.value.map(t => ({
+          tabela_preco_id: t.id,
+          produto_id: produtoData.id,
+          preco: formPrecos.value[t.id] || 0
+        }))
+        const { error: precoError } = await supabase
+          .from('tabela_preco_itens')
+          .upsert(precoRows, { onConflict: 'tabela_preco_id,produto_id' })
+        if (precoError) throw precoError
       }
 
       success('Produto criado com sucesso')
