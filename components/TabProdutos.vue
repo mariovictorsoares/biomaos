@@ -1048,6 +1048,11 @@ const showListaEmbalagensModal = ref(false)
 const showEmbalagemModal = ref(false)
 const editingEmbalagem = ref(null)
 
+// Tabelas de preço
+const tabelasPreco = ref([])
+const formPrecos = ref({}) // { [tabela_preco_id]: price_value }
+const showListaTabelasPrecoModal = ref(false)
+
 // Dropdown multiselect espécies
 const showEspeciesDropdown = ref(false)
 const dropdownRef = ref(null)
@@ -1481,6 +1486,42 @@ async function loadEstoque() {
   }
 }
 
+async function loadTabelasPreco() {
+  if (!currentCompany.value?.id) return
+  try {
+    const { data, error } = await supabase
+      .from('tabelas_preco')
+      .select('id, nome')
+      .eq('empresa_id', currentCompany.value.id)
+      .eq('ativo', true)
+      .order('nome')
+    if (error) throw error
+    tabelasPreco.value = data || []
+  } catch (e) {
+    console.error('Erro ao carregar tabelas de preço:', e)
+  }
+}
+
+async function loadProdutoPrecos(produtoId) {
+  if (!produtoId) {
+    formPrecos.value = {}
+    return
+  }
+  try {
+    const { data, error } = await supabase
+      .from('tabela_preco_itens')
+      .select('tabela_preco_id, preco')
+      .eq('produto_id', produtoId)
+    if (error) throw error
+    const map = {}
+    ;(data || []).forEach(item => { map[item.tabela_preco_id] = item.preco })
+    formPrecos.value = map
+  } catch (e) {
+    console.error('Erro ao carregar preços do produto:', e)
+    formPrecos.value = {}
+  }
+}
+
 async function loadMovimentacoes(especieId) {
   if (!currentCompany.value?.id || !especieId) return
 
@@ -1578,8 +1619,10 @@ async function openModal(produto) {
       especie_percentuais,
       ativo: produto.ativo !== false
     }
+    await loadProdutoPrecos(produto.id)
   } else {
     form.value = getEmptyForm()
+    formPrecos.value = {}
   }
 
   showModal.value = true
@@ -2153,6 +2196,7 @@ watch(
       loadEspecies()
       loadSubstratos()
       loadEmbalagens()
+      loadTabelasPreco()
       loadProdutos()
       loadEstoque()
     }
