@@ -20,6 +20,10 @@
           <span class="material-icons text-sm">swap_horiz</span>
           Movimentação
         </button>
+        <button @click="showListaTabelasPrecoModal = true" class="btn btn-secondary shrink-0 justify-center sm:justify-start">
+          <span class="material-icons text-sm">payments</span>
+          Tabelas de Preco
+        </button>
         <button @click="openModal(null)" class="btn btn-primary shrink-0 justify-center sm:justify-start">
           <span class="material-icons-outlined text-sm">add</span>
           Novo produto
@@ -483,6 +487,46 @@
                     </div>
                   </div>
 
+                  <!-- === SEÇÃO PREÇOS === -->
+                  <div class="border-t border-border-light dark:border-border-dark pt-4">
+                    <div class="flex items-center justify-between mb-3">
+                      <h3 class="text-sm font-semibold text-text-light dark:text-text-dark flex items-center gap-1.5">
+                        <span class="material-icons text-base text-primary">payments</span>
+                        Precos <span class="text-red-500">*</span>
+                      </h3>
+                      <button
+                        type="button"
+                        @click="showListaTabelasPrecoModal = true"
+                        class="w-[28px] h-[28px] flex items-center justify-center border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shrink-0"
+                        title="Gerenciar tabelas de preco"
+                      >
+                        <span class="material-icons-outlined text-sm text-subtext-light dark:text-subtext-dark">add</span>
+                      </button>
+                    </div>
+
+                    <div v-if="tabelasPreco.length > 0" class="space-y-2">
+                      <div v-for="tabela in tabelasPreco" :key="tabela.id" class="flex items-center gap-3">
+                        <label class="text-sm text-text-light dark:text-text-dark flex-1 truncate">{{ tabela.nome }}</label>
+                        <div class="relative w-32">
+                          <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-subtext-light dark:text-subtext-dark">R$</span>
+                          <input
+                            type="text"
+                            :value="formatPrecoInput(formPrecos[tabela.id])"
+                            @input="onPrecoInput(tabela.id, $event)"
+                            class="input text-sm text-right pl-8"
+                            placeholder="0,00"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-else class="text-center py-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                      <p class="text-xs text-subtext-light dark:text-subtext-dark mb-2">Nenhuma tabela de preco cadastrada</p>
+                      <button type="button" @click="showListaTabelasPrecoModal = true" class="text-xs text-primary hover:text-primary/80 font-medium">
+                        Criar tabela de preco
+                      </button>
+                    </div>
+                  </div>
 
                   <!-- === SEÇÃO ESTOQUE (apenas ao editar) === -->
                   <div v-if="isEditing && form.especie_ids.length > 0" class="border-t border-border-light dark:border-border-dark pt-4">
@@ -1014,6 +1058,15 @@
         @save="saveEmbalagem"
       />
     </Teleport>
+
+    <!-- Modal Lista Tabelas Preço -->
+    <Teleport to="body">
+      <ModalListaTabelasPreco
+        :show="showListaTabelasPrecoModal"
+        @close="showListaTabelasPrecoModal = false"
+        @updated="loadTabelasPreco"
+      />
+    </Teleport>
   </div>
 </template>
 
@@ -1210,6 +1263,16 @@ const paginatedMovimentacoes = computed(() => {
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0)
+}
+
+function formatPrecoInput(value) {
+  if (value === undefined || value === null || value === '') return ''
+  return Number(value).toFixed(2).replace('.', ',')
+}
+
+function onPrecoInput(tabelaId, event) {
+  let val = event.target.value.replace(/[^\d,]/g, '').replace(',', '.')
+  formPrecos.value[tabelaId] = val ? parseFloat(val) : null
 }
 
 function formatDateTime(dateStr) {
