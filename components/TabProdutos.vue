@@ -381,7 +381,8 @@
                             type="checkbox"
                             :value="esp.id"
                             v-model="form.especie_ids"
-                            class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                            :disabled="!form.especie_ids.includes(esp.id) && !canAddMoreEspecies"
+                            class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 disabled:opacity-50"
                           />
                           <span class="text-text-light dark:text-text-dark">{{ esp.nome }}</span>
                           <span class="text-xs text-subtext-light dark:text-subtext-dark">{{ esp.codigo }}</span>
@@ -391,6 +392,9 @@
                         </div>
                       </div>
                     </div>
+                    <p v-if="form.is_mix && form.modalidade === 'vivo' && form.especie_ids.length >= 2" class="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                      Máximo 2 espécies para produto vivo
+                    </p>
 
                     <!-- Percentuais do MIX (cortado) -->
                     <div v-if="form.especie_ids.length > 0 && form.modalidade === 'cortado'" class="mt-3 space-y-2">
@@ -1129,6 +1133,14 @@ const mixPercentualTotal = computed(() => {
 // Especies ativas
 const especiesAtivas = computed(() => {
   return especies.value.filter(e => e.ativo)
+})
+
+const maxEspeciesMix = computed(() => {
+  return form.value.modalidade === 'vivo' ? 2 : Infinity
+})
+
+const canAddMoreEspecies = computed(() => {
+  return form.value.especie_ids.length < maxEspeciesMix.value
 })
 
 // Substratos ativos
@@ -2122,6 +2134,14 @@ async function saveEmbalagem(data) {
 watch(() => form.value.is_mix, (newVal, oldVal) => {
   if (oldVal !== undefined && newVal !== oldVal) {
     form.value.especie_ids = []
+  }
+})
+
+// Limitar espécies ao trocar modalidade para vivo (max 2)
+watch(() => form.value.modalidade, (newVal, oldVal) => {
+  if (newVal === 'vivo' && form.value.is_mix && form.value.especie_ids.length > 2) {
+    form.value.especie_ids = form.value.especie_ids.slice(0, 2)
+    success('Espécies excedentes removidas. Produto vivo permite no máximo 2 espécies.')
   }
 })
 
