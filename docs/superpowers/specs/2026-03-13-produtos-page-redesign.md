@@ -101,7 +101,7 @@ Redesign the products page modal and add price table management. Key changes:
 ### 5. Product Code Validation
 
 - Client-side: `maxlength="5"` on input
-- DB constraint: `produtos.codigo` is `VARCHAR(20)` in DB, UI enforces max 5
+- DB constraint: `produtos.codigo` is `VARCHAR(50)` in DB (after migration 008), UI enforces max 5
 - Uniqueness check: validate `codigo` is unique per `empresa_id` before saving (existing behavior)
 - No format restrictions (letters, numbers, symbols allowed)
 
@@ -112,21 +112,25 @@ Components that use `preco_padrao` need to use price tables instead. The `pedido
 **Already migrated (use tabela_preco first, fallback to preco_padrao):**
 - `components/ModalCadastroPedido.vue` — already looks up `precoTabela` first
 - `components/ModalEditarPedido.vue` — already looks up `precoTabela` first
+- `pages/contratos/index.vue` — already has `getPrecoFromTabela()` with fallback
 
 **Need migration (only use preco_padrao today):**
-- `components/SlideoverCadastroPedido.vue` — add tabela_preco lookup matching Modal pattern
-- `components/SlideoverAlteracaoPedido.vue` — add tabela_preco lookup matching Modal pattern
-- `components/TabVendas.vue` — add tabela_preco lookup for price resolution
-- `pages/contratos/index.vue` — contratos already have `tabela_preco_id` (migration 016), use it
+- `components/SlideoverCadastroPedido.vue` — add tabela_preco lookup matching Modal pattern. Needs: fetch `tabela_preco_itens` data, add lookup function, add watcher on `tabela_preco_id` change.
+- `components/SlideoverAlteracaoPedido.vue` — same as above. Needs full data fetching infrastructure (not just a lookup function).
+
+**Out of scope (future task):**
+- `components/TabVendas.vue` — vendas table has no `tabela_preco_id` column. Stays using `preco_padrao` for now.
+- `components/TabPedidos.vue` — passes `preco_padrao` in product interface to sub-components but delegates actual price resolution to Modal/Slideover components. No changes needed here since sub-components handle lookup.
 
 **Price resolution logic (for components being migrated):**
-1. Get `tabela_preco_id` from the pedido/contrato being created/edited
-2. Look up `tabela_preco_itens` WHERE `tabela_preco_id` AND `produto_id`
-3. If found, use that price
-4. If not found, fall back to `preco_padrao` (backward compat with legacy products)
-5. If neither exists, show price as 0
+1. Get `tabela_preco_id` from the pedido being created/edited
+2. Fetch `tabela_preco_itens` WHERE `tabela_preco_id` matches
+3. On product selection, look up price from fetched items by `produto_id`
+4. If found, use that price
+5. If not found, fall back to `preco_padrao` (backward compat with legacy products)
+6. If neither exists, show price as 0
 
-**Note:** `clientes` does NOT have `tabela_preco_id`. Price table is assigned per pedido/contrato, not per customer. No new migration needed.
+**Note:** Price table is assigned per pedido/contrato, not per customer. No new migration needed.
 
 ## Files to Modify
 
@@ -134,10 +138,8 @@ Components that use `preco_padrao` need to use price tables instead. The `pedido
 |------|---------|
 | `components/TabProdutos.vue` | Remove tipo_produto_id (field + listing column + dead code). Manual codigo/nome. Prices section. MIX validation by modalidade. Price table modal trigger. |
 | `components/ModalListaTabelasPreco.vue` | **MODIFY** - Convert from emit-based to self-contained. Add delete with confirmation. Add inline edit. |
-| `components/SlideoverCadastroPedido.vue` | Add tabela_preco lookup (same pattern as ModalCadastroPedido) |
-| `components/SlideoverAlteracaoPedido.vue` | Add tabela_preco lookup (same pattern as ModalEditarPedido) |
-| `components/TabVendas.vue` | Add tabela_preco lookup for price resolution |
-| `pages/contratos/index.vue` | Use existing `tabela_preco_id` for price lookup |
+| `components/SlideoverCadastroPedido.vue` | Add tabela_preco_itens fetch + lookup function + watcher (matching ModalCadastroPedido pattern) |
+| `components/SlideoverAlteracaoPedido.vue` | Add tabela_preco_itens fetch + lookup function + watcher (matching ModalEditarPedido pattern) |
 
 ## Database Changes
 
