@@ -57,7 +57,6 @@
               </th>
               <th class="table-header">Espécie</th>
               <th class="table-header text-center w-24">Modalidade</th>
-              <th class="table-header w-32">Tipo</th>
               <th class="table-header text-right w-24">Estoque</th>
               <th class="table-header text-center w-24 rounded-tr-lg">Ações</th>
             </tr>
@@ -104,7 +103,6 @@
                   {{ produto.modalidade === 'vivo' ? 'Vivo' : 'Cortado' }}
                 </span>
               </td>
-              <td class="table-cell max-w-[160px] truncate">{{ getTipoNome(produto.tipo_produto_id) }}</td>
               <td class="table-cell text-right">
                 <div class="flex items-center justify-end gap-2">
                   <span :class="['text-sm font-medium', getEstoqueClassForProduto(produto)]">
@@ -141,7 +139,6 @@
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
                 <span class="text-xs font-medium text-primary">{{ produto.codigo }}</span>
-                <span class="text-xs text-subtext-light dark:text-subtext-dark">{{ getTipoNome(produto.tipo_produto_id) }}</span>
                 <span v-if="produto.is_mix" class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
                   MIX
                 </span>
