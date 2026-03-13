@@ -462,21 +462,20 @@
                     </div>
                   </div>
 
-                  <!-- Codigo e Nome (auto-gerados) -->
+                  <!-- Codigo e Nome (manual) -->
                   <div class="grid grid-cols-2 gap-4">
                     <div>
                       <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                        Código
-                        <span class="text-xs text-subtext-light dark:text-subtext-dark font-normal">(auto)</span>
+                        Codigo <span class="text-red-500">*</span>
                       </label>
-                      <input type="text" v-model="form.codigo" class="input" placeholder="Gerado automaticamente" />
+                      <input type="text" v-model="form.codigo" class="input" maxlength="5" placeholder="Ex: RUC" />
+                      <p class="text-xs text-subtext-light dark:text-subtext-dark mt-1">Max. 5 caracteres</p>
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                        Nome do Produto
-                        <span class="text-xs text-subtext-light dark:text-subtext-dark font-normal">(auto)</span>
+                        Nome do Produto <span class="text-red-500">*</span>
                       </label>
-                      <input type="text" v-model="form.nome" class="input" placeholder="Gerado automaticamente" />
+                      <input type="text" v-model="form.nome" class="input" placeholder="Nome do produto" />
                     </div>
                   </div>
 
@@ -1588,6 +1587,27 @@ async function saveOrUpdate() {
   saving.value = true
   try {
     const especieIds = (form.value.especie_ids || []).filter(id => id)
+
+    // Check codigo uniqueness
+    if (form.value.codigo) {
+      let query = supabase
+        .from('produtos')
+        .select('id')
+        .eq('empresa_id', currentCompany.value.id)
+        .eq('codigo', form.value.codigo)
+        .limit(1)
+
+      if (isEditing.value) {
+        query = query.neq('id', form.value.id)
+      }
+
+      const { data: existing } = await query
+      if (existing && existing.length > 0) {
+        showError('Ja existe um produto com este codigo')
+        saving.value = false
+        return
+      }
+    }
 
     if (isEditing.value) {
       const { error: updateError } = await supabase
