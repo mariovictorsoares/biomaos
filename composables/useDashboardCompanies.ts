@@ -121,6 +121,21 @@ export function useDashboardCompanies() {
     return userCompanies.value.filter(e => selectedCompanyIds.value.includes(e.id))
   })
 
+  // Computed para verificar se todas estao selecionadas
+  const allSelected = computed(() => {
+    return userCompanies.value.length > 0 && selectedCompanyIds.value.length === userCompanies.value.length
+  })
+
+  // Label para o dropdown
+  const dropdownLabel = computed(() => {
+    if (allSelected.value || selectedCompanyIds.value.length === 0) return 'Todas as Empresas'
+    if (selectedCompanyIds.value.length === 1) {
+      const empresa = userCompanies.value.find(e => e.id === selectedCompanyIds.value[0])
+      return empresa?.nome_fantasia || empresa?.razao_social || '1 empresa'
+    }
+    return `${selectedCompanyIds.value.length} empresas`
+  })
+
   // Computed para filtro SQL (para uso em queries)
   const companyFilter = computed(() => {
     return selectedCompanyIds.value
@@ -176,6 +191,8 @@ export function useDashboardCompanies() {
     // Computed
     selectedCompanies,
     companyFilter,
+    allSelected,
+    dropdownLabel,
 
     // Metodos
     loadUserCompanies,

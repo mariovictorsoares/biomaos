@@ -116,6 +116,7 @@ const supabase = useSupabaseClient()
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
+const { loadCurrentCompany } = useCurrentCompany()
 
 const email = ref('')
 const password = ref('')
@@ -149,6 +150,9 @@ const handleLogin = async () => {
       }
       return
     }
+
+    // Pre-carregar empresa atual antes de navegar ao dashboard
+    await loadCurrentCompany()
 
     router.push('/')
   } catch (err) {

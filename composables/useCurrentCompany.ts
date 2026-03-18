@@ -73,11 +73,15 @@ export function useCurrentCompany() {
   }
 
   const autoSelectFirstCompany = async () => {
+    const user = useSupabaseUser()
+    if (!user.value?.id) return
+
     try {
       // Buscar empresas vinculadas ao usuario
       const { data, error } = await supabase
         .from('empresa_usuarios')
         .select('empresa:empresas(*)')
+        .eq('user_id', user.value.id)
         .order('created_at', { ascending: true })
         .limit(1)
 

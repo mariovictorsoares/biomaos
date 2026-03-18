@@ -44,9 +44,22 @@
 </template>
 
 <script setup>
+import { watch } from 'vue'
 import { useSidebar } from '~/composables/useSidebar'
 import { useCurrentCompany } from '~/composables/useCurrentCompany'
 
 const { openSidebar } = useSidebar()
-const { currentCompanyInitials, currentCompanyLogo } = useCurrentCompany()
+const { currentCompany, currentCompanyInitials, currentCompanyLogo, loadCurrentCompany } = useCurrentCompany()
+
+// Garantir que empresa carrega quando usuario autentica (ex: refresh de pagina)
+const user = useSupabaseUser()
+watch(
+  () => user.value?.id,
+  async (newId) => {
+    if (newId && !currentCompany.value) {
+      await loadCurrentCompany()
+    }
+  },
+  { immediate: true }
+)
 </script>
