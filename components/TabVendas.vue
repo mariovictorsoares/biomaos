@@ -610,7 +610,6 @@ interface Pedido {
   id: string
   empresa_id: string
   cliente_id: string | null
-  contrato_id?: string | null
   numero: string
   data_pedido: string
   data_entrega: string | null
@@ -1106,10 +1105,8 @@ async function updatePedidoStatus(pedidoId: string, newStatus: string) {
   if (!currentCompany.value?.id) return
 
   try {
-    // Buscar pedido para saber o status anterior e contrato_id
     const pedido = pedidos.value.find(p => p.id === pedidoId)
     const statusAnterior = pedido?.status
-    const contratoId = pedido?.contrato_id
 
     const { error } = await supabase
       .from('pedidos')
@@ -1119,28 +1116,6 @@ async function updatePedidoStatus(pedidoId: string, newStatus: string) {
 
     if (error) throw error
 
-    // Atualizar contador de entregas do contrato se mudou para/de entregue ou finalizado
-    if (contratoId) {
-      const statusEntregue = ['entregue', 'finalizado']
-      const eraEntregue = statusEntregue.includes(statusAnterior || '')
-      const agoraEntregue = statusEntregue.includes(newStatus)
-
-      if (!eraEntregue && agoraEntregue) {
-        // Incrementar entregas_realizadas
-        try {
-          await supabase.rpc('increment_entregas_realizadas', { contrato_uuid: contratoId })
-        } catch (rpcError) {
-          console.warn('Função RPC não disponível:', rpcError)
-        }
-      } else if (eraEntregue && !agoraEntregue) {
-        // Decrementar entregas_realizadas
-        try {
-          await supabase.rpc('decrement_entregas_realizadas', { contrato_uuid: contratoId })
-        } catch (rpcError) {
-          console.warn('Função RPC não disponível:', rpcError)
-        }
-      }
-    }
 
     // Atualizar localmente sem recarregar toda a página
     const pedidoIndex = pedidos.value.findIndex(p => p.id === pedidoId)

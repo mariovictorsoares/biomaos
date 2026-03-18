@@ -107,16 +107,6 @@
       <!-- Cards de Métricas Principais -->
       <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <!-- Contratos Ativos -->
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="material-icons-outlined text-gray-500 dark:text-gray-400">description</span>
-            </div>
-            <span class="text-sm text-subtext-light dark:text-subtext-dark">Contratos Ativos</span>
-          </div>
-          <p class="text-3xl font-semibold text-text-light dark:text-text-dark">{{ metricas.contratosAtivos }}</p>
-        </div>
-
         <!-- Total de Microverdes a entregar -->
         <div class="card p-4">
           <div class="flex items-center gap-3 mb-3">
@@ -649,7 +639,6 @@ const filtroProducaoAtivo = ref('todos')
 
 // Dados
 const metricas = ref({
-  contratosAtivos: 0,
   microverdesEntregar: 0,
   entregasProgramadas: 0,
   faturamentoPrevisto: 0
@@ -918,7 +907,6 @@ async function loadDashboard() {
 
     // Carregar tudo em paralelo
     const [
-      contratosRes,
       producoesRes,
       pedidosRes,
       vendasRes,
@@ -926,13 +914,6 @@ async function loadDashboard() {
       produtosRes,
       especiesRes
     ] = await Promise.all([
-      // Contratos ativos
-      supabase
-        .from('contratos')
-        .select('id', { count: 'exact' })
-        .in('empresa_id', empresaIds)
-        .eq('status', 'ativo'),
-
       // Produções
       supabase
         .from('producao')
@@ -1010,9 +991,6 @@ async function loadDashboard() {
       especie_nome: t.especies?.nome || null
     }))
     proximasColheitas.value = colheitasProximasRes.data || []
-
-    // Processar contratos
-    metricas.value.contratosAtivos = contratosRes.count || 0
 
     // Processar pedidos
     const pedidos = pedidosRes.data || []
@@ -1173,7 +1151,7 @@ async function loadDashboard() {
 }
 
 function resetData() {
-  metricas.value = { contratosAtivos: 0, microverdesEntregar: 0, entregasProgramadas: 0, faturamentoPrevisto: 0 }
+  metricas.value = { microverdesEntregar: 0, entregasProgramadas: 0, faturamentoPrevisto: 0 }
   producao.value = {
     total: 0, perdas: 0, previstos: 0, realizados: 0, atrasados: 0,
     plantio: { total: 0, perdas: 0, previstos: 0, realizados: 0, atrasados: 0 },

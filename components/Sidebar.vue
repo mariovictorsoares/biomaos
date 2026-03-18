@@ -1086,8 +1086,7 @@ const handleLogout = async () => {
 const baseMenuItems = [
   { label: 'Dashboard', path: '/', icon: 'home' },
   { label: 'Comercial', path: '/comercial', icon: 'storefront' },
-  { label: 'Contratos', path: '/contratos', icon: 'description' },
-  { label: 'Clientes', path: '/clientes', icon: 'people' },
+{ label: 'Clientes', path: '/clientes', icon: 'people' },
   { label: 'Produção', path: '/producao', icon: 'factory' },
   { label: 'Produtos', path: '/produtos', icon: 'local_florist' },
   { label: 'Fazendas', path: '/fazendas', icon: 'agriculture' },
