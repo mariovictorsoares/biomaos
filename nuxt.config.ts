@@ -18,6 +18,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     resendApiKey: process.env.RESEND_API_KEY,
+    ewelinkAppId: process.env.EWELINK_APP_ID,
+    ewelinkAppSecret: process.env.EWELINK_APP_SECRET,
     public: {
       baseUrl: process.env.BASE_URL || 'http://localhost:3000',
       featurebaseAppId: process.env.FEATUREBASE_APP_ID || ''

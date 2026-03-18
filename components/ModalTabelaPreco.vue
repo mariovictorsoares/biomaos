@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed inset-0 z-[70] overflow-y-auto">
+  <div class="fixed inset-0 z-[95] overflow-y-auto">
     <!-- Backdrop -->
     <div
       class="fixed inset-0 glass-backdrop transition-opacity"
@@ -55,19 +55,21 @@
                   </option>
                 </select>
               </div>
-              <div class="w-24 sm:w-28 flex-shrink-0">
+              <div class="w-28 sm:w-32 flex-shrink-0">
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-1.5">
                   Valor
                 </label>
-                <input
-                  type="text"
-                  v-model="itemForm.precoFormatado"
-                  @focus="onPrecoFocus"
-                  @blur="onPrecoBlur"
-                  @input="onPrecoInput"
-                  class="input w-full text-sm"
-                  placeholder="R$ 0,00"
-                />
+                <div class="relative">
+                  <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-subtext-light dark:text-subtext-dark">R$</span>
+                  <input
+                    type="text"
+                    :value="itemForm.precoFormatado"
+                    @input="onPrecoInput"
+                    class="input w-full text-sm text-right pl-8"
+                    placeholder="0,00"
+                    inputmode="numeric"
+                  />
+                </div>
               </div>
               <button
                 @click="adicionarItem"
@@ -95,15 +97,17 @@
                   {{ getProdutoNome(item.produto_id) }}
                 </p>
               </div>
-              <div class="w-24 sm:w-28 flex-shrink-0">
-                <input
-                  type="text"
-                  v-model="item.precoFormatado"
-                  @focus="onItemPrecoFocus(index)"
-                  @blur="onItemPrecoBlur(index)"
-                  @input="(e) => onItemPrecoInput(e, index)"
-                  class="input w-full text-right text-xs sm:text-sm"
-                />
+              <div class="w-28 sm:w-32 flex-shrink-0">
+                <div class="relative">
+                  <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-subtext-light dark:text-subtext-dark">R$</span>
+                  <input
+                    type="text"
+                    :value="item.precoFormatado"
+                    @input="(e) => onItemPrecoInput(e, index)"
+                    class="input w-full text-right text-xs sm:text-sm pl-8"
+                    inputmode="numeric"
+                  />
+                </div>
               </div>
               <button
                 @click="removerItem(index)"
@@ -139,7 +143,7 @@
             class="flex-1 btn btn-primary justify-center text-sm"
             :disabled="!canSave || saving"
           >
-            <span v-if="saving" class="material-icons text-sm animate-spin mr-2">refresh</span>
+            <span v-if="saving" class="material-icons-outlined text-sm animate-spin mr-2">refresh</span>
             Salvar
           </button>
         </div>
@@ -201,7 +205,7 @@ const form = ref({
 const itemForm = ref({
   produtoId: '',
   preco: 0,
-  precoFormatado: 'R$ 0,00'
+  precoFormatado: '0,00'
 })
 
 // Computed
@@ -225,87 +229,51 @@ onMounted(() => {
     form.value.itens = props.tabelaPrecoItens.map(item => ({
       produto_id: item.produto_id,
       preco: item.preco,
-      precoFormatado: formatCurrency(item.preco)
+      precoFormatado: formatMonetario(item.preco)
     }))
   }
 })
 
-// Funcoes de formatacao
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-}
-
-function parseCurrency(value: string): number {
-  // Remove R$, pontos de milhar e substitui virgula por ponto
-  const cleaned = value.replace(/[R$\s.]/g, '').replace(',', '.')
-  return parseFloat(cleaned) || 0
-}
-
-// Handlers para o input de adicionar produto
-function onPrecoFocus() {
-  // Ao focar, mostra apenas o numero
-  if (itemForm.value.preco > 0) {
-    itemForm.value.precoFormatado = itemForm.value.preco.toString().replace('.', ',')
-  } else {
-    itemForm.value.precoFormatado = ''
-  }
-}
-
-function onPrecoBlur() {
-  // Ao sair, formata como moeda
-  itemForm.value.precoFormatado = formatCurrency(itemForm.value.preco)
+// Formatação monetária estilo banco
+function formatMonetario(value: number): string {
+  const cents = Math.round(Number(value) * 100)
+  const reais = (cents / 100).toFixed(2)
+  const [intPart, decPart] = reais.split('.')
+  const formatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return `${formatted},${decPart}`
 }
 
 function onPrecoInput(e: Event) {
   const target = e.target as HTMLInputElement
-  const value = target.value
-
-  // Permite apenas numeros e uma virgula
-  const cleaned = value.replace(/[^\d,]/g, '')
-
-  // Garante apenas uma virgula
-  const parts = cleaned.split(',')
-  let finalValue = parts[0]
-  if (parts.length > 1) {
-    finalValue += ',' + parts[1].slice(0, 2) // Max 2 decimais
+  const raw = target.value.replace(/\D/g, '')
+  if (!raw) {
+    itemForm.value.preco = 0
+    itemForm.value.precoFormatado = '0,00'
+    target.value = '0,00'
+    return
   }
-
-  itemForm.value.precoFormatado = finalValue
-  itemForm.value.preco = parseCurrency(finalValue)
-}
-
-// Handlers para os inputs da lista de itens
-function onItemPrecoFocus(index: number) {
-  const item = form.value.itens[index]
-  if (item.preco > 0) {
-    item.precoFormatado = item.preco.toString().replace('.', ',')
-  } else {
-    item.precoFormatado = ''
-  }
-}
-
-function onItemPrecoBlur(index: number) {
-  const item = form.value.itens[index]
-  item.precoFormatado = formatCurrency(item.preco)
+  const cents = parseInt(raw, 10)
+  const reais = cents / 100
+  itemForm.value.preco = reais
+  itemForm.value.precoFormatado = formatMonetario(reais)
+  target.value = itemForm.value.precoFormatado
 }
 
 function onItemPrecoInput(e: Event, index: number) {
   const target = e.target as HTMLInputElement
-  const value = target.value
-
-  // Permite apenas numeros e uma virgula
-  const cleaned = value.replace(/[^\d,]/g, '')
-
-  // Garante apenas uma virgula
-  const parts = cleaned.split(',')
-  let finalValue = parts[0]
-  if (parts.length > 1) {
-    finalValue += ',' + parts[1].slice(0, 2)
-  }
-
+  const raw = target.value.replace(/\D/g, '')
   const item = form.value.itens[index]
-  item.precoFormatado = finalValue
-  item.preco = parseCurrency(finalValue)
+  if (!raw) {
+    item.preco = 0
+    item.precoFormatado = '0,00'
+    target.value = '0,00'
+    return
+  }
+  const cents = parseInt(raw, 10)
+  const reais = cents / 100
+  item.preco = reais
+  item.precoFormatado = formatMonetario(reais)
+  target.value = item.precoFormatado
 }
 
 function getProdutoNome(produtoId: string): string {
@@ -319,14 +287,14 @@ function adicionarItem() {
   form.value.itens.push({
     produto_id: itemForm.value.produtoId,
     preco: itemForm.value.preco,
-    precoFormatado: formatCurrency(itemForm.value.preco)
+    precoFormatado: formatMonetario(itemForm.value.preco)
   })
 
   // Limpar form do item
   itemForm.value = {
     produtoId: '',
     preco: 0,
-    precoFormatado: 'R$ 0,00'
+    precoFormatado: '0,00'
   }
 }
 

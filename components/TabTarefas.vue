@@ -56,7 +56,7 @@
 
       <!-- Direita: Botao Nova Tarefa -->
       <button @click="openNovaTarefa" class="btn btn-primary shrink-0 justify-center sm:justify-start">
-        <span class="material-icons text-sm">add</span>
+        <span class="material-icons-outlined text-sm">add</span>
         Nova Tarefa
       </button>
     </div>
@@ -66,7 +66,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <span class="material-icons text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Carregando tarefas...</p>
       </div>
 
@@ -76,7 +76,7 @@
           <thead>
             <tr class="bg-gray-100 dark:bg-gray-700/50 border-b border-border-light dark:border-border-dark">
               <th class="table-header w-10 text-center">
-                <span class="material-icons text-sm text-subtext-light dark:text-subtext-dark">check_box_outline_blank</span>
+                <span class="material-icons-outlined text-sm text-subtext-light dark:text-subtext-dark">check_box_outline_blank</span>
               </th>
               <th class="table-header">Nome</th>
               <th class="table-header text-center">Bandejas</th>
@@ -102,7 +102,7 @@
                     ? 'bg-[#4A7C59] border-[#4A7C59] text-white'
                     : 'border-gray-300 dark:border-gray-600 hover:border-[#4A7C59] dark:hover:border-[#4A7C59]'"
                 >
-                  <span v-if="tarefa.concluida" class="material-icons text-sm">check</span>
+                  <span v-if="tarefa.concluida" class="material-icons-outlined text-sm">check</span>
                 </button>
               </td>
               <!-- Nome -->
@@ -169,7 +169,7 @@
                 ? 'bg-[#4A7C59] border-[#4A7C59] text-white'
                 : 'border-gray-300 dark:border-gray-600 hover:border-[#4A7C59] dark:hover:border-[#4A7C59]'"
             >
-              <span v-if="tarefa.concluida" class="material-icons text-sm">check</span>
+              <span v-if="tarefa.concluida" class="material-icons-outlined text-sm">check</span>
             </button>
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2">
@@ -187,7 +187,7 @@
               </div>
               <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-subtext-light dark:text-subtext-dark">
                 <span v-if="tarefa.especies?.nome" :class="{ 'line-through': tarefa.concluida }">
-                  <span class="material-icons text-[11px] align-middle mr-0.5">eco</span>
+                  <span class="material-icons-outlined text-[11px] align-middle mr-0.5">eco</span>
                   {{ tarefa.especies.nome }}
                 </span>
                 <span v-if="tarefa.bandejas" :class="{ 'line-through': tarefa.concluida }">
@@ -198,11 +198,11 @@
                     ? 'line-through'
                     : isOverdue(tarefa) ? 'text-red-600 dark:text-red-400 font-medium' : ''
                 ]">
-                  <span class="material-icons text-[11px] align-middle mr-0.5">calendar_today</span>
+                  <span class="material-icons-outlined text-[11px] align-middle mr-0.5">calendar_today</span>
                   {{ formatDateBR(tarefa.data_prevista) }}
                 </span>
                 <span v-if="tarefa.plantios?.fazendas?.nome" :class="{ 'line-through': tarefa.concluida }">
-                  <span class="material-icons text-[11px] align-middle mr-0.5">location_on</span>
+                  <span class="material-icons-outlined text-[11px] align-middle mr-0.5">location_on</span>
                   {{ tarefa.plantios.fazendas.nome }}
                 </span>
               </div>
@@ -219,7 +219,7 @@
           {{ hasAnyFilter ? 'Tente ajustar os filtros' : 'Tarefas serão geradas automaticamente a partir do cultivo ou adicione manualmente' }}
         </p>
         <button @click="openNovaTarefa" class="btn btn-primary">
-          <span class="material-icons text-sm">add</span>
+          <span class="material-icons-outlined text-sm">add</span>
           Nova Tarefa
         </button>
       </div>
@@ -244,7 +244,7 @@
               :disabled="currentPage === 1"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_left</span>
+              <span class="material-icons-outlined text-sm">chevron_left</span>
             </button>
             <span class="hidden xs:inline">Página</span>
             <input
@@ -260,7 +260,7 @@
               :disabled="currentPage === totalPages"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_right</span>
+              <span class="material-icons-outlined text-sm">chevron_right</span>
             </button>
           </div>
         </div>
@@ -293,7 +293,7 @@
                 <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between">
                   <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Nova Tarefa</h2>
                   <button @click="closeNovaTarefa" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <span class="material-icons">close</span>
+                    <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
 
@@ -341,7 +341,7 @@
                 <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
                   <button @click="closeNovaTarefa" class="btn btn-secondary" :disabled="saving">Cancelar</button>
                   <button @click="salvarNovaTarefa" class="btn btn-primary" :disabled="saving || !isNovaTarefaValid">
-                    <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
+                    <span v-if="saving" class="material-icons-outlined animate-spin text-sm">refresh</span>
                     {{ saving ? 'Salvando...' : 'Salvar' }}
                   </button>
                 </div>

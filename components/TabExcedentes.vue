@@ -26,7 +26,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-16">
-        <span class="material-icons text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-3">Carregando excedentes...</p>
       </div>
 
@@ -159,7 +159,7 @@
             :disabled="currentPage === 1"
             class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <span class="material-icons text-sm">chevron_left</span>
+            <span class="material-icons-outlined text-sm">chevron_left</span>
           </button>
           <span>Página</span>
           <input
@@ -175,7 +175,7 @@
             :disabled="currentPage === totalPages"
             class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <span class="material-icons text-sm">chevron_right</span>
+            <span class="material-icons-outlined text-sm">chevron_right</span>
           </button>
         </div>
       </div>

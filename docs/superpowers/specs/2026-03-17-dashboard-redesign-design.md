@@ -37,7 +37,7 @@ Redesign total do dashboard principal (`pages/index.vue`) do BiomaOS. O dashboar
 
 ### Seção 1 — Hero KPIs
 
-5 cards responsivos (`grid-cols-2 xl:grid-cols-5`):
+5 cards responsivos (`grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5`):
 
 | KPI | Valor Mock | Sparkline | Variação |
 |-----|-----------|-----------|----------|
@@ -50,10 +50,10 @@ Redesign total do dashboard principal (`pages/index.vue`) do BiomaOS. O dashboar
 Cada card:
 - Label: `text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400`
 - Valor: `text-2xl font-bold text-gray-900 dark:text-white`
-- Sparkline: SVG inline ~60x24px, stroke verde primário, fill com opacity 10%
+- Sparkline: SVG inline ~60x24px, polyline com `stroke-width: 1.5`, fill area abaixo da linha até baseline com opacity 10%
 - Badge variação: pill verde/vermelho com seta
 
-Counter animado: interpola de 0 ao valor em ~600ms com easing `ease-out`.
+Counter animado: interpola de 0 ao valor em ~600ms com easing `ease-out`. Formata em cada frame (R$, %, un).
 
 ### Seção 2a — Rankings por Produto (esquerda)
 
@@ -62,7 +62,7 @@ Card com 3 tabs: `Eficiência` | `Mais Vendidos` | `Margem`
 Cada tab mostra Top 10 como barras horizontais:
 - Linha: nome do produto (esquerda) + barra + valor (direita)
 - Barra: largura proporcional ao valor max, cor gradiente baseada na posição
-- Cores das barras: do verde (#22C55E) ao amarelo (#EAB308) ao vermelho (#EF4444)
+- Cores das barras por posição no ranking: posição 1 = verde (#22C55E), posição 5 = amarelo (#EAB308), posição 10 = vermelho (#EF4444), interpolando entre elas
 - Animação: barras crescem da esquerda com stagger delay (50ms entre cada)
 - Transição entre tabs: crossfade suave (opacity + transform)
 
@@ -77,7 +77,7 @@ Mostarda, Rúcula, Brócolis, Repolho Roxo, Cenoura
 Donut chart central (Chart.js Doughnut):
 - 4 fases: Plantio (azul), Luz (amarelo), Colheita (verde), Concluído (cinza)
 - cutout: 70% (donut fino)
-- Centro: número total de produções em texto grande
+- Centro: número total de produções (`text-3xl font-bold text-gray-900 dark:text-white`)
 
 4 mini-cards dispostos em grid 2x2 abaixo do donut:
 - Total Produções: ícone + número
@@ -151,7 +151,7 @@ p-5
 const heroKpis = ref([
   { label: 'Faturamento Previsto', value: 24580, format: 'currency', sparkline: [18200, 21400, 22800, 24580], change: 12 },
   { label: 'Unidades Vendidas', value: 1842, format: 'number', suffix: 'un', sparkline: [1520, 1680, 1750, 1842], change: 8 },
-  { label: 'Produção Ativa', value: 156, format: 'number', suffix: 'bdj', sparkline: [168, 172, 160, 156], change: -3 },
+  { label: 'Produção Total', value: 156, format: 'number', suffix: 'bdj', sparkline: [168, 172, 160, 156], change: -3 },
   { label: 'Margem Bruta', value: 42, format: 'percent', sparkline: [38, 39, 41, 42], change: 2 },
   { label: 'Eficiência Geral', value: 87, format: 'percent', sparkline: [78, 82, 84, 87], change: 5 },
 ])
@@ -160,19 +160,25 @@ const heroKpis = ref([
 const rankingTabs = ['Eficiência', 'Mais Vendidos', 'Margem']
 const rankings = ref({
   eficiencia: [
-    { nome: 'Rabanete', valor: 96 },
-    { nome: 'Girassol', valor: 93 },
-    // ... top 10
+    { nome: 'Rabanete', valor: 96 }, { nome: 'Girassol', valor: 93 },
+    { nome: 'Ervilha', valor: 89 }, { nome: 'Mostarda', valor: 86 },
+    { nome: 'Rúcula', valor: 82 }, { nome: 'Beterraba', valor: 78 },
+    { nome: 'Coentro', valor: 74 }, { nome: 'Brócolis', valor: 69 },
+    { nome: 'Repolho Roxo', valor: 63 }, { nome: 'Cenoura', valor: 58 },
   ],
   vendidos: [
-    { nome: 'Rúcula', valor: 342 },
-    { nome: 'Rabanete', valor: 298 },
-    // ... top 10
+    { nome: 'Rúcula', valor: 342 }, { nome: 'Rabanete', valor: 298 },
+    { nome: 'Girassol', valor: 256 }, { nome: 'Coentro', valor: 214 },
+    { nome: 'Mostarda', valor: 187 }, { nome: 'Ervilha', valor: 165 },
+    { nome: 'Beterraba', valor: 142 }, { nome: 'Brócolis', valor: 118 },
+    { nome: 'Cenoura', valor: 95 }, { nome: 'Repolho Roxo', valor: 78 },
   ],
   margem: [
-    { nome: 'Girassol', valor: 58 },
-    { nome: 'Mostarda', valor: 52 },
-    // ... top 10
+    { nome: 'Girassol', valor: 58 }, { nome: 'Mostarda', valor: 52 },
+    { nome: 'Rabanete', valor: 48 }, { nome: 'Ervilha', valor: 45 },
+    { nome: 'Rúcula', valor: 41 }, { nome: 'Beterraba', valor: 38 },
+    { nome: 'Coentro', valor: 34 }, { nome: 'Brócolis', valor: 29 },
+    { nome: 'Repolho Roxo', valor: 24 }, { nome: 'Cenoura', valor: 19 },
   ]
 })
 
@@ -184,15 +190,22 @@ const producao = ref({
 
 // Vendas Mensais (12 meses)
 const vendasMensais = ref([
-  { mes: 'Mar/25', valor: 15200 },
-  // ... 12 entries
+  { mes: 'Mar/25', valor: 15200 }, { mes: 'Abr/25', valor: 17800 },
+  { mes: 'Mai/25', valor: 16400 }, { mes: 'Jun/25', valor: 19200 },
+  { mes: 'Jul/25', valor: 21500 }, { mes: 'Ago/25', valor: 20100 },
+  { mes: 'Set/25', valor: 22800 }, { mes: 'Out/25', valor: 24200 },
+  { mes: 'Nov/25', valor: 23100 }, { mes: 'Dez/25', valor: 18900 },
+  { mes: 'Jan/26', valor: 20400 }, { mes: 'Fev/26', valor: 24580 },
 ])
 
 // Fazendas
 const fazendas = ref([
   { nome: 'Fazenda Central', ocupacao: 85, eficiencia: 92 },
   { nome: 'Fazenda Norte', ocupacao: 62, eficiencia: 88 },
-  // ... 5-6 entries
+  { nome: 'Fazenda Sul', ocupacao: 94, eficiencia: 76 },
+  { nome: 'Fazenda Leste', ocupacao: 45, eficiencia: 95 },
+  { nome: 'Fazenda Oeste', ocupacao: 73, eficiencia: 83 },
+  { nome: 'Fazenda Horizonte', ocupacao: 58, eficiencia: 90 },
 ])
 ```
 

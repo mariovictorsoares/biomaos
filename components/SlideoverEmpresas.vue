@@ -26,14 +26,14 @@
                     @click="goBack"
                     class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   >
-                    <span class="material-icons text-xl">arrow_back</span>
+                    <span class="material-icons-outlined text-xl">arrow_back</span>
                   </button>
                   <h2 class="text-lg font-semibold text-text-light dark:text-text-dark flex-1">{{ viewTitle }}</h2>
                   <button
                     @click="closeSlideover"
                     class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   >
-                    <span class="material-icons">close</span>
+                    <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
 
@@ -49,7 +49,7 @@
                           <div class="flex items-center justify-between">
                             <h2 class="text-xs sm:text-sm font-medium text-subtext-light dark:text-subtext-dark uppercase tracking-wider">Lista Empresas</h2>
                             <button v-if="isMasterUser" @click="navigateTo('create')" class="hidden sm:flex btn btn-primary shrink-0">
-                              <span class="material-icons text-sm">add</span>
+                              <span class="material-icons-outlined text-sm">add</span>
                               Nova empresa
                             </button>
                           </div>
@@ -64,7 +64,7 @@
                               <input v-model="searchQuery" type="text" placeholder="Pesquise aqui..." class="input w-full text-sm pl-9 sm:pl-10" />
                             </div>
                             <button v-if="isMasterUser" @click="navigateTo('create')" class="sm:hidden btn btn-primary w-full justify-center">
-                              <span class="material-icons text-sm">add</span>
+                              <span class="material-icons-outlined text-sm">add</span>
                               Nova empresa
                             </button>
                           </div>
@@ -99,7 +99,7 @@
 
                       <!-- Loading -->
                       <div v-if="loading" class="text-center py-12">
-                        <span class="material-icons text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+                        <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
                         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Carregando...</p>
                       </div>
 
@@ -111,7 +111,7 @@
                           {{ isMasterUser ? 'Comece criando sua primeira empresa' : 'Você ainda não tem acesso a nenhuma empresa' }}
                         </p>
                         <button v-if="isMasterUser" @click="navigateTo('create')" class="btn btn-primary">
-                          <span class="material-icons text-sm">add</span>
+                          <span class="material-icons-outlined text-sm">add</span>
                           Nova empresa
                         </button>
                       </div>
@@ -129,11 +129,11 @@
                           </div>
                           <div class="flex items-center gap-1.5">
                             <button @click="currentPage--" :disabled="currentPage === 1" class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                              <span class="material-icons text-sm">chevron_left</span>
+                              <span class="material-icons-outlined text-sm">chevron_left</span>
                             </button>
                             <span>{{ currentPage }} de {{ totalPages }}</span>
                             <button @click="currentPage++" :disabled="currentPage === totalPages" class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                              <span class="material-icons text-sm">chevron_right</span>
+                              <span class="material-icons-outlined text-sm">chevron_right</span>
                             </button>
                           </div>
                         </div>
@@ -159,7 +159,7 @@
                           Definir como atual
                         </button>
                         <button @click="openEdit" class="text-sm text-primary hover:underline flex items-center gap-1">
-                          <span class="material-icons text-sm">edit</span>
+                          <span class="material-icons-outlined text-sm">edit</span>
                           Editar
                         </button>
                       </div>
@@ -209,13 +209,13 @@
                           </span>
                         </div>
                         <button @click="navigateTo('invite')" class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors">
-                          <span class="material-icons text-base">person_add</span>
+                          <span class="material-icons-outlined text-base">person_add</span>
                           Convidar
                         </button>
                       </div>
 
                       <div v-if="loadingColaboradores" class="text-center py-8">
-                        <span class="material-icons text-2xl text-gray-300 animate-spin">refresh</span>
+                        <span class="material-icons-outlined text-2xl text-gray-300 animate-spin">refresh</span>
                       </div>
 
                       <div v-else-if="colaboradores.length === 0" class="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
@@ -242,23 +242,23 @@
                       <!-- Convites Pendentes -->
                       <div v-if="convitesPendentes.length > 0" class="mt-4 pt-4 border-t border-gray-100 dark:border-border-dark">
                         <p class="text-xs font-medium text-gray-500 dark:text-subtext-dark mb-3 flex items-center gap-1.5">
-                          <span class="material-icons text-amber-500 text-sm">schedule</span>
+                          <span class="material-icons-outlined text-amber-500 text-sm">schedule</span>
                           Convites pendentes
                         </p>
                         <div class="space-y-2">
                           <div v-for="convite in convitesPendentes" :key="convite.id" class="flex items-center gap-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/50">
                             <div class="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-xs font-medium text-amber-600 shrink-0">
-                              <span class="material-icons text-base">mail</span>
+                              <span class="material-icons-outlined text-base">mail</span>
                             </div>
                             <div class="flex-1 min-w-0">
                               <p class="text-sm text-gray-900 dark:text-text-dark truncate">{{ convite.email }}</p>
                               <p class="text-xs text-gray-500 dark:text-subtext-dark">{{ convite.role === 'admin' ? 'Administrador' : 'Membro' }}</p>
                             </div>
                             <button @click="copyInviteLink(convite.token)" class="p-1.5 text-gray-400 hover:text-primary rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors" title="Copiar link">
-                              <span class="material-icons text-base">content_copy</span>
+                              <span class="material-icons-outlined text-base">content_copy</span>
                             </button>
                             <button @click="cancelInvite(convite.id)" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors" title="Cancelar">
-                              <span class="material-icons text-base">close</span>
+                              <span class="material-icons-outlined text-base">close</span>
                             </button>
                           </div>
                         </div>
@@ -297,8 +297,8 @@
                           <div class="flex gap-3 items-center">
                             <input type="text" v-model="newEmpresa.cnpj" class="input flex-1" placeholder="00.000.000/0000-00" v-maska data-maska="##.###.###/####-##" />
                             <button type="button" @click="buscarCNPJ('new')" :disabled="buscandoCNPJ" class="btn btn-secondary shrink-0">
-                              <span v-if="buscandoCNPJ" class="material-icons text-sm animate-spin">refresh</span>
-                              <span v-else class="material-icons text-sm">search</span>
+                              <span v-if="buscandoCNPJ" class="material-icons-outlined text-sm animate-spin">refresh</span>
+                              <span v-else class="material-icons-outlined text-sm">search</span>
                               {{ buscandoCNPJ ? 'Buscando...' : 'Buscar' }}
                             </button>
                             <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark whitespace-nowrap">
@@ -389,8 +389,8 @@
                           <div class="flex gap-3 items-center">
                             <input type="text" v-model="editEmpresa.cnpj" class="input flex-1" placeholder="00.000.000/0000-00" v-maska data-maska="##.###.###/####-##" />
                             <button type="button" @click="buscarCNPJ('edit')" :disabled="buscandoCNPJ" class="btn btn-secondary shrink-0">
-                              <span v-if="buscandoCNPJ" class="material-icons text-sm animate-spin">refresh</span>
-                              <span v-else class="material-icons text-sm">search</span>
+                              <span v-if="buscandoCNPJ" class="material-icons-outlined text-sm animate-spin">refresh</span>
+                              <span v-else class="material-icons-outlined text-sm">search</span>
                               {{ buscandoCNPJ ? 'Buscando...' : 'Buscar' }}
                             </button>
                             <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark whitespace-nowrap">
@@ -477,7 +477,7 @@
                 <div v-if="currentView === 'create'" class="px-4 sm:px-6 py-4 border-t border-border-light dark:border-border-dark flex items-center justify-end gap-3 shrink-0">
                   <button @click="goBack" class="btn btn-secondary" :disabled="saving">Cancelar</button>
                   <button @click="saveEmpresa" class="btn btn-primary" :disabled="saving">
-                    <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
+                    <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
                     {{ saving ? 'Salvando...' : 'Salvar empresa' }}
                   </button>
                 </div>
@@ -485,7 +485,7 @@
                 <div v-else-if="currentView === 'edit'" class="px-4 sm:px-6 py-4 border-t border-border-light dark:border-border-dark flex items-center justify-end gap-3 shrink-0">
                   <button @click="goBack" class="btn btn-secondary" :disabled="saving">Cancelar</button>
                   <button @click="updateEmpresa" class="btn btn-primary" :disabled="saving">
-                    <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
+                    <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
                     {{ saving ? 'Salvando...' : 'Salvar alterações' }}
                   </button>
                 </div>
@@ -493,8 +493,8 @@
                 <div v-else-if="currentView === 'invite'" class="px-4 sm:px-6 py-4 border-t border-border-light dark:border-border-dark flex items-center justify-end gap-3 shrink-0">
                   <button @click="goBack" class="btn btn-secondary" :disabled="sendingInvite">Cancelar</button>
                   <button @click="sendInvite" class="btn btn-primary" :disabled="sendingInvite || !inviteEmail">
-                    <span v-if="sendingInvite" class="material-icons text-sm animate-spin">refresh</span>
-                    <span v-else class="material-icons text-sm">send</span>
+                    <span v-if="sendingInvite" class="material-icons-outlined text-sm animate-spin">refresh</span>
+                    <span v-else class="material-icons-outlined text-sm">send</span>
                     {{ sendingInvite ? 'Enviando...' : 'Enviar convite' }}
                   </button>
                 </div>

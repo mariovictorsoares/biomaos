@@ -1,56 +1,141 @@
 <template>
   <div>
-    <!-- Toolbar: Filtros + Ação -->
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 mb-4">
-      <!-- Esquerda: Busca + Filtros -->
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-        <!-- Busca -->
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base">search</span>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Buscar pedidos..."
-            class="input w-full sm:w-64 text-sm pl-9"
+    <!-- Toolbar: Período + Filtros + Botão -->
+    <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+      <!-- Seletor de Período (Date Range Picker) -->
+      <div class="flex items-center gap-1">
+        <button @click="periodoAnterior" class="p-1.5 self-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+          <span class="material-icons-outlined text-sm text-subtext-light">chevron_left</span>
+        </button>
+        <div class="pedidos-date-range-wrapper">
+          <VueDatePicker
+            v-model="dateRangeModel"
+            range
+            :preset-dates="presetDates"
+            :dark="isDark"
+            :enable-time-picker="false"
+            auto-apply
+            :format="formatDateDisplay"
+            locale="pt-BR"
+            placeholder="Período..."
+            :clearable="false"
+            menu-class-name="dp-menu-custom"
+            teleport
           />
         </div>
-        <!-- Data Inicial -->
-        <input
-          type="date"
-          v-model="filterDataInicial"
-          class="input text-sm w-full sm:w-auto shrink-0"
-          placeholder="Data inicial"
-        />
-        <!-- Data Final -->
-        <input
-          type="date"
-          v-model="filterDataFinal"
-          class="input text-sm w-full sm:w-auto shrink-0"
-          placeholder="Data final"
-        />
-        <!-- Filtro Status -->
-        <select v-model="filterStatus" class="input text-sm w-full sm:w-auto shrink-0">
-          <option value="">Todos status</option>
-          <option value="previsto">Previsto</option>
-          <option value="reservado">Reservado</option>
-          <option value="confirmado">Confirmado</option>
-          <option value="finalizado">Finalizado</option>
-          <option value="cancelado">Cancelado</option>
-        </select>
-        <!-- Checkbox Mostrar Finalizados -->
-        <label class="flex items-center gap-2 cursor-pointer shrink-0">
-          <input
-            type="checkbox"
-            v-model="mostrarFinalizados"
-            class="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary dark:bg-gray-800 dark:border-gray-600"
-          />
-          <span class="text-sm text-subtext-light dark:text-subtext-dark whitespace-nowrap">Mostrar finalizados</span>
-        </label>
+        <button @click="proximoPeriodo" class="p-1.5 self-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+          <span class="material-icons-outlined text-sm text-subtext-light">chevron_right</span>
+        </button>
       </div>
-      <!-- Direita: Botão -->
-      <button @click="openCadastro" class="btn btn-primary shrink-0 justify-center sm:justify-start">
-        <span class="material-icons text-sm">add</span>
-        Novo pedido
+
+      <!-- Filtro Cliente - Multi Select Dropdown -->
+      <div class="relative" ref="filtroClienteRef">
+        <button
+          @click="toggleFiltroCliente"
+          class="flex items-center gap-1.5 bg-white dark:bg-gray-800 rounded-lg px-2.5 sm:px-3 h-[34px] sm:h-[38px] border transition-colors"
+          :class="filtroClienteAberto ? 'border-primary ring-1 ring-primary' : 'border-border-light dark:border-border-dark hover:border-gray-300 dark:hover:border-gray-500'"
+        >
+          <span class="material-icons-outlined text-sm text-subtext-light">person_outline</span>
+          <span class="text-xs text-text-light dark:text-text-dark whitespace-nowrap max-w-[120px] sm:max-w-[160px] truncate">
+            {{ filtroClienteLabel }}
+          </span>
+          <span v-if="clientesSelecionados.length > 0 && clientesSelecionados.length < clientes.length" class="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-primary rounded-full">{{ clientesSelecionados.length }}</span>
+          <span class="material-icons-outlined text-sm text-subtext-light transition-transform" :class="filtroClienteAberto ? 'rotate-180' : ''">expand_more</span>
+        </button>
+
+        <Transition
+          enter-active-class="transition duration-150 ease-out"
+          enter-from-class="opacity-0 scale-95 -translate-y-1"
+          enter-to-class="opacity-100 scale-100 translate-y-0"
+          leave-active-class="transition duration-100 ease-in"
+          leave-from-class="opacity-100 scale-100 translate-y-0"
+          leave-to-class="opacity-0 scale-95 -translate-y-1"
+        >
+          <div v-if="filtroClienteAberto" class="absolute top-full left-0 mt-1 w-56 sm:w-64 bg-white dark:bg-gray-800 rounded-lg border border-border-light dark:border-border-dark shadow-lg z-30 overflow-hidden">
+            <div class="p-2 border-b border-border-light dark:border-border-dark">
+              <input
+                ref="filtroClienteBuscaRef"
+                v-model="filtroClienteBusca"
+                type="text"
+                placeholder="Buscar cliente..."
+                class="w-full px-2.5 py-1.5 text-xs border border-border-light dark:border-border-dark rounded-md bg-gray-50 dark:bg-gray-700 focus:ring-1 focus:ring-primary focus:border-primary text-text-light dark:text-text-dark placeholder-gray-400"
+              />
+            </div>
+            <div class="flex items-center justify-between px-3 py-1.5 border-b border-border-light dark:border-border-dark">
+              <button @click="selecionarTodosClientes" class="text-[10px] text-primary hover:text-primary/80 font-medium">Todos</button>
+              <button @click="limparFiltroClientes" class="text-[10px] text-subtext-light hover:text-text-light dark:hover:text-text-dark font-medium">Limpar</button>
+            </div>
+            <div class="max-h-48 overflow-y-auto overscroll-contain">
+              <label
+                v-for="cliente in clientesFiltrados"
+                :key="cliente.id"
+                class="flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+              >
+                <div
+                  @click.prevent="toggleCliente(cliente.id)"
+                  class="w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors"
+                  :class="clientesSelecionados.includes(cliente.id) ? 'border-primary bg-primary' : 'border-gray-300 dark:border-gray-500'"
+                >
+                  <span v-if="clientesSelecionados.includes(cliente.id)" class="material-icons-outlined text-white" style="font-size: 10px">check</span>
+                </div>
+                <span class="text-xs text-text-light dark:text-text-dark truncate">{{ cliente.nome_fantasia || cliente.razao_social }}</span>
+              </label>
+              <div v-if="clientesFiltrados.length === 0" class="px-3 py-4 text-center text-[10px] text-subtext-light">Nenhum cliente encontrado</div>
+            </div>
+          </div>
+        </Transition>
+      </div>
+
+      <!-- Filtro Status - Multi Select Dropdown -->
+      <div class="relative" ref="filtroStatusRef">
+        <button
+          @click="toggleFiltroStatus"
+          class="flex items-center gap-1.5 bg-white dark:bg-gray-800 rounded-lg px-2.5 sm:px-3 h-[34px] sm:h-[38px] border transition-colors"
+          :class="filtroStatusAberto ? 'border-primary ring-1 ring-primary' : 'border-border-light dark:border-border-dark hover:border-gray-300 dark:hover:border-gray-500'"
+        >
+          <span class="material-icons-outlined text-sm text-subtext-light">filter_list</span>
+          <span class="text-xs text-text-light dark:text-text-dark whitespace-nowrap">
+            {{ filtroStatusLabel }}
+          </span>
+          <span
+            v-if="statusSelecionados.length > 0 && statusSelecionados.length < opcoesStatus.length"
+            class="bg-primary text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-medium"
+          >{{ statusSelecionados.length }}</span>
+          <span class="material-icons-outlined text-xs text-subtext-light transition-transform" :class="filtroStatusAberto ? 'rotate-180' : ''">expand_more</span>
+        </button>
+
+        <Transition enter-active-class="transition ease-out duration-150" enter-from-class="opacity-0 scale-95 -translate-y-1" enter-to-class="opacity-100 scale-100 translate-y-0" leave-active-class="transition ease-in duration-100" leave-from-class="opacity-100 scale-100 translate-y-0" leave-to-class="opacity-0 scale-95 -translate-y-1">
+          <div v-if="filtroStatusAberto" class="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-border-light dark:border-border-dark rounded-lg shadow-lg z-50 w-52">
+            <div class="flex items-center px-3 py-1.5 border-b border-border-light dark:border-border-dark">
+              <button @click="statusSelecionados = opcoesStatus.map(s => s.key)" class="text-[10px] text-primary hover:text-primary/80 font-medium">Todos</button>
+            </div>
+            <div class="py-1 max-h-[200px] overflow-y-auto">
+              <label
+                v-for="opcao in opcoesStatus"
+                :key="opcao.key"
+                class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+              >
+                <div class="w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-colors"
+                  :class="statusSelecionados.includes(opcao.key) ? 'bg-primary border-primary' : 'border-gray-300 dark:border-gray-500'"
+                >
+                  <span v-if="statusSelecionados.includes(opcao.key)" class="material-icons-outlined text-white text-[10px]">check</span>
+                </div>
+                <input type="checkbox" :checked="statusSelecionados.includes(opcao.key)" @change="toggleStatus(opcao.key)" class="sr-only" />
+                <span class="text-xs text-text-light dark:text-text-dark truncate">{{ opcao.label }}</span>
+              </label>
+            </div>
+          </div>
+        </Transition>
+      </div>
+
+      <!-- Spacer -->
+      <div class="flex-1"></div>
+
+      <!-- Botão Novo Pedido -->
+      <button @click="openCadastro" class="btn btn-primary text-xs sm:text-sm px-3 sm:px-4 h-[34px] sm:h-[38px]">
+        <span class="material-icons-outlined text-sm mr-1">add</span>
+        <span class="hidden sm:inline">Novo pedido</span>
+        <span class="sm:hidden">Novo</span>
       </button>
     </div>
 
@@ -62,12 +147,24 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-100 dark:bg-gray-700/50 border-b border-border-light dark:border-border-dark">
-              <th class="table-header">Código</th>
-              <th class="table-header">Data Abertura</th>
-              <th class="table-header">Previsão Entrega</th>
-              <th class="table-header">Responsável</th>
-              <th class="table-header">Cliente</th>
-              <th class="table-header text-center w-32">Status</th>
+              <th class="table-header cursor-pointer select-none hover:text-primary transition-colors" @click="toggleSort('numero')">
+                <span class="inline-flex items-center gap-1">Código <span class="material-icons-outlined text-xs" :class="sortColumn === 'numero' ? 'text-primary' : 'text-gray-300 dark:text-gray-600'">{{ sortColumn === 'numero' ? (sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</span></span>
+              </th>
+              <th class="table-header cursor-pointer select-none hover:text-primary transition-colors" @click="toggleSort('data_pedido')">
+                <span class="inline-flex items-center gap-1">Data Abertura <span class="material-icons-outlined text-xs" :class="sortColumn === 'data_pedido' ? 'text-primary' : 'text-gray-300 dark:text-gray-600'">{{ sortColumn === 'data_pedido' ? (sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</span></span>
+              </th>
+              <th class="table-header cursor-pointer select-none hover:text-primary transition-colors" @click="toggleSort('data_entrega')">
+                <span class="inline-flex items-center gap-1">Previsão Entrega <span class="material-icons-outlined text-xs" :class="sortColumn === 'data_entrega' ? 'text-primary' : 'text-gray-300 dark:text-gray-600'">{{ sortColumn === 'data_entrega' ? (sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</span></span>
+              </th>
+              <th class="table-header cursor-pointer select-none hover:text-primary transition-colors" @click="toggleSort('responsavel')">
+                <span class="inline-flex items-center gap-1">Responsável <span class="material-icons-outlined text-xs" :class="sortColumn === 'responsavel' ? 'text-primary' : 'text-gray-300 dark:text-gray-600'">{{ sortColumn === 'responsavel' ? (sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</span></span>
+              </th>
+              <th class="table-header cursor-pointer select-none hover:text-primary transition-colors" @click="toggleSort('cliente')">
+                <span class="inline-flex items-center gap-1">Cliente <span class="material-icons-outlined text-xs" :class="sortColumn === 'cliente' ? 'text-primary' : 'text-gray-300 dark:text-gray-600'">{{ sortColumn === 'cliente' ? (sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</span></span>
+              </th>
+              <th class="table-header text-center w-32 cursor-pointer select-none hover:text-primary transition-colors" @click="toggleSort('status')">
+                <span class="inline-flex items-center gap-1 justify-center">Status <span class="material-icons-outlined text-xs" :class="sortColumn === 'status' ? 'text-primary' : 'text-gray-300 dark:text-gray-600'">{{ sortColumn === 'status' ? (sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</span></span>
+              </th>
               <th class="table-header text-center w-16">Ações</th>
             </tr>
           </thead>
@@ -100,7 +197,7 @@
                   <span :class="getStatusBadgeClass(pedido.status)">
                     {{ getStatusLabel(pedido.status) }}
                   </span>
-                  <span v-if="pedidosComProducao.has(pedido.id)" class="material-icons text-xs text-green-500" title="Produção gerada">agriculture</span>
+                  <span v-if="pedidosComProducao.has(pedido.id)" class="material-icons-outlined text-xs text-green-500" title="Produção gerada">agriculture</span>
                 </div>
               </td>
               <td class="table-cell text-center" @click.stop>
@@ -134,7 +231,7 @@
                 <span :class="getStatusBadgeClass(pedido.status)" class="text-[10px] px-1.5 py-0.5">
                   {{ getStatusLabel(pedido.status) }}
                 </span>
-                <span v-if="pedidosComProducao.has(pedido.id)" class="material-icons text-xs text-green-500" title="Produção gerada">agriculture</span>
+                <span v-if="pedidosComProducao.has(pedido.id)" class="material-icons-outlined text-xs text-green-500" title="Produção gerada">agriculture</span>
               </div>
               <p class="text-sm font-medium text-text-light dark:text-text-dark truncate">
                 {{ pedido.clientes?.razao_social || pedido.clientes?.nome_fantasia || 'Sem cliente' }}
@@ -156,7 +253,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <span class="material-icons text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Carregando...</p>
       </div>
 
@@ -168,7 +265,7 @@
           {{ hasActiveFilters ? 'Tente ajustar os filtros' : 'Comece criando seu primeiro pedido' }}
         </p>
         <button v-if="!hasActiveFilters" @click="openCadastro" class="btn btn-primary">
-          <span class="material-icons text-sm">add</span>
+          <span class="material-icons-outlined text-sm">add</span>
           Novo pedido
         </button>
       </div>
@@ -193,7 +290,7 @@
               :disabled="currentPage === 1"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_left</span>
+              <span class="material-icons-outlined text-sm">chevron_left</span>
             </button>
             <span class="hidden xs:inline">Página</span>
             <input
@@ -209,7 +306,7 @@
               :disabled="currentPage === totalPages"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_right</span>
+              <span class="material-icons-outlined text-sm">chevron_right</span>
             </button>
           </div>
         </div>
@@ -226,20 +323,20 @@
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="showDetalhes" class="fixed inset-0 z-50 overflow-hidden">
+        <div v-if="showDetalhes" class="fixed inset-0 z-[80] overflow-y-auto">
           <div class="fixed inset-0 glass-backdrop" @click="closeDetalhes"></div>
 
-          <div class="fixed inset-y-0 right-0 flex max-w-full">
+          <div class="flex min-h-full items-center justify-center p-2 sm:p-4">
             <Transition
-              enter-active-class="transform transition-transform duration-300 ease-out"
-              enter-from-class="translate-x-full"
-              enter-to-class="translate-x-0"
-              leave-active-class="transform transition-transform duration-200 ease-in"
-              leave-from-class="translate-x-0"
-              leave-to-class="translate-x-full"
+              enter-active-class="transition-all duration-200 ease-out"
+              enter-from-class="opacity-0 scale-95"
+              enter-to-class="opacity-100 scale-100"
+              leave-active-class="transition-all duration-150 ease-in"
+              leave-from-class="opacity-100 scale-100"
+              leave-to-class="opacity-0 scale-95"
             >
-              <div v-if="showDetalhes" class="w-screen max-w-full sm:max-w-xl">
-                <div class="h-full flex flex-col glass-panel shadow-2xl">
+              <div v-if="showDetalhes" class="relative z-[81] w-full max-w-2xl">
+                <div class="flex flex-col glass-panel rounded-xl shadow-2xl max-h-[90vh] overflow-hidden">
                   <!-- Header -->
                   <div class="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100 dark:border-border-dark flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
@@ -256,7 +353,7 @@
                       </div>
                     </div>
                     <button @click="closeDetalhes" class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shrink-0">
-                      <span class="material-icons text-xl">close</span>
+                      <span class="material-icons-outlined text-xl">close</span>
                     </button>
                   </div>
 
@@ -330,7 +427,7 @@
                       </div>
 
                       <div v-if="selectedPedido && pedidosComProducao.has(selectedPedido.id)" class="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                        <span class="material-icons text-sm text-green-600">agriculture</span>
+                        <span class="material-icons-outlined text-sm text-green-600">agriculture</span>
                         <span class="text-xs text-green-700 dark:text-green-400 font-medium">Produção já gerada para este pedido</span>
                       </div>
 
@@ -369,7 +466,7 @@
                         </div>
 
                         <div v-if="loadingItens" class="text-center py-8">
-                          <span class="material-icons text-2xl text-gray-300 animate-spin">refresh</span>
+                          <span class="material-icons-outlined text-2xl text-gray-300 animate-spin">refresh</span>
                         </div>
 
                         <div v-else-if="pedidoItens.length === 0" class="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
@@ -400,7 +497,7 @@
                               :disabled="currentPageItens === 1"
                               class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <span class="material-icons text-sm text-gray-600 dark:text-gray-400">chevron_left</span>
+                              <span class="material-icons-outlined text-sm text-gray-600 dark:text-gray-400">chevron_left</span>
                             </button>
                             <span class="text-xs text-gray-500 dark:text-gray-400">
                               {{ currentPageItens }} / {{ totalPagesItens }}
@@ -410,7 +507,7 @@
                               :disabled="currentPageItens === totalPagesItens"
                               class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <span class="material-icons text-sm text-gray-600 dark:text-gray-400">chevron_right</span>
+                              <span class="material-icons-outlined text-sm text-gray-600 dark:text-gray-400">chevron_right</span>
                             </button>
                           </div>
                         </div>
@@ -672,7 +769,7 @@
                   <!-- Footer -->
                   <div class="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-border-dark">
                     <button @click="openAlteracao" class="w-full btn btn-primary justify-center">
-                      <span class="material-icons text-sm">edit</span>
+                      <span class="material-icons-outlined text-sm">edit</span>
                       Editar pedido
                     </button>
                   </div>
@@ -739,9 +836,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, onBeforeUnmount, nextTick } from 'vue'
+import VueDatePicker from '@vuepic/vue-datepicker'
 import { useCurrentCompany } from '~/composables/useCurrentCompany'
 
+const route = useRoute()
+const router = useRouter()
 const { gerarCascadeFromPedido, cancelarCascadePedido } = useAutoCascade()
 
 interface Cliente {
@@ -873,11 +973,208 @@ const currentPageItens = ref(1)
 const itensPerPage = 5
 
 // Filtros
-const filterDataInicial = ref('')
-const filterDataFinal = ref('')
-const filterStatus = ref('')
-const searchQuery = ref('')
-const mostrarFinalizados = ref(false)
+
+// Periodo (date range)
+function getInicioSemana(d: Date): string {
+  const date = new Date(d)
+  const day = date.getDay()
+  const diff = day === 0 ? 6 : day - 1
+  date.setDate(date.getDate() - diff)
+  return date.toISOString().split('T')[0]
+}
+
+function getFimSemana(d: Date): string {
+  const date = new Date(d)
+  const day = date.getDay()
+  const diff = day === 0 ? 0 : 7 - day
+  date.setDate(date.getDate() + diff)
+  return date.toISOString().split('T')[0]
+}
+
+const periodo = ref({
+  inicio: getInicioSemana(new Date()),
+  fim: getFimSemana(new Date())
+})
+
+const dateRangeModel = ref<Date[]>([
+  new Date(periodo.value.inicio + 'T00:00:00'),
+  new Date(periodo.value.fim + 'T00:00:00')
+])
+
+const isDark = ref(false)
+
+const presetDates = computed(() => {
+  const today = new Date()
+  const startThisWeek = new Date(getInicioSemana(today) + 'T00:00:00')
+  const endThisWeek = new Date(getFimSemana(today) + 'T00:00:00')
+  const lastWeekStart = new Date(startThisWeek)
+  lastWeekStart.setDate(lastWeekStart.getDate() - 7)
+  const lastWeekEnd = new Date(endThisWeek)
+  lastWeekEnd.setDate(lastWeekEnd.getDate() - 7)
+  const startThisMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+  const endThisMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+  const startLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+  const endLastMonth = new Date(today.getFullYear(), today.getMonth(), 0)
+  return [
+    { label: 'Esta semana', value: [startThisWeek, endThisWeek] },
+    { label: 'Semana passada', value: [lastWeekStart, lastWeekEnd] },
+    { label: 'Este mês', value: [startThisMonth, endThisMonth] },
+    { label: 'Mês passado', value: [startLastMonth, endLastMonth] },
+  ]
+})
+
+function formatDateDisplay(dates: Date[]) {
+  if (!dates || dates.length < 2) return ''
+  const fmt = (d: Date) => {
+    const dd = String(d.getDate()).padStart(2, '0')
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const yy = String(d.getFullYear()).slice(2)
+    return `${dd}/${mm}/${yy}`
+  }
+  return `${fmt(dates[0])} - ${fmt(dates[1])}`
+}
+
+function periodoAnterior() {
+  const inicio = new Date(periodo.value.inicio + 'T00:00:00')
+  const fim = new Date(periodo.value.fim + 'T00:00:00')
+  const dias = Math.round((fim.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24)) + 1
+  inicio.setDate(inicio.getDate() - dias)
+  fim.setDate(fim.getDate() - dias)
+  periodo.value.inicio = inicio.toISOString().split('T')[0]
+  periodo.value.fim = fim.toISOString().split('T')[0]
+  dateRangeModel.value = [inicio, fim]
+}
+
+function proximoPeriodo() {
+  const inicio = new Date(periodo.value.inicio + 'T00:00:00')
+  const fim = new Date(periodo.value.fim + 'T00:00:00')
+  const dias = Math.round((fim.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24)) + 1
+  inicio.setDate(inicio.getDate() + dias)
+  fim.setDate(fim.getDate() + dias)
+  periodo.value.inicio = inicio.toISOString().split('T')[0]
+  periodo.value.fim = fim.toISOString().split('T')[0]
+  dateRangeModel.value = [inicio, fim]
+}
+
+watch(dateRangeModel, (val) => {
+  if (val && val.length === 2 && val[0] && val[1]) {
+    periodo.value.inicio = new Date(val[0]).toISOString().split('T')[0]
+    periodo.value.fim = new Date(val[1]).toISOString().split('T')[0]
+  }
+})
+
+// Filtro Cliente
+const clientesSelecionados = ref<string[]>([])
+const filtroClienteAberto = ref(false)
+const filtroClienteBusca = ref('')
+const filtroClienteRef = ref<HTMLElement | null>(null)
+const filtroClienteBuscaRef = ref<HTMLInputElement | null>(null)
+
+const filtroClienteLabel = computed(() => {
+  if (clientesSelecionados.value.length === 0) return 'Todos clientes'
+  if (clientesSelecionados.value.length === clientes.value.length) return 'Todos clientes'
+  if (clientesSelecionados.value.length === 1) {
+    const c = clientes.value.find(cl => cl.id === clientesSelecionados.value[0])
+    return c?.nome_fantasia || c?.razao_social || 'Cliente'
+  }
+  return `${clientesSelecionados.value.length} clientes`
+})
+
+const clientesFiltrados = computed(() => {
+  const busca = filtroClienteBusca.value.toLowerCase()
+  if (!busca) return clientes.value
+  return clientes.value.filter(c =>
+    (c.nome_fantasia || '').toLowerCase().includes(busca) ||
+    c.razao_social.toLowerCase().includes(busca)
+  )
+})
+
+function toggleFiltroCliente() {
+  filtroClienteAberto.value = !filtroClienteAberto.value
+  if (filtroClienteAberto.value) {
+    filtroClienteBusca.value = ''
+    nextTick(() => filtroClienteBuscaRef.value?.focus())
+  }
+}
+
+function toggleCliente(id: string) {
+  const idx = clientesSelecionados.value.indexOf(id)
+  if (idx >= 0) {
+    clientesSelecionados.value.splice(idx, 1)
+  } else {
+    clientesSelecionados.value.push(id)
+  }
+}
+
+function selecionarTodosClientes() {
+  clientesSelecionados.value = clientes.value.map(c => c.id)
+}
+
+function limparFiltroClientes() {
+  clientesSelecionados.value = []
+}
+
+function onClickOutsideFiltroCliente(e: MouseEvent) {
+  if (filtroClienteRef.value && !filtroClienteRef.value.contains(e.target as Node)) {
+    filtroClienteAberto.value = false
+  }
+}
+
+// Filtro Status (multiselect)
+const opcoesStatus = [
+  { key: 'previsto', label: 'Previsto' },
+  { key: 'reservado', label: 'Reservado' },
+  { key: 'confirmado', label: 'Confirmado' },
+  { key: 'em_producao', label: 'Em Produção' },
+  { key: 'finalizado', label: 'Finalizado' },
+  { key: 'cancelado', label: 'Cancelado' },
+]
+const statusSelecionados = ref<string[]>(opcoesStatus.filter(s => s.key !== 'finalizado' && s.key !== 'cancelado').map(s => s.key))
+const filtroStatusAberto = ref(false)
+const filtroStatusRef = ref<HTMLElement | null>(null)
+
+const filtroStatusLabel = computed(() => {
+  if (statusSelecionados.value.length === 0) return 'Nenhum status'
+  if (statusSelecionados.value.length === opcoesStatus.length) return 'Todos status'
+  if (statusSelecionados.value.length === 1) {
+    return opcoesStatus.find(s => s.key === statusSelecionados.value[0])?.label || 'Status'
+  }
+  return `${statusSelecionados.value.length} status`
+})
+
+function toggleFiltroStatus() {
+  filtroStatusAberto.value = !filtroStatusAberto.value
+}
+
+function toggleStatus(key: string) {
+  const idx = statusSelecionados.value.indexOf(key)
+  if (idx >= 0) {
+    if (statusSelecionados.value.length <= 1) return
+    statusSelecionados.value.splice(idx, 1)
+  } else {
+    statusSelecionados.value.push(key)
+  }
+}
+
+function onClickOutsideFiltroStatus(e: MouseEvent) {
+  if (filtroStatusRef.value && !filtroStatusRef.value.contains(e.target as Node)) {
+    filtroStatusAberto.value = false
+  }
+}
+
+// Ordenação
+const sortColumn = ref<string>('data_pedido')
+const sortDir = ref<'asc' | 'desc'>('desc')
+
+function toggleSort(col: string) {
+  if (sortColumn.value === col) {
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortColumn.value = col
+    sortDir.value = col === 'numero' ? 'asc' : 'desc'
+  }
+  currentPage.value = 1
+}
 
 // Proximo codigo
 const proximoCodigo = computed(() => {
@@ -888,44 +1185,69 @@ const proximoCodigo = computed(() => {
 
 // Computed
 const hasActiveFilters = computed(() => {
-  return filterDataInicial.value || filterDataFinal.value || filterStatus.value || searchQuery.value
+  return clientesSelecionados.value.length < clientes.value.length || statusSelecionados.value.length < opcoesStatus.length
 })
 
 const filteredPedidos = computed(() => {
   let result = [...pedidos.value]
 
-  // Filtro por status finalizado
-  if (!mostrarFinalizados.value) {
-    result = result.filter(p => p.status !== 'finalizado')
+  // Filtro por período (data_entrega dentro do range)
+  if (periodo.value.inicio) {
+    result = result.filter(p => (p.data_entrega || p.data_pedido) >= periodo.value.inicio)
+  }
+  if (periodo.value.fim) {
+    result = result.filter(p => (p.data_entrega || p.data_pedido) <= periodo.value.fim)
   }
 
-  // Filtro por data inicial
-  if (filterDataInicial.value) {
-    result = result.filter(p => p.data_pedido >= filterDataInicial.value)
+  // Filtro por status (multiselect)
+  if (statusSelecionados.value.length > 0 && statusSelecionados.value.length < opcoesStatus.length) {
+    result = result.filter(p => statusSelecionados.value.includes(p.status))
   }
 
-  // Filtro por data final
-  if (filterDataFinal.value) {
-    result = result.filter(p => p.data_pedido <= filterDataFinal.value)
+  // Filtro por cliente (multiselect)
+  if (clientesSelecionados.value.length > 0 && clientesSelecionados.value.length < clientes.value.length) {
+    result = result.filter(p => p.cliente_id && clientesSelecionados.value.includes(p.cliente_id))
   }
 
-  // Filtro por status
-  if (filterStatus.value) {
-    result = result.filter(p => p.status === filterStatus.value)
-  }
 
-  // Filtro por cliente (busca)
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(p =>
-      p.clientes?.razao_social?.toLowerCase().includes(query) ||
-      p.clientes?.nome_fantasia?.toLowerCase().includes(query) ||
-      p.numero?.includes(query)
-    )
-  }
-
-  // Ordenar por data_pedido decrescente
-  result.sort((a, b) => new Date(b.data_pedido).getTime() - new Date(a.data_pedido).getTime())
+  // Ordenação dinâmica
+  const col = sortColumn.value
+  const dir = sortDir.value === 'asc' ? 1 : -1
+  result.sort((a, b) => {
+    let valA: any, valB: any
+    switch (col) {
+      case 'numero':
+        valA = parseInt(a.numero) || 0
+        valB = parseInt(b.numero) || 0
+        break
+      case 'data_pedido':
+        valA = a.data_pedido || ''
+        valB = b.data_pedido || ''
+        break
+      case 'data_entrega':
+        valA = a.data_entrega || ''
+        valB = b.data_entrega || ''
+        break
+      case 'responsavel':
+        valA = (a.responsavel || '').toLowerCase()
+        valB = (b.responsavel || '').toLowerCase()
+        break
+      case 'cliente':
+        valA = (a.clientes?.nome_fantasia || a.clientes?.razao_social || '').toLowerCase()
+        valB = (b.clientes?.nome_fantasia || b.clientes?.razao_social || '').toLowerCase()
+        break
+      case 'status':
+        valA = a.status || ''
+        valB = b.status || ''
+        break
+      default:
+        valA = a.data_pedido || ''
+        valB = b.data_pedido || ''
+    }
+    if (valA < valB) return -1 * dir
+    if (valA > valB) return 1 * dir
+    return 0
+  })
 
   return result
 })
@@ -945,10 +1267,10 @@ const paginatedItens = computed(() => {
 })
 
 // Watchers
-watch([searchQuery, filterStatus, filterDataInicial, filterDataFinal, mostrarFinalizados], () => {
+watch([statusSelecionados, clientesSelecionados, periodo], () => {
   currentPage.value = 1
   pageInput.value = '1'
-})
+}, { deep: true })
 
 watch(itemsPerPage, () => {
   currentPage.value = 1
@@ -1104,6 +1426,7 @@ async function loadClientes() {
 
     if (error) throw error
     clientes.value = data || []
+    clientesSelecionados.value = clientes.value.map(c => c.id)
   } catch (e: any) {
     console.error('Erro ao carregar clientes:', e)
   }
@@ -1472,4 +1795,115 @@ watch(
   },
   { immediate: true }
 )
+
+// Abrir pedido via query param (?pedido=<id>)
+watch(
+  () => route.query.pedido,
+  (pedidoId) => {
+    if (pedidoId && typeof pedidoId === 'string' && pedidos.value.length > 0) {
+      const pedido = pedidos.value.find(p => p.id === pedidoId)
+      if (pedido) {
+        openDetalhes(pedido)
+        router.replace({ query: {} })
+      }
+    }
+  }
+)
+
+watch(
+  () => pedidos.value.length,
+  () => {
+    const pedidoId = route.query.pedido
+    if (pedidoId && typeof pedidoId === 'string') {
+      const pedido = pedidos.value.find(p => p.id === pedidoId)
+      if (pedido) {
+        openDetalhes(pedido)
+        router.replace({ query: {} })
+      }
+    }
+  }
+)
+
+// Lifecycle
+onMounted(() => {
+  document.addEventListener('click', onClickOutsideFiltroCliente)
+  document.addEventListener('click', onClickOutsideFiltroStatus)
+
+  // Dark mode detection para datepicker
+  isDark.value = document.documentElement.classList.contains('dark')
+  const darkObserver = new MutationObserver(() => {
+    isDark.value = document.documentElement.classList.contains('dark')
+  })
+  darkObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+  onBeforeUnmount(() => darkObserver.disconnect())
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onClickOutsideFiltroCliente)
+  document.removeEventListener('click', onClickOutsideFiltroStatus)
+})
 </script>
+
+<style>
+/* VueDatePicker — BiomaOS theme (unscoped para afetar popup teleportado) */
+
+/* ---------- Input ---------- */
+.pedidos-date-range-wrapper {
+  min-width: 200px;
+  max-width: 240px;
+}
+
+.pedidos-date-range-wrapper .dp__input_wrap .dp__input {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.35rem 0.5rem 0.35rem 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #333;
+  height: 34px;
+  transition: all 0.15s ease;
+}
+
+@media (min-width: 640px) {
+  .pedidos-date-range-wrapper .dp__input_wrap .dp__input {
+    height: 38px;
+  }
+}
+
+.pedidos-date-range-wrapper .dp__input_wrap .dp__input:hover {
+  border-color: #549E54;
+}
+
+.pedidos-date-range-wrapper .dp__input_wrap .dp__input:focus,
+.pedidos-date-range-wrapper .dp__input_wrap .dp__input.dp__input_focus {
+  border-color: #549E54;
+  box-shadow: 0 0 0 2px rgba(84, 158, 84, 0.15);
+}
+
+.dark .pedidos-date-range-wrapper .dp__input_wrap .dp__input {
+  background: #2a2a2a;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+.dark .pedidos-date-range-wrapper .dp__input_wrap .dp__input:hover {
+  border-color: #549E54;
+}
+
+.dark .pedidos-date-range-wrapper .dp__input_wrap .dp__input:focus,
+.dark .pedidos-date-range-wrapper .dp__input_wrap .dp__input.dp__input_focus {
+  border-color: #549E54;
+  box-shadow: 0 0 0 2px rgba(84, 158, 84, 0.2);
+}
+
+/* ---------- Input icon ---------- */
+.pedidos-date-range-wrapper .dp__input_icon {
+  color: #549E54;
+}
+
+.dark .pedidos-date-range-wrapper .dp__input_icon {
+  color: #86efac;
+}
+</style>

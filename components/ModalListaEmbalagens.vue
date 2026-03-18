@@ -46,7 +46,7 @@
                 class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary transition-colors flex-shrink-0"
                 title="Editar embalagem"
               >
-                <span class="material-icons text-lg">edit</span>
+                <span class="material-icons-outlined text-lg">edit</span>
               </button>
             </div>
           </div>

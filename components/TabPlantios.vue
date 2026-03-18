@@ -63,7 +63,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-16">
-        <span class="material-icons text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-3">Carregando plantios...</p>
       </div>
 
@@ -80,13 +80,13 @@
                 <th class="table-header font-medium text-center whitespace-nowrap cursor-pointer hover:text-text-light dark:hover:text-text-dark select-none" @click="toggleSort('data_plantio')">
                   <div class="flex items-center justify-center gap-0.5">
                     Data Plantio
-                    <span v-if="sortField === 'data_plantio'" class="material-icons text-[10px]">{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                    <span v-if="sortField === 'data_plantio'" class="material-icons-outlined text-[10px]">{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
                   </div>
                 </th>
                 <th class="table-header font-medium text-center whitespace-nowrap cursor-pointer hover:text-text-light dark:hover:text-text-dark select-none" @click="toggleSort('data_colheita')">
                   <div class="flex items-center justify-center gap-0.5">
                     Data Colheita
-                    <span v-if="sortField === 'data_colheita'" class="material-icons text-[10px]">{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                    <span v-if="sortField === 'data_colheita'" class="material-icons-outlined text-[10px]">{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
                   </div>
                 </th>
                 <th class="table-header font-medium whitespace-nowrap hidden xl:table-cell">Fazenda</th>
@@ -224,7 +224,7 @@
             :disabled="currentPage === 1"
             class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <span class="material-icons text-sm">chevron_left</span>
+            <span class="material-icons-outlined text-sm">chevron_left</span>
           </button>
           <span>Página</span>
           <input
@@ -240,7 +240,7 @@
             :disabled="currentPage === totalPages"
             class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <span class="material-icons text-sm">chevron_right</span>
+            <span class="material-icons-outlined text-sm">chevron_right</span>
           </button>
         </div>
       </div>
@@ -282,7 +282,7 @@
                       </div>
                     </div>
                     <button @click="closeDetailsSlideover" class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shrink-0">
-                      <span class="material-icons text-xl">close</span>
+                      <span class="material-icons-outlined text-xl">close</span>
                     </button>
                   </div>
 
@@ -301,7 +301,7 @@
 
                       <!-- Pedido Link -->
                       <div v-if="selectedPlantio?.pedido_itens?.pedidos" class="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                        <span class="material-icons text-sm text-blue-500">shopping_cart</span>
+                        <span class="material-icons-outlined text-sm text-blue-500">shopping_cart</span>
                         <span class="text-xs text-blue-700 dark:text-blue-400">
                           Pedido #{{ selectedPlantio.pedido_itens.pedidos.numero }}
                           <span v-if="selectedPlantio.pedido_itens.pedidos.clientes?.nome_fantasia" class="ml-1">
@@ -415,7 +415,7 @@
                                   : 'border-gray-300 dark:border-gray-600 hover:border-primary'
                               ]"
                             >
-                              <span v-if="tarefa.concluida" class="material-icons text-white text-xs">check</span>
+                              <span v-if="tarefa.concluida" class="material-icons-outlined text-white text-xs">check</span>
                             </button>
                             <div class="flex-1 min-w-0">
                               <p :class="['text-xs', tarefa.concluida ? 'line-through text-subtext-light dark:text-subtext-dark' : 'text-text-light dark:text-text-dark']">
@@ -447,7 +447,7 @@
                         class="btn btn-primary justify-center text-sm"
                         :disabled="saving"
                       >
-                        <span class="material-icons text-base mr-1">play_arrow</span>
+                        <span class="material-icons-outlined text-base mr-1">play_arrow</span>
                         Iniciar
                       </button>
                       <button
@@ -456,7 +456,7 @@
                         class="btn btn-primary justify-center text-sm"
                         :disabled="saving"
                       >
-                        <span class="material-icons text-base mr-1">grass</span>
+                        <span class="material-icons-outlined text-base mr-1">grass</span>
                         Marcar Colhido
                       </button>
                       <button
@@ -465,7 +465,7 @@
                         class="btn btn-secondary justify-center text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                         :disabled="saving"
                       >
-                        <span class="material-icons text-base mr-1">close</span>
+                        <span class="material-icons-outlined text-base mr-1">close</span>
                         Cancelar
                       </button>
                     </div>
@@ -504,7 +504,7 @@
                 <div class="px-6 py-4 border-b border-border-light dark:border-border-dark flex items-center justify-between">
                   <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Novo Plantio</h2>
                   <button @click="closeNovoPlantioModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <span class="material-icons">close</span>
+                    <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
 
@@ -579,7 +579,7 @@
                 <div class="px-6 py-4 border-t border-border-light dark:border-border-dark flex items-center justify-end gap-3">
                   <button @click="closeNovoPlantioModal" class="btn btn-secondary">Voltar</button>
                   <button @click="salvarNovoPlantio" class="btn btn-primary" :disabled="saving || !isNovoFormValid">
-                    <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
+                    <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
                     {{ saving ? 'Salvando...' : 'Criar Plantio' }}
                   </button>
                 </div>

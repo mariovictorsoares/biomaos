@@ -30,11 +30,11 @@
 
       <!-- Lado Direito: Botao Desktop -->
       <button @click="openModal()" class="hidden sm:flex btn btn-primary shrink-0">
-        Nova Recorrencia
+        Nova Recorrência
       </button>
       <!-- Botao Mobile -->
       <button @click="openModal()" class="sm:hidden btn btn-primary w-full justify-center">
-        Nova Recorrencia
+        Nova Recorrência
       </button>
     </div>
 
@@ -43,7 +43,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-16">
-        <span class="material-icons text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-3">Carregando plantios recorrentes...</p>
       </div>
 
@@ -56,10 +56,10 @@
                 <th class="table-header font-medium whitespace-nowrap">Nome</th>
                 <th class="table-header font-medium whitespace-nowrap">Espécie</th>
                 <th class="table-header font-medium text-center whitespace-nowrap">Bandejas</th>
-                <th class="table-header font-medium whitespace-nowrap">Frequencia</th>
+                <th class="table-header font-medium whitespace-nowrap">Frequência</th>
                 <th class="table-header font-medium whitespace-nowrap hidden xl:table-cell">Fazenda</th>
                 <th class="table-header font-medium text-center whitespace-nowrap">Ativo</th>
-                <th class="table-header font-medium text-center whitespace-nowrap w-24">Acoes</th>
+                <th class="table-header font-medium text-center whitespace-nowrap w-24">Ações</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border-light dark:divide-border-dark">
@@ -165,7 +165,7 @@
               <p class="font-semibold text-text-light dark:text-text-dark">{{ formatNumber(rec.bandejas) }}</p>
             </div>
             <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-2 text-center">
-              <p class="text-subtext-light dark:text-subtext-dark mb-0.5">Inicio</p>
+              <p class="text-subtext-light dark:text-subtext-dark mb-0.5">Início</p>
               <p class="font-semibold text-text-light dark:text-text-dark">{{ formatDateBR(rec.data_inicio) || '-' }}</p>
             </div>
             <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-2 text-center">
@@ -183,10 +183,10 @@
         </div>
         <h3 class="text-lg font-semibold text-text-light dark:text-text-dark mb-2">Nenhum plantio recorrente encontrado</h3>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mb-6 max-w-sm">
-          Crie plantios recorrentes para automatizar o agendamento da producao.
+          Crie plantios recorrentes para automatizar o agendamento da produção.
         </p>
         <button @click="openModal()" class="btn btn-primary">
-          Nova Recorrencia
+          Nova Recorrência
         </button>
       </div>
 
@@ -206,9 +206,9 @@
             :disabled="currentPage === 1"
             class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <span class="material-icons text-sm">chevron_left</span>
+            <span class="material-icons-outlined text-sm">chevron_left</span>
           </button>
-          <span>Pagina</span>
+          <span>Página</span>
           <input
             v-model="pageInput"
             type="text"
@@ -222,7 +222,7 @@
             :disabled="currentPage === totalPages"
             class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <span class="material-icons text-sm">chevron_right</span>
+            <span class="material-icons-outlined text-sm">chevron_right</span>
           </button>
         </div>
       </div>
@@ -256,7 +256,7 @@
                     {{ editingId ? 'Editar Plantio Recorrente' : 'Novo Plantio Recorrente' }}
                   </h2>
                   <button @click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <span class="material-icons">close</span>
+                    <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
 
@@ -311,20 +311,20 @@
                     </div>
                   </div>
 
-                  <!-- Recorrencia -->
+                  <!-- Recorrência -->
                   <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-4">
-                    <h3 class="text-sm font-semibold text-text-light dark:text-text-dark">Configuracao de Recorrencia</h3>
+                    <h3 class="text-sm font-semibold text-text-light dark:text-text-dark">Configuração de Recorrência</h3>
 
-                    <!-- Recorrencia Infinita -->
+                    <!-- Recorrência Infinita -->
                     <label class="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" v-model="form.recorrencia_infinita" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary" />
-                      <span class="text-sm text-text-light dark:text-text-dark">Recorrencia infinita</span>
+                      <span class="text-sm text-text-light dark:text-text-dark">Recorrência infinita</span>
                     </label>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <!-- Data Inicio -->
+                      <!-- Data Início -->
                       <div>
-                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Data Inicio *</label>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Data Início *</label>
                         <input type="date" v-model="form.data_inicio" class="input" />
                       </div>
 
@@ -336,13 +336,13 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <!-- Tipo Frequencia -->
+                      <!-- Tipo Frequência -->
                       <div>
-                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Tipo de Frequencia</label>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Tipo de Frequência</label>
                         <select v-model="form.tipo_frequencia" class="input">
                           <option value="semanal">Semanal</option>
                           <option value="dia_semana">Dia da Semana</option>
-                          <option value="dia_util_mes">Dia Util do Mes</option>
+                          <option value="dia_util_mes">Dia Útil do Mês</option>
                         </select>
                       </div>
 
@@ -354,7 +354,7 @@
 
                       <!-- Intervalo (para dia_util_mes) -->
                       <div v-if="form.tipo_frequencia === 'dia_util_mes'">
-                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">N-esimo dia util</label>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">N-ésimo dia útil</label>
                         <input type="number" v-model.number="form.intervalo" class="input" min="1" max="23" />
                       </div>
 
@@ -364,18 +364,18 @@
                         <select v-model.number="form.dia_semana" class="input">
                           <option :value="0">Domingo</option>
                           <option :value="1">Segunda-feira</option>
-                          <option :value="2">Terca-feira</option>
+                          <option :value="2">Terça-feira</option>
                           <option :value="3">Quarta-feira</option>
                           <option :value="4">Quinta-feira</option>
                           <option :value="5">Sexta-feira</option>
-                          <option :value="6">Sabado</option>
+                          <option :value="6">Sábado</option>
                         </select>
                       </div>
                     </div>
 
                     <!-- Preview -->
                     <div class="text-xs text-subtext-light dark:text-subtext-dark bg-white dark:bg-gray-900 rounded px-3 py-2">
-                      Frequencia: <span class="font-medium text-text-light dark:text-text-dark">{{ frequenciaPreview }}</span>
+                      Frequência: <span class="font-medium text-text-light dark:text-text-dark">{{ frequenciaPreview }}</span>
                     </div>
 
                     <!-- Criar Atrasados -->
@@ -388,7 +388,7 @@
                   <!-- Notas -->
                   <div>
                     <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Notas</label>
-                    <textarea v-model="form.notas" class="input" rows="3" placeholder="Observacoes opcionais..."></textarea>
+                    <textarea v-model="form.notas" class="input" rows="3" placeholder="Observações opcionais..."></textarea>
                   </div>
                 </div>
 
@@ -396,8 +396,8 @@
                 <div class="px-6 py-4 border-t border-border-light dark:border-border-dark flex items-center justify-end gap-3">
                   <button @click="closeModal" class="btn btn-secondary">Voltar</button>
                   <button @click="salvar" class="btn btn-primary" :disabled="saving || !isFormValid">
-                    <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
-                    {{ saving ? 'Salvando...' : (editingId ? 'Salvar' : 'Criar Recorrencia') }}
+                    <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
+                    {{ saving ? 'Salvando...' : (editingId ? 'Salvar' : 'Criar Recorrência') }}
                   </button>
                 </div>
               </div>
@@ -431,16 +431,16 @@
               <div v-if="showDeleteModal" class="relative z-[101] bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
                 <div class="p-6 text-center">
                   <div class="w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
-                    <span class="material-icons text-2xl text-red-500">delete</span>
+                    <span class="material-icons-outlined text-2xl text-red-500">delete</span>
                   </div>
-                  <h3 class="text-lg font-semibold text-text-light dark:text-text-dark mb-2">Excluir Recorrencia</h3>
+                  <h3 class="text-lg font-semibold text-text-light dark:text-text-dark mb-2">Excluir Recorrência</h3>
                   <p class="text-sm text-subtext-light dark:text-subtext-dark mb-6">
-                    Tem certeza que deseja excluir <strong>"{{ deleteTarget?.nome }}"</strong>? Esta acao nao pode ser desfeita.
+                    Tem certeza que deseja excluir <strong>"{{ deleteTarget?.nome }}"</strong>? Esta ação não pode ser desfeita.
                   </p>
                   <div class="flex items-center justify-center gap-3">
                     <button @click="showDeleteModal = false" class="btn btn-secondary">Cancelar</button>
                     <button @click="excluir" class="btn bg-red-500 hover:bg-red-600 text-white" :disabled="saving">
-                      <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
+                      <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
                       {{ saving ? 'Excluindo...' : 'Excluir' }}
                     </button>
                   </div>
@@ -543,11 +543,11 @@ const deleteTarget = ref<PlantioRecorrente | null>(null)
 const diasSemanaLabels: Record<number, string> = {
   0: 'domingo',
   1: 'segunda-feira',
-  2: 'terca-feira',
+  2: 'terça-feira',
   3: 'quarta-feira',
   4: 'quinta-feira',
   5: 'sexta-feira',
-  6: 'sabado'
+  6: 'sábado'
 }
 
 // Computed
@@ -656,7 +656,7 @@ function formatFrequenciaFromValues(tipo: string, intervalo?: number, dia?: numb
       return `Toda ${diaLabel}`
     }
     case 'dia_util_mes':
-      return `${intervalo || 1}-esimo dia util do mes`
+      return `${intervalo || 1}-ésimo dia útil do mês`
     default:
       return '-'
   }
@@ -719,7 +719,7 @@ async function toggleAtivo(rec: PlantioRecorrente) {
     showError('Erro ao alterar status')
   } else {
     rec.ativo = novoAtivo
-    success(novoAtivo ? 'Recorrencia ativada' : 'Recorrencia desativada')
+    success(novoAtivo ? 'Recorrência ativada' : 'Recorrência desativada')
   }
 
   togglingId.value = null
@@ -755,7 +755,7 @@ async function salvar() {
         .eq('id', editingId.value)
 
       if (error) throw error
-      success('Recorrencia atualizada com sucesso')
+      success('Recorrência atualizada com sucesso')
     } else {
       payload.ativo = true
       const { error } = await supabase
@@ -763,13 +763,13 @@ async function salvar() {
         .insert(payload)
 
       if (error) throw error
-      success('Recorrencia criada com sucesso')
+      success('Recorrência criada com sucesso')
     }
 
     closeModal()
     await fetchRecorrentes()
   } catch (err: any) {
-    showError(err.message || 'Erro ao salvar recorrencia')
+    showError(err.message || 'Erro ao salvar recorrência')
   } finally {
     saving.value = false
   }
@@ -786,9 +786,9 @@ async function excluir() {
     .eq('id', deleteTarget.value.id)
 
   if (error) {
-    showError('Erro ao excluir recorrencia')
+    showError('Erro ao excluir recorrência')
   } else {
-    success('Recorrencia excluida com sucesso')
+    success('Recorrência excluída com sucesso')
     await fetchRecorrentes()
   }
 

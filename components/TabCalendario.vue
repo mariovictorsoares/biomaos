@@ -8,7 +8,7 @@
           @click="previousMonth"
           class="p-1.5 sm:p-2 border border-border-light dark:border-border-dark rounded-l-lg hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 transition-colors"
         >
-          <span class="material-icons text-sm">chevron_left</span>
+          <span class="material-icons-outlined text-sm">chevron_left</span>
         </button>
         <div class="px-3 sm:px-4 py-1.5 sm:py-2 border-y border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-sm sm:text-base font-medium min-w-[160px] sm:min-w-[200px] text-center whitespace-nowrap capitalize">
           {{ monthName }} {{ year }}
@@ -17,7 +17,7 @@
           @click="nextMonth"
           class="p-1.5 sm:p-2 border border-border-light dark:border-border-dark rounded-r-lg hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 transition-colors"
         >
-          <span class="material-icons text-sm">chevron_right</span>
+          <span class="material-icons-outlined text-sm">chevron_right</span>
         </button>
         <!-- Botão Hoje -->
         <button
@@ -53,7 +53,7 @@
 
       <!-- Loading -->
       <div v-if="loading" class="text-center py-16">
-        <span class="material-icons text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-3">Carregando calendário...</p>
       </div>
 
@@ -186,7 +186,7 @@
                   getTaskChipClasses(tarefa)
                 ]"
               >
-                <span class="material-icons text-xs opacity-70">{{ getTaskIcon(tarefa) }}</span>
+                <span class="material-icons-outlined text-xs opacity-70">{{ getTaskIcon(tarefa) }}</span>
                 <div class="flex-1 min-w-0">
                   <div class="font-medium truncate">{{ tarefa.titulo }}</div>
                   <div v-if="tarefa.especies" class="text-[10px] opacity-70 truncate">
@@ -195,7 +195,7 @@
                 </div>
                 <span
                   v-if="tarefa.concluida"
-                  class="material-icons text-xs text-green-600 dark:text-green-400"
+                  class="material-icons-outlined text-xs text-green-600 dark:text-green-400"
                 >check_circle</span>
               </div>
             </div>
@@ -204,14 +204,14 @@
 
         <!-- Vazio -->
         <div v-else class="text-center py-12">
-          <span class="material-icons text-5xl text-gray-300 dark:text-gray-600">event_busy</span>
+          <span class="material-icons-outlined text-5xl text-gray-300 dark:text-gray-600">event_busy</span>
           <p class="text-sm text-subtext-light dark:text-subtext-dark mt-3">Nenhuma tarefa neste mês</p>
         </div>
       </div>
 
       <!-- Empty state desktop -->
       <div v-if="!loading && tarefas.length === 0" class="hidden md:block text-center py-12">
-        <span class="material-icons text-5xl text-gray-300 dark:text-gray-600">event_busy</span>
+        <span class="material-icons-outlined text-5xl text-gray-300 dark:text-gray-600">event_busy</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-3">Nenhuma tarefa neste mês</p>
       </div>
     </div>
@@ -253,7 +253,7 @@
                 @click="selectedDay = null"
                 class="p-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
-                <span class="material-icons text-lg text-subtext-light dark:text-subtext-dark">close</span>
+                <span class="material-icons-outlined text-lg text-subtext-light dark:text-subtext-dark">close</span>
               </button>
             </div>
 
@@ -275,7 +275,7 @@
                       </p>
                       <span
                         v-if="tarefa.concluida"
-                        class="material-icons text-xs text-green-600 dark:text-green-400 shrink-0"
+                        class="material-icons-outlined text-xs text-green-600 dark:text-green-400 shrink-0"
                       >check_circle</span>
                     </div>
                     <p v-if="tarefa.especies" class="text-xs text-subtext-light dark:text-subtext-dark mt-0.5">
@@ -287,7 +287,7 @@
                   </div>
 
                   <!-- Ícone do tipo -->
-                  <span :class="['material-icons text-base shrink-0', getTaskIconColor(tarefa)]">
+                  <span :class="['material-icons-outlined text-base shrink-0', getTaskIconColor(tarefa)]">
                     {{ getTaskIcon(tarefa) }}
                   </span>
                 </div>

@@ -30,8 +30,8 @@
       </div>
       <!-- Direita: Botao -->
       <button @click="openModal()" class="btn btn-primary shrink-0 justify-center sm:justify-start">
-        <span class="material-icons text-sm">add</span>
-        Nova recorrencia
+        <span class="material-icons-outlined text-sm">add</span>
+        Nova recorrência
       </button>
     </div>
 
@@ -40,7 +40,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <span class="material-icons text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Carregando...</p>
       </div>
 
@@ -183,8 +183,8 @@
           {{ hasActiveFilters ? 'Tente ajustar os filtros' : 'Comece criando sua primeira recorrência' }}
         </p>
         <button v-if="!hasActiveFilters" @click="openModal()" class="btn btn-primary">
-          <span class="material-icons text-sm">add</span>
-          Nova recorrencia
+          <span class="material-icons-outlined text-sm">add</span>
+          Nova recorrência
         </button>
       </div>
 
@@ -208,7 +208,7 @@
               :disabled="currentPage === 1"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_left</span>
+              <span class="material-icons-outlined text-sm">chevron_left</span>
             </button>
             <span class="hidden xs:inline">Página</span>
             <input
@@ -224,7 +224,7 @@
               :disabled="currentPage === totalPages"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_right</span>
+              <span class="material-icons-outlined text-sm">chevron_right</span>
             </button>
           </div>
         </div>
@@ -256,10 +256,10 @@
                 <!-- Header -->
                 <div class="px-6 py-4 border-b border-border-light dark:border-border-dark flex items-center justify-between">
                   <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">
-                    {{ editingId ? 'Editar Recorrencia' : 'Nova Recorrencia' }}
+                    {{ editingId ? 'Editar Recorrência' : 'Nova Recorrência' }}
                   </h2>
                   <button @click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <span class="material-icons">close</span>
+                    <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
 
@@ -282,19 +282,19 @@
                     </div>
                   </div>
 
-                  <!-- Recorrencia -->
+                  <!-- Recorrência -->
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Tipo de Frequencia *</label>
+                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Tipo de Frequência *</label>
                       <select v-model="form.tipo_frequencia" class="input">
                         <option value="semanal">A cada N semanas</option>
                         <option value="dia_semana">Dia da semana</option>
-                        <option value="dia_util_mes">Dia util do mes</option>
+                        <option value="dia_util_mes">Dia útil do mês</option>
                       </select>
                     </div>
                     <div v-if="form.tipo_frequencia === 'semanal' || form.tipo_frequencia === 'dia_util_mes'">
                       <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">
-                        {{ form.tipo_frequencia === 'semanal' ? 'Intervalo (semanas)' : 'Dia util do mes' }}
+                        {{ form.tipo_frequencia === 'semanal' ? 'Intervalo (semanas)' : 'Dia útil do mês' }}
                       </label>
                       <input v-model.number="form.intervalo" type="number" class="input" min="1" />
                     </div>
@@ -303,11 +303,11 @@
                       <select v-model.number="form.dia_semana" class="input">
                         <option :value="0">Domingo</option>
                         <option :value="1">Segunda-feira</option>
-                        <option :value="2">Terca-feira</option>
+                        <option :value="2">Terça-feira</option>
                         <option :value="3">Quarta-feira</option>
                         <option :value="4">Quinta-feira</option>
                         <option :value="5">Sexta-feira</option>
-                        <option :value="6">Sabado</option>
+                        <option :value="6">Sábado</option>
                       </select>
                     </div>
                   </div>
@@ -315,7 +315,7 @@
                   <!-- Datas -->
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Data Inicio *</label>
+                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Data Início *</label>
                       <input v-model="form.data_inicio" type="date" class="input" />
                     </div>
                     <div v-if="!form.recorrencia_infinita">
@@ -332,7 +332,7 @@
                         v-model="form.recorrencia_infinita"
                         class="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary dark:bg-gray-800 dark:border-gray-600"
                       />
-                      <span class="text-sm text-text-light dark:text-text-dark">Recorrencia infinita</span>
+                      <span class="text-sm text-text-light dark:text-text-dark">Recorrência infinita</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                       <input
@@ -346,14 +346,14 @@
 
                   <!-- Preview frequencia -->
                   <div v-if="previewFrequencia" class="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <span class="material-icons text-sm text-blue-500">event_repeat</span>
+                    <span class="material-icons-outlined text-sm text-blue-500">event_repeat</span>
                     <span class="text-xs text-blue-700 dark:text-blue-400 font-medium">{{ previewFrequencia }}</span>
                   </div>
 
                   <!-- Notas -->
                   <div>
                     <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Notas</label>
-                    <textarea v-model="form.notas" class="input" rows="2" placeholder="Observacoes..."></textarea>
+                    <textarea v-model="form.notas" class="input" rows="2" placeholder="Observações..."></textarea>
                   </div>
 
                   <!-- Itens -->
@@ -366,7 +366,7 @@
                         </span>
                       </div>
                       <button @click="addItem" class="text-sm text-primary hover:underline flex items-center gap-1">
-                        <span class="material-icons text-sm">add</span>
+                        <span class="material-icons-outlined text-sm">add</span>
                         Adicionar item
                       </button>
                     </div>
@@ -396,7 +396,7 @@
                           <input v-model.number="item.quantidade" type="number" class="input text-sm" min="1" />
                         </div>
                         <div class="w-full sm:w-28">
-                          <label class="block text-xs text-subtext-light dark:text-subtext-dark mb-1">Preco Unit.</label>
+                          <label class="block text-xs text-subtext-light dark:text-subtext-dark mb-1">Preço Unit.</label>
                           <input v-model.number="item.preco_unitario" type="number" class="input text-sm" min="0" step="0.01" />
                         </div>
                         <div class="flex items-center gap-3 sm:pb-0.5">
@@ -413,7 +413,7 @@
                             class="text-gray-400 hover:text-red-500 transition-colors shrink-0"
                             title="Remover item"
                           >
-                            <span class="material-icons text-lg">close</span>
+                            <span class="material-icons-outlined text-lg">close</span>
                           </button>
                         </div>
                       </div>
@@ -425,8 +425,8 @@
                 <div class="px-6 py-4 border-t border-border-light dark:border-border-dark flex items-center justify-end gap-3">
                   <button @click="closeModal" class="btn btn-secondary">Cancelar</button>
                   <button @click="saveRecorrencia" class="btn btn-primary" :disabled="saving || !isFormValid">
-                    <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
-                    {{ saving ? 'Salvando...' : (editingId ? 'Salvar alteracoes' : 'Criar recorrencia') }}
+                    <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
+                    {{ saving ? 'Salvando...' : (editingId ? 'Salvar alterações' : 'Criar recorrência') }}
                   </button>
                 </div>
               </div>
@@ -451,15 +451,15 @@
           <div class="flex min-h-full items-center justify-center p-4">
             <div class="relative z-[101] bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-sm p-6">
               <div class="text-center">
-                <span class="material-icons text-4xl text-red-400 mb-3">warning</span>
-                <h3 class="text-lg font-semibold text-text-light dark:text-text-dark mb-2">Excluir recorrencia</h3>
+                <span class="material-icons-outlined text-4xl text-red-400 mb-3">warning</span>
+                <h3 class="text-lg font-semibold text-text-light dark:text-text-dark mb-2">Excluir recorrência</h3>
                 <p class="text-sm text-subtext-light dark:text-subtext-dark mb-6">
-                  Tem certeza que deseja excluir "<strong>{{ deletingRec?.nome }}</strong>"? Esta acao nao pode ser desfeita.
+                  Tem certeza que deseja excluir "<strong>{{ deletingRec?.nome }}</strong>"? Esta ação não pode ser desfeita.
                 </p>
                 <div class="flex items-center justify-center gap-3">
                   <button @click="showDeleteConfirm = false" class="btn btn-secondary">Cancelar</button>
                   <button @click="deleteRecorrencia" class="btn bg-red-600 hover:bg-red-700 text-white" :disabled="saving">
-                    <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
+                    <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
                     {{ saving ? 'Excluindo...' : 'Excluir' }}
                   </button>
                 </div>
@@ -572,10 +572,10 @@ const defaultForm = () => ({
 const form = ref(defaultForm())
 
 // Dias da semana helper
-const diasSemana = ['Domingo', 'Segunda-feira', 'Terca-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sabado']
+const diasSemana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado']
 
 // =====================================================
-// Formatacao de Frequencia
+// Formatacao de Frequência
 // =====================================================
 
 function formatFrequencia(rec: PedidoRecorrente): string {
@@ -589,7 +589,7 @@ function formatFrequencia(rec: PedidoRecorrente): string {
   }
   if (rec.tipo_frequencia === 'dia_util_mes') {
     const n = rec.intervalo || 1
-    return `${n}o dia util do mes`
+    return `${n}o dia útil do mês`
   }
   return '-'
 }
@@ -608,7 +608,7 @@ const previewFrequencia = computed(() => {
   }
   if (f.tipo_frequencia === 'dia_util_mes') {
     const n = f.intervalo || 1
-    return `${n}o dia util do mes`
+    return `${n}o dia útil do mês`
   }
   return ''
 })
@@ -765,7 +765,7 @@ async function loadRecorrencias() {
     if (error) throw error
     recorrencias.value = data || []
   } catch (e: any) {
-    showError('Erro ao carregar recorrencias: ' + e.message)
+    showError('Erro ao carregar recorrências: ' + e.message)
   } finally {
     loading.value = false
   }
@@ -909,11 +909,11 @@ async function saveRecorrencia() {
       if (itensError) throw itensError
     }
 
-    success(editingId.value ? 'Recorrencia atualizada com sucesso' : 'Recorrencia criada com sucesso')
+    success(editingId.value ? 'Recorrência atualizada com sucesso' : 'Recorrência criada com sucesso')
     closeModal()
     await loadRecorrencias()
   } catch (e: any) {
-    showError('Erro ao salvar recorrencia: ' + e.message)
+    showError('Erro ao salvar recorrência: ' + e.message)
   } finally {
     saving.value = false
   }
@@ -932,7 +932,7 @@ async function toggleAtivo(rec: PedidoRecorrente) {
       .eq('id', rec.id)
     if (error) throw error
     rec.ativo = newAtivo
-    success(newAtivo ? 'Recorrencia ativada' : 'Recorrencia desativada')
+    success(newAtivo ? 'Recorrência ativada' : 'Recorrência desativada')
   } catch (e: any) {
     showError('Erro ao alterar status: ' + e.message)
   }
@@ -958,19 +958,19 @@ async function deleteRecorrencia() {
       .eq('pedido_recorrente_id', deletingRec.value.id)
     if (itensError) throw itensError
 
-    // Excluir a recorrencia
+    // Excluir a recorrência
     const { error } = await supabase
       .from('pedidos_recorrentes')
       .delete()
       .eq('id', deletingRec.value.id)
     if (error) throw error
 
-    success('Recorrencia excluida com sucesso')
+    success('Recorrência excluída com sucesso')
     showDeleteConfirm.value = false
     deletingRec.value = null
     await loadRecorrencias()
   } catch (e: any) {
-    showError('Erro ao excluir recorrencia: ' + e.message)
+    showError('Erro ao excluir recorrência: ' + e.message)
   } finally {
     saving.value = false
   }

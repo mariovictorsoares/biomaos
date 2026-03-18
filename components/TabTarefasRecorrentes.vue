@@ -11,8 +11,8 @@
         />
       </div>
       <button @click="openModal()" class="btn btn-primary shrink-0 justify-center sm:justify-start">
-        <span class="material-icons text-sm">add</span>
-        Nova Recorrencia
+        <span class="material-icons-outlined text-sm">add</span>
+        Nova Recorrência
       </button>
     </div>
 
@@ -21,7 +21,7 @@
 
       <!-- Loading -->
       <div v-if="loading" class="text-center py-12">
-        <span class="material-icons text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Carregando recorrências...</p>
       </div>
 
@@ -71,14 +71,14 @@
                     class="p-1 text-subtext-light dark:text-subtext-dark hover:text-[#4A7C59] dark:hover:text-[#6B9E7A] transition-colors"
                     title="Editar"
                   >
-                    <span class="material-icons text-sm">edit</span>
+                    <span class="material-icons-outlined text-sm">edit</span>
                   </button>
                   <button
                     @click="confirmDelete(rec)"
                     class="p-1 text-subtext-light dark:text-subtext-dark hover:text-red-600 dark:hover:text-red-400 transition-colors"
                     title="Excluir"
                   >
-                    <span class="material-icons text-sm">delete</span>
+                    <span class="material-icons-outlined text-sm">delete</span>
                   </button>
                 </div>
               </td>
@@ -102,7 +102,7 @@
               </p>
               <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-subtext-light dark:text-subtext-dark">
                 <span>
-                  <span class="material-icons text-[11px] align-middle mr-0.5">schedule</span>
+                  <span class="material-icons-outlined text-[11px] align-middle mr-0.5">schedule</span>
                   {{ formatFrequencia(rec) }}
                 </span>
                 <span :class="rec.ativo ? 'text-[#4A7C59] dark:text-[#6B9E7A]' : 'text-red-500 dark:text-red-400'">
@@ -115,13 +115,13 @@
                 @click="openModal(rec)"
                 class="p-1 text-subtext-light dark:text-subtext-dark hover:text-[#4A7C59] dark:hover:text-[#6B9E7A] transition-colors"
               >
-                <span class="material-icons text-sm">edit</span>
+                <span class="material-icons-outlined text-sm">edit</span>
               </button>
               <button
                 @click="confirmDelete(rec)"
                 class="p-1 text-subtext-light dark:text-subtext-dark hover:text-red-600 dark:hover:text-red-400 transition-colors"
               >
-                <span class="material-icons text-sm">delete</span>
+                <span class="material-icons-outlined text-sm">delete</span>
               </button>
             </div>
           </div>
@@ -136,8 +136,8 @@
           {{ searchTerm ? 'Tente ajustar a busca' : 'Crie regras de recorrência para gerar tarefas automaticamente' }}
         </p>
         <button @click="openModal()" class="btn btn-primary">
-          <span class="material-icons text-sm">add</span>
-          Nova Recorrencia
+          <span class="material-icons-outlined text-sm">add</span>
+          Nova Recorrência
         </button>
       </div>
 
@@ -161,7 +161,7 @@
               :disabled="currentPage === 1"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_left</span>
+              <span class="material-icons-outlined text-sm">chevron_left</span>
             </button>
             <span class="hidden xs:inline">Página</span>
             <input
@@ -177,7 +177,7 @@
               :disabled="currentPage === totalPages"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_right</span>
+              <span class="material-icons-outlined text-sm">chevron_right</span>
             </button>
           </div>
         </div>
@@ -212,7 +212,7 @@
                     {{ editingId ? 'Editar Recorrência' : 'Nova Recorrência' }}
                   </h2>
                   <button @click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <span class="material-icons">close</span>
+                    <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
 
@@ -239,7 +239,7 @@
                     ></textarea>
                   </div>
 
-                  <!-- Recorrencia Infinita -->
+                  <!-- Recorrência Infinita -->
                   <div class="flex items-center gap-2">
                     <input
                       id="recorrencia_infinita"
@@ -250,9 +250,9 @@
                     <label for="recorrencia_infinita" class="text-sm text-text-light dark:text-text-dark">Recorrência infinita</label>
                   </div>
 
-                  <!-- Data Inicio -->
+                  <!-- Data Início -->
                   <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Data Inicio *</label>
+                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Data Início *</label>
                     <input
                       v-model="form.data_inicio"
                       type="date"
@@ -276,14 +276,14 @@
                     <select v-model="form.tipo_frequencia" class="input">
                       <option value="semanal">Semanal</option>
                       <option value="dia_semana">Dia da Semana</option>
-                      <option value="dia_util_mes">Dia Util do Mes</option>
+                      <option value="dia_util_mes">Dia Útil do Mês</option>
                     </select>
                   </div>
 
                   <!-- Intervalo -->
                   <div v-if="form.tipo_frequencia === 'semanal' || form.tipo_frequencia === 'dia_util_mes'">
                     <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      {{ form.tipo_frequencia === 'semanal' ? 'Intervalo (semanas)' : 'N-esimo dia util' }}
+                      {{ form.tipo_frequencia === 'semanal' ? 'Intervalo (semanas)' : 'N-ésimo dia útil' }}
                     </label>
                     <input
                       v-model.number="form.intervalo"
@@ -320,7 +320,7 @@
                 <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
                   <button @click="closeModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
                   <button @click="salvar" class="btn btn-primary" :disabled="saving || !isFormValid">
-                    <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
+                    <span v-if="saving" class="material-icons-outlined animate-spin text-sm">refresh</span>
                     {{ saving ? 'Salvando...' : 'Salvar' }}
                   </button>
                 </div>
@@ -354,7 +354,7 @@
             >
               <div v-if="showDeleteModal" class="relative glass-panel rounded-lg shadow-xl w-full max-w-sm">
                 <div class="p-6 text-center">
-                  <span class="material-icons text-4xl text-red-500 mb-3">warning</span>
+                  <span class="material-icons-outlined text-4xl text-red-500 mb-3">warning</span>
                   <h3 class="text-lg font-semibold text-text-light dark:text-text-dark mb-2">Excluir Recorrência</h3>
                   <p class="text-sm text-subtext-light dark:text-subtext-dark mb-6">
                     Tem certeza que deseja excluir <strong>{{ deletingItem?.nome }}</strong>? Esta ação não pode ser desfeita.
@@ -362,7 +362,7 @@
                   <div class="flex items-center justify-center gap-3">
                     <button @click="showDeleteModal = false" class="btn btn-secondary" :disabled="saving">Cancelar</button>
                     <button @click="excluir" class="btn bg-red-600 hover:bg-red-700 text-white" :disabled="saving">
-                      <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
+                      <span v-if="saving" class="material-icons-outlined animate-spin text-sm">refresh</span>
                       {{ saving ? 'Excluindo...' : 'Excluir' }}
                     </button>
                   </div>
@@ -437,11 +437,11 @@ const deletingItem = ref<TarefaRecorrente | null>(null)
 const diasSemana = [
   { value: 0, label: 'Domingo' },
   { value: 1, label: 'Segunda-feira' },
-  { value: 2, label: 'Terca-feira' },
+  { value: 2, label: 'Terça-feira' },
   { value: 3, label: 'Quarta-feira' },
   { value: 4, label: 'Quinta-feira' },
   { value: 5, label: 'Sexta-feira' },
-  { value: 6, label: 'Sabado' },
+  { value: 6, label: 'Sábado' },
 ]
 
 // Computed
@@ -501,7 +501,7 @@ function formatFrequencia(rec: TarefaRecorrente): string {
       return dia ? `Toda ${dia.label}` : 'Dia da semana'
     }
     case 'dia_util_mes':
-      return `${rec.intervalo || 1}-esimo dia util do mes`
+      return `${rec.intervalo || 1}-ésimo dia útil do mês`
     default:
       return '-'
   }

@@ -8,7 +8,7 @@
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="fixed inset-0 z-[100] overflow-y-auto">
         <!-- Backdrop -->
         <div
           class="fixed inset-0 glass-backdrop"

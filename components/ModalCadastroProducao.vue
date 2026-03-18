@@ -1,19 +1,35 @@
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 z-50 overflow-y-auto">
-      <!-- Backdrop -->
-      <div class="fixed inset-0 bg-black/50 transition-opacity" @click="$emit('close')"></div>
+    <Transition
+      enter-active-class="transition-opacity duration-200"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div class="fixed inset-0 z-[100] overflow-y-auto">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 glass-backdrop" @click="$emit('close')"></div>
 
-      <!-- Modal -->
-      <div class="flex min-h-full items-center justify-center p-4">
-        <div class="relative w-full max-w-3xl bg-card-light dark:bg-card-dark rounded-xl shadow-xl transform transition-all">
+        <!-- Modal -->
+        <div class="flex min-h-full items-center justify-center p-4">
+          <Transition
+            enter-active-class="transition-all duration-200"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition-all duration-200"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
+          >
+            <div class="relative w-full max-w-3xl glass-panel rounded-xl shadow-xl">
           <!-- Header -->
           <div class="flex items-center justify-between px-6 py-4 border-b border-border-light dark:border-border-dark">
             <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Cadastro de Plano de Produção</h2>
             <div class="flex items-center gap-2">
               <button @click="$emit('close')" class="btn btn-secondary">Voltar</button>
               <button @click="handleConcluir" class="btn btn-primary" :disabled="saving">
-                <span v-if="saving" class="animate-spin material-icons text-sm">refresh</span>
+                <span v-if="saving" class="animate-spin material-icons-outlined text-sm">refresh</span>
                 {{ saving ? 'Salvando...' : 'Concluir plano' }}
               </button>
             </div>
@@ -247,7 +263,7 @@
                     <td class="table-cell text-center">{{ formatDate(item.dataColheita) }}</td>
                     <td class="table-cell text-center">{{ formatDate(item.dataPlantio) }}</td>
                     <td class="table-cell text-center">
-                      <button @click="removerItem(index)" class="text-red-500 hover:text-red-700"><span class="material-icons text-sm">delete</span></button>
+                      <button @click="removerItem(index)" class="text-red-500 hover:text-red-700"><span class="material-icons-outlined text-sm">delete</span></button>
                     </td>
                   </tr>
                 </tbody>
@@ -276,9 +292,11 @@
               </div>
             </div>
           </div>
+            </div>
+          </Transition>
         </div>
       </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>
 

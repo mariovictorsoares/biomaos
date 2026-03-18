@@ -16,7 +16,7 @@
         >
           <!-- Icon -->
           <div :class="getIconContainerClass(toast.type)">
-            <span class="material-icons text-sm">{{ getIcon(toast.type) }}</span>
+            <span class="material-icons-outlined text-sm">{{ getIcon(toast.type) }}</span>
           </div>
 
           <!-- Message -->
@@ -27,7 +27,7 @@
             @click="removeToast(toast.id)"
             class="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
           >
-            <span class="material-icons text-lg">close</span>
+            <span class="material-icons-outlined text-lg">close</span>
           </button>
         </div>
       </TransitionGroup>

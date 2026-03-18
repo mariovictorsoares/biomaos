@@ -24,7 +24,7 @@
       </div>
       <!-- Direita: Botão -->
       <button @click="openMovimentacaoModal" class="btn btn-primary shrink-0 justify-center sm:justify-start">
-        <span class="material-icons text-sm">swap_horiz</span>
+        <span class="material-icons-outlined text-sm">swap_horiz</span>
         Movimentação
       </button>
     </div>
@@ -77,7 +77,7 @@
         >
           <div class="flex items-start gap-3">
             <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-sm font-bold text-primary overflow-hidden shrink-0">
-              <span class="material-icons text-xl">inventory_2</span>
+              <span class="material-icons-outlined text-xl">inventory_2</span>
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2">
@@ -100,7 +100,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <span class="material-icons text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Carregando...</p>
       </div>
 
@@ -112,7 +112,7 @@
           {{ searchQuery || filterStatus ? 'Tente ajustar os filtros' : 'Cadastre produtos e faça movimentações' }}
         </p>
         <button @click="openMovimentacaoModal" class="btn btn-primary">
-          <span class="material-icons text-sm">swap_horiz</span>
+          <span class="material-icons-outlined text-sm">swap_horiz</span>
           Movimentação
         </button>
       </div>
@@ -137,7 +137,7 @@
               :disabled="currentPage === 1"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_left</span>
+              <span class="material-icons-outlined text-sm">chevron_left</span>
             </button>
             <span class="hidden xs:inline">Página</span>
             <input
@@ -153,7 +153,7 @@
               :disabled="currentPage === totalPages"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_right</span>
+              <span class="material-icons-outlined text-sm">chevron_right</span>
             </button>
           </div>
         </div>
@@ -186,7 +186,7 @@
                 <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between">
                   <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Movimentação de Estoque</h2>
                   <button @click="closeMovimentacaoModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <span class="material-icons">close</span>
+                    <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
 
@@ -240,7 +240,7 @@
                 <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
                   <button @click="closeMovimentacaoModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
                   <button @click="saveMovimentacao" class="btn btn-primary" :disabled="saving || !isMovimentacaoValid">
-                    <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
+                    <span v-if="saving" class="material-icons-outlined animate-spin text-sm">refresh</span>
                     {{ saving ? 'Salvando...' : 'Confirmar' }}
                   </button>
                 </div>
@@ -280,7 +280,7 @@
                       'w-10 h-10 rounded-full flex items-center justify-center',
                       selectedMovimentacao.cancelado ? 'bg-gray-200 text-gray-400' : selectedMovimentacao.tipo === 'entrada' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
                     ]">
-                      <span class="material-icons">{{ selectedMovimentacao.cancelado ? 'block' : selectedMovimentacao.tipo === 'entrada' ? 'add' : 'remove' }}</span>
+                      <span class="material-icons-outlined">{{ selectedMovimentacao.cancelado ? 'block' : selectedMovimentacao.tipo === 'entrada' ? 'add' : 'remove' }}</span>
                     </span>
                     <div>
                       <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">
@@ -290,7 +290,7 @@
                     </div>
                   </div>
                   <button @click="closeDetalhesModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <span class="material-icons">close</span>
+                    <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
 
@@ -340,7 +340,7 @@
                   <div v-if="!selectedMovimentacao.cancelado" class="pt-4 border-t border-border-light dark:border-border-dark">
                     <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-4">
                       <p class="text-xs text-yellow-700 dark:text-yellow-400">
-                        <span class="material-icons text-sm align-middle mr-1">warning</span>
+                        <span class="material-icons-outlined text-sm align-middle mr-1">warning</span>
                         Ao cancelar, o estoque será revertido automaticamente. Esta ação não pode ser desfeita.
                       </p>
                     </div>
@@ -365,7 +365,7 @@
                     class="btn btn-danger"
                     :disabled="!motivoCancelamento.trim() || saving"
                   >
-                    <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
+                    <span v-if="saving" class="material-icons-outlined animate-spin text-sm">refresh</span>
                     {{ saving ? 'Cancelando...' : 'Cancelar Movimentação' }}
                   </button>
                 </div>
@@ -404,7 +404,7 @@
                   <div class="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100 dark:border-border-dark flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                       <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                        <span class="material-icons text-primary text-xl sm:text-2xl">inventory_2</span>
+                        <span class="material-icons-outlined text-primary text-xl sm:text-2xl">inventory_2</span>
                       </div>
                       <div class="min-w-0 flex-1">
                         <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-text-dark truncate">
@@ -416,7 +416,7 @@
                       </div>
                     </div>
                     <button @click="closeSlideover" class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shrink-0">
-                      <span class="material-icons text-xl">close</span>
+                      <span class="material-icons-outlined text-xl">close</span>
                     </button>
                   </div>
 
@@ -472,7 +472,7 @@
                               @click="aplicarFiltroData"
                               class="btn btn-secondary text-xs py-1 px-2"
                             >
-                              <span class="material-icons text-sm">filter_alt</span>
+                              <span class="material-icons-outlined text-sm">filter_alt</span>
                               Filtrar
                             </button>
                             <button
@@ -480,14 +480,14 @@
                               @click="limparFiltroData"
                               class="btn btn-secondary text-xs py-1 px-2"
                             >
-                              <span class="material-icons text-sm">clear</span>
+                              <span class="material-icons-outlined text-sm">clear</span>
                             </button>
                           </div>
                         </div>
 
                         <!-- Loading Movimentações -->
                         <div v-if="loadingMovimentacoes" class="text-center py-8">
-                          <span class="material-icons text-2xl text-gray-300 animate-spin">refresh</span>
+                          <span class="material-icons-outlined text-2xl text-gray-300 animate-spin">refresh</span>
                         </div>
 
                         <div v-else-if="movimentacoes.length > 0" class="space-y-2">
@@ -506,7 +506,7 @@
                                   'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
                                   mov.cancelado ? 'bg-gray-200 text-gray-400 dark:bg-gray-700' : mov.tipo === 'entrada' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                                 ]">
-                                  <span class="material-icons text-sm">{{ mov.cancelado ? 'block' : mov.tipo === 'entrada' ? 'add' : 'remove' }}</span>
+                                  <span class="material-icons-outlined text-sm">{{ mov.cancelado ? 'block' : mov.tipo === 'entrada' ? 'add' : 'remove' }}</span>
                                 </span>
                                 <div class="min-w-0">
                                   <div class="flex items-center gap-2">
@@ -531,7 +531,7 @@
                                   {{ mov.tipo === 'entrada' ? '+' : '-' }}{{ mov.quantidade }}
                                 </span>
                                 <span class="text-xs text-gray-400">
-                                  <span class="material-icons text-xs">visibility</span>
+                                  <span class="material-icons-outlined text-xs">visibility</span>
                                 </span>
                               </div>
                             </div>
@@ -546,7 +546,7 @@
                                 :disabled="currentPageMovimentacoes === 1"
                                 class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
                               >
-                                <span class="material-icons text-sm">chevron_left</span>
+                                <span class="material-icons-outlined text-sm">chevron_left</span>
                               </button>
                               <span class="text-xs text-gray-500">{{ currentPageMovimentacoes }} / {{ totalPagesMovimentacoes }}</span>
                               <button
@@ -554,7 +554,7 @@
                                 :disabled="currentPageMovimentacoes === totalPagesMovimentacoes"
                                 class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
                               >
-                                <span class="material-icons text-sm">chevron_right</span>
+                                <span class="material-icons-outlined text-sm">chevron_right</span>
                               </button>
                             </div>
                           </div>
@@ -571,7 +571,7 @@
                   <!-- Footer -->
                   <div class="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-border-dark">
                     <button @click="openMovimentacaoForProduct()" class="w-full btn btn-primary justify-center">
-                      <span class="material-icons text-sm">swap_horiz</span>
+                      <span class="material-icons-outlined text-sm">swap_horiz</span>
                       Nova Movimentação
                     </button>
                   </div>

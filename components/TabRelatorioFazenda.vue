@@ -69,7 +69,7 @@
 
       <!-- Empty state for chart -->
       <div v-else class="card p-8 mb-4 text-center">
-        <span class="material-icons text-4xl text-gray-300 dark:text-gray-600 mb-2">bar_chart</span>
+        <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 mb-2">bar_chart</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark">
           Nenhum dado para o período selecionado
         </p>

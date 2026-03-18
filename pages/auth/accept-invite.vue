@@ -1,51 +1,61 @@
 <template>
-  <div class="w-full max-w-md">
-    <div class="card p-8 text-center">
-      <!-- Loading -->
-      <div v-if="loading">
-        <span class="material-icons text-5xl text-primary animate-spin mb-4">refresh</span>
-        <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-2">Processando convite...</h2>
-        <p class="text-sm text-subtext-light dark:text-subtext-dark">Aguarde um momento</p>
+  <div class="auth-animate-stagger">
+    <!-- Loading -->
+    <div v-if="loading" class="text-center py-8">
+      <div class="w-16 h-16 mx-auto bg-[#568D43]/10 rounded-2xl flex items-center justify-center mb-5">
+        <svg class="animate-spin h-8 w-8 text-[#568D43]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
       </div>
+      <h2 class="text-xl font-semibold text-gray-900 mb-2">Processando convite...</h2>
+      <p class="text-sm text-gray-500">Aguarde um momento</p>
+    </div>
 
-      <!-- Sucesso -->
-      <div v-else-if="success">
-        <span class="material-icons text-5xl text-green-500 mb-4">check_circle</span>
-        <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-2">Convite aceito!</h2>
-        <p class="text-sm text-subtext-light dark:text-subtext-dark mb-6">Você agora faz parte da empresa.</p>
-        <NuxtLink to="/" class="btn btn-primary w-full justify-center">
-          Ir para o Dashboard
-        </NuxtLink>
+    <!-- Sucesso -->
+    <div v-else-if="success" class="text-center py-8">
+      <div class="w-16 h-16 mx-auto bg-green-50 border border-green-200 rounded-2xl flex items-center justify-center mb-5">
+        <span class="material-icons-outlined text-green-500 text-3xl">check_circle</span>
       </div>
+      <h2 class="text-xl font-semibold text-gray-900 mb-2">Convite aceito!</h2>
+      <p class="text-sm text-gray-500 mb-6">Você agora faz parte da empresa.</p>
+      <NuxtLink to="/" class="auth-btn-primary inline-flex items-center justify-center gap-2 px-8 !w-auto">
+        Ir para o Dashboard
+      </NuxtLink>
+    </div>
 
-      <!-- Erro -->
-      <div v-else-if="error">
-        <span class="material-icons text-5xl text-red-500 mb-4">error</span>
-        <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-2">Erro ao aceitar convite</h2>
-        <p class="text-sm text-subtext-light dark:text-subtext-dark mb-6">{{ errorMessage }}</p>
-        <NuxtLink to="/auth/login" class="btn btn-primary w-full justify-center">
-          Ir para o Login
-        </NuxtLink>
+    <!-- Erro -->
+    <div v-else-if="error" class="text-center py-8">
+      <div class="w-16 h-16 mx-auto bg-red-50 border border-red-200 rounded-2xl flex items-center justify-center mb-5">
+        <span class="material-icons-outlined text-red-500 text-3xl">error</span>
       </div>
+      <h2 class="text-xl font-semibold text-gray-900 mb-2">Erro ao aceitar convite</h2>
+      <p class="text-sm text-gray-500 mb-6">{{ errorMessage }}</p>
+      <NuxtLink to="/auth/login" class="auth-btn-primary inline-flex items-center justify-center gap-2 px-8 !w-auto">
+        Ir para o Login
+      </NuxtLink>
+    </div>
 
-      <!-- Não autenticado -->
-      <div v-else-if="!user">
-        <span class="material-icons text-5xl text-primary mb-4">mail</span>
-        <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-2">Você recebeu um convite!</h2>
-        <p class="text-sm text-subtext-light dark:text-subtext-dark mb-6">
-          Faça login com sua conta para aceitar o convite.
-        </p>
-        <NuxtLink :to="`/auth/login?redirect=/auth/accept-invite?token=${token}`" class="btn btn-primary w-full justify-center">
-          Fazer Login
-        </NuxtLink>
+    <!-- Nao autenticado -->
+    <div v-else-if="!user" class="text-center py-8">
+      <div class="w-16 h-16 mx-auto bg-[#568D43]/10 rounded-2xl flex items-center justify-center mb-5">
+        <span class="material-icons-outlined text-[#568D43] text-3xl">mail</span>
       </div>
+      <h2 class="text-xl font-semibold text-gray-900 mb-2">Você recebeu um convite!</h2>
+      <p class="text-sm text-gray-500 mb-6">
+        Faça login com sua conta para aceitar o convite.
+      </p>
+      <NuxtLink :to="`/auth/login?redirect=/auth/accept-invite?token=${token}`" class="auth-btn-primary inline-flex items-center justify-center gap-2 px-8 !w-auto">
+        Fazer Login
+      </NuxtLink>
     </div>
   </div>
 </template>
 
 <script setup>
 definePageMeta({
-  layout: 'auth'
+  layout: 'auth',
+  pageTransition: { name: 'auth-page', mode: 'out-in' }
 })
 
 const route = useRoute()
@@ -84,7 +94,6 @@ async function acceptInvite() {
   }
 }
 
-// Aceitar convite quando usuário estiver autenticado
 watch(user, (newUser) => {
   if (newUser && token.value && !success.value && !error.value) {
     acceptInvite()

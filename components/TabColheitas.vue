@@ -37,7 +37,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-16">
-        <span class="material-icons text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-3">Carregando colheitas...</p>
       </div>
 
@@ -156,7 +156,7 @@
               :disabled="currentPage === 1"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_left</span>
+              <span class="material-icons-outlined text-sm">chevron_left</span>
             </button>
             <span class="hidden xs:inline">Página</span>
             <input
@@ -172,7 +172,7 @@
               :disabled="currentPage === totalPages"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_right</span>
+              <span class="material-icons-outlined text-sm">chevron_right</span>
             </button>
           </div>
         </div>
@@ -221,7 +221,7 @@
                       </div>
                     </div>
                     <button @click="closeDetalhes" class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shrink-0">
-                      <span class="material-icons text-xl">close</span>
+                      <span class="material-icons-outlined text-xl">close</span>
                     </button>
                   </div>
 
@@ -254,7 +254,7 @@
                       <!-- Notas -->
                       <div v-if="selectedColheita?.notas" class="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-3 sm:p-4">
                         <div class="flex items-start gap-2">
-                          <span class="material-icons text-sm text-yellow-600 mt-0.5">note</span>
+                          <span class="material-icons-outlined text-sm text-yellow-600 mt-0.5">note</span>
                           <p class="text-sm text-yellow-800 dark:text-yellow-300">{{ selectedColheita.notas }}</p>
                         </div>
                       </div>
@@ -269,7 +269,7 @@
                         </div>
 
                         <div v-if="loadingDetalhes" class="text-center py-8">
-                          <span class="material-icons text-2xl text-gray-300 animate-spin">refresh</span>
+                          <span class="material-icons-outlined text-2xl text-gray-300 animate-spin">refresh</span>
                         </div>
 
                         <div v-else-if="detalheItens.length === 0" class="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
@@ -285,7 +285,7 @@
                           >
                             <div class="flex items-center justify-between mb-2">
                               <div class="flex items-center gap-2">
-                                <span class="material-icons text-sm text-primary">eco</span>
+                                <span class="material-icons-outlined text-sm text-primary">eco</span>
                                 <span class="text-sm font-medium text-gray-900 dark:text-text-dark">
                                   {{ item.especies?.nome || 'Espécie não identificada' }}
                                 </span>
@@ -296,12 +296,12 @@
                                 :disabled="savingItemId === item.id"
                                 class="text-xs px-3 py-1.5 rounded-lg bg-[#4A7C59] text-white hover:bg-[#3d6a4a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                               >
-                                <span v-if="savingItemId === item.id" class="material-icons text-xs animate-spin">refresh</span>
-                                <span class="material-icons text-xs" v-else>check</span>
+                                <span v-if="savingItemId === item.id" class="material-icons-outlined text-xs animate-spin">refresh</span>
+                                <span class="material-icons-outlined text-xs" v-else>check</span>
                                 Marcar Colhido
                               </button>
                               <span v-else class="text-xs px-3 py-1.5 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 flex items-center gap-1">
-                                <span class="material-icons text-xs">check_circle</span>
+                                <span class="material-icons-outlined text-xs">check_circle</span>
                                 Colhido
                               </span>
                             </div>
@@ -337,7 +337,7 @@
                         </div>
 
                         <div v-if="loadingPackList" class="text-center py-8">
-                          <span class="material-icons text-2xl text-gray-300 animate-spin">refresh</span>
+                          <span class="material-icons-outlined text-2xl text-gray-300 animate-spin">refresh</span>
                         </div>
 
                         <div v-else-if="packList.length === 0" class="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
@@ -385,7 +385,7 @@
                   <!-- Footer -->
                   <div class="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-border-dark">
                     <button @click="closeDetalhes" class="w-full btn btn-primary justify-center">
-                      <span class="material-icons text-sm">close</span>
+                      <span class="material-icons-outlined text-sm">close</span>
                       Fechar
                     </button>
                   </div>

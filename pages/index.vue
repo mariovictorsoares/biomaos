@@ -1,596 +1,256 @@
 <template>
   <div class="min-h-screen">
     <!-- Header -->
-    <div class="flex flex-col gap-4 mb-12">
+    <div class="flex flex-col gap-4 mb-8">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 class="text-lg font-medium text-text-light/70 dark:text-text-dark/70 tracking-wide uppercase">Dashboard</h1>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Visão geral da operação</p>
+        </div>
 
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           <!-- Dropdown Multi-Select de Empresas -->
           <div class="relative" ref="dropdownRef">
             <button
               @click="showDropdown = !showDropdown"
-              class="flex items-center justify-between gap-2 bg-white dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg px-4 py-2 w-full sm:w-64 text-left hover:border-primary transition-colors"
+              class="flex items-center justify-between gap-2 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 w-full sm:w-64 text-left hover:border-primary transition-colors shadow-sm"
             >
               <div class="flex items-center gap-2 truncate">
-                <span class="material-icons text-gray-400 text-xl">business</span>
-                <span class="text-sm text-text-light dark:text-text-dark truncate">
-                  {{ empresasSelecionadasLabel }}
-                </span>
+                <span class="material-icons-outlined text-primary text-lg">business</span>
+                <span class="text-sm text-gray-700 dark:text-gray-200 truncate">Todas as Empresas</span>
               </div>
-              <span class="material-icons text-gray-400 text-xl transition-transform" :class="{ 'rotate-180': showDropdown }">
-                expand_more
-              </span>
+              <span class="material-icons-outlined text-gray-400 text-lg transition-transform" :class="{ 'rotate-180': showDropdown }">expand_more</span>
             </button>
-
-            <!-- Dropdown Menu -->
-            <Transition
-              enter-active-class="transition ease-out duration-100"
-              enter-from-class="transform opacity-0 scale-95"
-              enter-to-class="transform opacity-100 scale-100"
-              leave-active-class="transition ease-in duration-75"
-              leave-from-class="transform opacity-100 scale-100"
-              leave-to-class="transform opacity-0 scale-95"
-            >
-              <div
-                v-if="showDropdown"
-                class="absolute z-50 mt-2 w-full sm:w-72 bg-white dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg overflow-hidden"
-              >
-                <!-- Header do Dropdown -->
-                <div class="px-4 py-3 border-b border-border-light dark:border-border-dark bg-gray-50 dark:bg-gray-800">
-                  <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-text-light dark:text-text-dark">Selecionar Empresas</span>
-                    <button
-                      @click="selecionarTodas"
-                      class="text-xs text-primary hover:text-primary/80 font-medium"
-                    >
-                      {{ todasSelecionadas ? 'Desmarcar todas' : 'Selecionar todas' }}
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Lista de Empresas -->
-                <div class="max-h-64 overflow-y-auto">
-                  <label
-                    v-for="empresa in userCompanies"
-                    :key="empresa.id"
-                    class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      :checked="isSelected(empresa.id)"
-                      @change="toggleCompany(empresa.id)"
-                      class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
-                    />
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-medium text-text-light dark:text-text-dark truncate">
-                        {{ empresa.nome_fantasia || empresa.razao_social }}
-                      </p>
-                      <p v-if="empresa.cnpj" class="text-xs text-subtext-light dark:text-subtext-dark">
-                        {{ formatarCNPJ(empresa.cnpj) }}
-                      </p>
-                    </div>
-                  </label>
-
-                  <div v-if="userCompanies.length === 0" class="px-4 py-6 text-center text-subtext-light dark:text-subtext-dark text-sm">
-                    Nenhuma empresa disponível
-                  </div>
-                </div>
-              </div>
-            </Transition>
           </div>
 
           <!-- Seletor de Período -->
-          <div class="flex items-center gap-2 bg-white dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg px-3 py-2">
-            <button @click="periodoAnterior" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1">
-              <span class="material-icons text-xl">chevron_left</span>
+          <div class="flex items-center gap-2 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 shadow-sm">
+            <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-0.5">
+              <span class="material-icons-outlined text-lg">chevron_left</span>
             </button>
-            <span class="text-sm text-text-light dark:text-text-dark min-w-[160px] sm:min-w-[180px] text-center whitespace-nowrap">
-              {{ formatarPeriodo(periodoInicio) }} até {{ formatarPeriodo(periodoFim) }}
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 min-w-[160px] text-center whitespace-nowrap">
+              10/03/2026 até 16/03/2026
             </span>
-            <button @click="proximoPeriodo" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1">
-              <span class="material-icons text-xl">chevron_right</span>
+            <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-0.5">
+              <span class="material-icons-outlined text-lg">chevron_right</span>
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Loading -->
-    <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
-      <p class="mt-2 text-subtext-light dark:text-subtext-dark">Carregando dashboard...</p>
-    </div>
-
-    <!-- Conteúdo -->
-    <template v-else>
-      <!-- Cards de Métricas Principais -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        <!-- Contratos Ativos -->
-        <!-- Total de Microverdes a entregar -->
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="material-icons-outlined text-amber-600 dark:text-amber-400">local_shipping</span>
+    <!-- Hero KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
+      <div
+        v-for="(kpi, index) in heroKpis"
+        :key="kpi.label"
+        class="kpi-card bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm p-5 relative overflow-hidden"
+        :style="{ animationDelay: `${index * 100}ms` }"
+      >
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" :class="kpi.iconBg">
+              <span class="material-icons-outlined text-base" :class="kpi.iconColor">{{ kpi.icon }}</span>
             </div>
-            <span class="text-sm text-subtext-light dark:text-subtext-dark">Total de Microverdes a entregar no período</span>
+            <span class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ kpi.label }}</span>
           </div>
-          <p class="text-3xl font-semibold text-text-light dark:text-text-dark">{{ metricas.microverdesEntregar }}</p>
         </div>
 
-        <!-- Entregas Programadas -->
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="material-icons-outlined text-green-600 dark:text-green-400">event</span>
+        <div class="flex items-end justify-between">
+          <div>
+            <div class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tabular-nums">
+              {{ formatKpiValue(kpi, animatedValues[index]) }}
             </div>
-            <span class="text-sm text-subtext-light dark:text-subtext-dark">Entregas Programadas para o período</span>
-          </div>
-          <p class="text-3xl font-semibold text-text-light dark:text-text-dark">{{ metricas.entregasProgramadas }}</p>
-        </div>
-
-        <!-- Faturamento Previsto -->
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="material-icons-outlined text-emerald-600 dark:text-emerald-400">attach_money</span>
-            </div>
-            <span class="text-sm text-subtext-light dark:text-subtext-dark">Faturamento Previsto do Período</span>
-          </div>
-          <p class="text-3xl font-semibold text-text-light dark:text-text-dark">{{ formatarMoeda(metricas.faturamentoPrevisto) }}</p>
-        </div>
-      </div>
-
-      <!-- Produção Ativa: Tarefas Hoje, Colheitas Próximas, Atrasados -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <!-- Tarefas de Hoje -->
-        <div class="card p-4 sm:p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-base font-medium text-text-light dark:text-text-dark">Tarefas de Hoje</h2>
-            <span class="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium">
-              {{ tarefasHoje.length }}
-            </span>
-          </div>
-          <div v-if="tarefasHoje.length > 0" class="space-y-2 max-h-48 overflow-y-auto">
-            <div
-              v-for="t in tarefasHoje"
-              :key="t.id"
-              class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800"
-            >
+            <div class="flex items-center gap-1 mt-1.5">
               <span
-                class="w-2 h-2 rounded-full flex-shrink-0"
-                :class="t.concluida ? 'bg-green-500' : 'bg-yellow-500'"
-              ></span>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm text-text-light dark:text-text-dark truncate">{{ t.nome }}</p>
-                <p class="text-xs text-subtext-light dark:text-subtext-dark truncate">
-                  {{ t.especie_nome || 'Tarefa manual' }}
-                  <span v-if="t.bandejas"> &middot; {{ t.bandejas }} bdj</span>
-                </p>
-              </div>
-            </div>
-          </div>
-          <div v-else class="py-6 text-center text-subtext-light dark:text-subtext-dark text-sm">
-            Nenhuma tarefa para hoje
-          </div>
-        </div>
-
-        <!-- Próximas Colheitas (7 dias) -->
-        <div class="card p-4 sm:p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-base font-medium text-text-light dark:text-text-dark">Colheitas (7 dias)</h2>
-            <span class="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-medium">
-              {{ proximasColheitas.length }}
-            </span>
-          </div>
-          <div v-if="proximasColheitas.length > 0" class="space-y-2 max-h-48 overflow-y-auto">
-            <div
-              v-for="c in proximasColheitas"
-              :key="c.data_colheita"
-              class="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800"
-            >
-              <div>
-                <p class="text-sm font-medium text-text-light dark:text-text-dark">
-                  {{ formatarDataCurta(c.data_colheita) }}
-                </p>
-                <p class="text-xs text-subtext-light dark:text-subtext-dark">
-                  {{ c.status === 'concluida' ? 'Concluída' : c.status === 'parcial' ? 'Parcial' : 'Pendente' }}
-                </p>
-              </div>
-              <span
-                class="text-xs px-2 py-1 rounded-full font-medium"
-                :class="{
-                  'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300': c.status === 'concluida',
-                  'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300': c.status === 'parcial',
-                  'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300': c.status === 'pendente'
-                }"
+                class="inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full"
+                :class="kpi.change >= 0 ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'"
               >
-                {{ c.status }}
+                <span class="material-icons-outlined text-xs">{{ kpi.change >= 0 ? 'trending_up' : 'trending_down' }}</span>
+                {{ kpi.change >= 0 ? '+' : '' }}{{ kpi.change }}{{ kpi.format === 'percent' ? 'pp' : '%' }}
+              </span>
+              <span class="text-[10px] text-gray-400 dark:text-gray-500">vs sem. anterior</span>
+            </div>
+          </div>
+
+          <!-- Sparkline -->
+          <svg class="w-16 h-8 flex-shrink-0" viewBox="0 0 64 28">
+            <defs>
+              <linearGradient :id="'sparkGrad' + index" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" :stop-color="kpi.change >= 0 ? '#22C55E' : '#EF4444'" stop-opacity="0.15" />
+                <stop offset="100%" :stop-color="kpi.change >= 0 ? '#22C55E' : '#EF4444'" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <polygon
+              :points="sparklineArea(kpi.sparkline)"
+              :fill="'url(#sparkGrad' + index + ')'"
+            />
+            <polyline
+              :points="sparklinePoints(kpi.sparkline)"
+              fill="none"
+              :stroke="kpi.change >= 0 ? '#22C55E' : '#EF4444'"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Section: Rankings + Produção -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+      <!-- Rankings por Produto -->
+      <div class="bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm p-5">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Rankings por Produto</h2>
+          <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
+            <button
+              v-for="tab in rankingTabs"
+              :key="tab.key"
+              @click="activeRankingTab = tab.key"
+              class="px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200"
+              :class="activeRankingTab === tab.key
+                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+            >
+              {{ tab.label }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Ranking Bars -->
+        <div class="space-y-2.5">
+          <TransitionGroup name="ranking-list">
+            <div
+              v-for="(item, idx) in currentRanking"
+              :key="item.nome + activeRankingTab"
+              class="flex items-center gap-3 group"
+            >
+              <span class="text-xs font-bold w-5 text-right tabular-nums" :style="{ color: getRankColor(idx) }">
+                {{ idx + 1 }}
+              </span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{{ item.nome }}</span>
+                  <span class="text-sm font-bold tabular-nums text-gray-900 dark:text-white ml-2">
+                    {{ formatRankingValue(item.valor) }}
+                  </span>
+                </div>
+                <div class="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all duration-500 ease-out ranking-bar"
+                    :style="{
+                      width: rankingBarAnimated ? `${(item.valor / currentRanking[0].valor) * 100}%` : '0%',
+                      backgroundColor: getRankColor(idx),
+                      transitionDelay: `${idx * 50}ms`
+                    }"
+                  />
+                </div>
+              </div>
+            </div>
+          </TransitionGroup>
+        </div>
+      </div>
+
+      <!-- Produção -->
+      <div class="bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm p-5">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-5">Produção</h2>
+
+        <div class="flex flex-col items-center">
+          <!-- Donut Chart -->
+          <div class="relative w-56 h-56 mb-6">
+            <Doughnut :data="chartProducaoData" :options="doughnutOptions" />
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ producao.total }}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400">produções</span>
+            </div>
+          </div>
+
+          <!-- Legenda -->
+          <div class="flex flex-wrap items-center justify-center gap-4 mb-6">
+            <div v-for="fase in producaoFases" :key="fase.label" class="flex items-center gap-1.5">
+              <div class="w-2.5 h-2.5 rounded-full" :style="{ backgroundColor: fase.color }" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">{{ fase.label }} ({{ fase.value }})</span>
+            </div>
+          </div>
+
+          <!-- Mini Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
+            <div
+              v-for="card in producaoCards"
+              :key="card.label"
+              class="flex flex-col items-center p-3 rounded-lg border"
+              :class="card.borderClass"
+            >
+              <span class="material-icons-outlined text-lg mb-1" :class="card.iconClass">{{ card.icon }}</span>
+              <span class="text-xl font-bold" :class="card.valueClass">{{ card.value }}</span>
+              <span class="text-[10px] text-gray-500 dark:text-gray-400 text-center">{{ card.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Section: Vendas Mensais + Fazendas -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <!-- Vendas Mensais -->
+      <div class="bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm p-5">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Vendas Mensais</h2>
+          <span class="text-xs text-gray-400 dark:text-gray-500">últimos 12 meses</span>
+        </div>
+        <div class="h-[280px]">
+          <Bar :data="chartVendasData" :options="barOptions" />
+        </div>
+      </div>
+
+      <!-- Fazendas -->
+      <div class="bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm p-5">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Fazendas</h2>
+          <span class="text-xs text-gray-400 dark:text-gray-500">{{ fazendas.length }} unidades</span>
+        </div>
+
+        <div class="space-y-4">
+          <div
+            v-for="fazenda in fazendas"
+            :key="fazenda.nome"
+            class="group p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ fazenda.nome }}</span>
+              <div class="flex items-center gap-3">
+                <span
+                  class="text-xs font-semibold px-2 py-0.5 rounded-full"
+                  :class="getEficienciaBadgeClass(fazenda.eficiencia)"
+                >
+                  {{ fazenda.eficiencia }}% efic.
+                </span>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-700"
+                  :style="{ width: `${fazenda.ocupacao}%` }"
+                  :class="getOcupacaoBarClass(fazenda.ocupacao)"
+                />
+              </div>
+              <span class="text-xs font-bold tabular-nums w-10 text-right" :class="getOcupacaoTextClass(fazenda.ocupacao)">
+                {{ fazenda.ocupacao }}%
               </span>
             </div>
           </div>
-          <div v-else class="py-6 text-center text-subtext-light dark:text-subtext-dark text-sm">
-            Nenhuma colheita nos próximos 7 dias
-          </div>
-        </div>
-
-        <!-- Tarefas Atrasadas -->
-        <div class="card p-4 sm:p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-base font-medium text-text-light dark:text-text-dark">Tarefas Atrasadas</h2>
-            <span
-              class="text-xs px-2 py-1 rounded-full font-medium"
-              :class="tarefasAtrasadas.length > 0
-                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-                : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'"
-            >
-              {{ tarefasAtrasadas.length }}
-            </span>
-          </div>
-          <div v-if="tarefasAtrasadas.length > 0" class="space-y-2 max-h-48 overflow-y-auto">
-            <div
-              v-for="t in tarefasAtrasadas"
-              :key="t.id"
-              class="flex items-center gap-3 p-2 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/30"
-            >
-              <span class="material-icons text-red-500 text-lg">warning</span>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm text-text-light dark:text-text-dark truncate">{{ t.nome }}</p>
-                <p class="text-xs text-red-600 dark:text-red-400">
-                  {{ formatarDataCurta(t.data_prevista) }}
-                  <span v-if="t.especie_nome"> &middot; {{ t.especie_nome }}</span>
-                </p>
-              </div>
-            </div>
-          </div>
-          <div v-else class="py-6 text-center text-green-600 dark:text-green-400 text-sm">
-            Nenhuma tarefa atrasada
-          </div>
         </div>
       </div>
-
-      <!-- Produção e Vendas -->
-      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-        <!-- Seção Produção -->
-        <div class="card p-4 sm:p-6">
-          <h2 class="text-base font-medium text-text-light dark:text-text-dark mb-4">Produção</h2>
-
-          <!-- Filtros de Produção -->
-          <div class="flex flex-wrap gap-2 mb-4">
-            <button
-              v-for="filtro in filtrosProducao"
-              :key="filtro.value"
-              @click="filtroProducaoAtivo = filtro.value"
-              :class="[
-                'px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                filtroProducaoAtivo === filtro.value
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark hover:bg-gray-200 dark:hover:bg-gray-600'
-              ]"
-            >
-              {{ filtro.label }}
-            </button>
-          </div>
-
-          <div class="flex flex-col lg:flex-row gap-6">
-            <!-- Métricas de Produção -->
-            <div class="flex-1 space-y-4">
-              <!-- Total -->
-              <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-blue-500">
-                <span class="text-sm text-subtext-light dark:text-subtext-dark">Total</span>
-                <div class="text-right">
-                  <span class="text-xl font-semibold text-blue-600">{{ producaoFiltrada.total }}</span>
-                  <span class="text-sm text-subtext-light dark:text-subtext-dark ml-2">100%</span>
-                </div>
-              </div>
-
-              <!-- Perdas -->
-              <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-blue-500">
-                <span class="text-sm text-subtext-light dark:text-subtext-dark">Perdas</span>
-                <div class="text-right">
-                  <span class="text-xl font-semibold text-blue-600">{{ producaoFiltrada.perdas }}</span>
-                  <span class="text-sm text-subtext-light dark:text-subtext-dark ml-2">{{ calcularPercentual(producaoFiltrada.perdas, producaoFiltrada.total) }}%</span>
-                </div>
-              </div>
-
-              <!-- Linha inferior -->
-              <div class="grid grid-cols-3 gap-2 sm:gap-3">
-                <div class="p-2 sm:p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-green-500">
-                  <p class="text-xs text-subtext-light dark:text-subtext-dark">Previstos</p>
-                  <p class="text-base sm:text-lg font-semibold text-green-600">{{ producaoFiltrada.previstos }}</p>
-                  <p class="text-xs text-green-600">{{ calcularPercentual(producaoFiltrada.previstos, producaoFiltrada.total) }}%</p>
-                </div>
-                <div class="p-2 sm:p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-green-500">
-                  <p class="text-xs text-subtext-light dark:text-subtext-dark">Realizados</p>
-                  <p class="text-base sm:text-lg font-semibold text-green-600">{{ producaoFiltrada.realizados }}</p>
-                  <p class="text-xs text-green-600">{{ calcularPercentual(producaoFiltrada.realizados, producaoFiltrada.total) }}%</p>
-                </div>
-                <div class="p-2 sm:p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-red-500">
-                  <p class="text-xs text-subtext-light dark:text-subtext-dark">Atrasados</p>
-                  <p class="text-base sm:text-lg font-semibold text-red-600">{{ producaoFiltrada.atrasados }}</p>
-                  <p class="text-xs text-red-600">{{ calcularPercentual(producaoFiltrada.atrasados, producaoFiltrada.total) }}%</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Gráfico de Pizza Produção -->
-            <div class="w-full lg:w-48 h-48 flex items-center justify-center mx-auto lg:mx-0">
-              <Pie v-if="hasProducaoData" :data="chartProducaoData" :options="chartOptions" />
-              <div v-else class="text-center text-subtext-light dark:text-subtext-dark text-sm">
-                Sem dados
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Seção Vendas -->
-        <div class="card p-4 sm:p-6">
-          <h2 class="text-base font-medium text-text-light dark:text-text-dark mb-4">Vendas</h2>
-
-          <div class="flex flex-col lg:flex-row gap-6">
-            <!-- Métricas de Vendas -->
-            <div class="flex-1 space-y-3">
-              <div class="grid grid-cols-2 gap-3">
-                <!-- Total de Microverdes -->
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-green-500">
-                  <p class="text-xs text-subtext-light dark:text-subtext-dark">Total de Microverdes</p>
-                  <div class="flex items-center justify-between">
-                    <p class="text-base sm:text-lg font-semibold text-green-600">{{ vendas.totalMicroverdes }}</p>
-                    <p class="text-xs text-subtext-light dark:text-subtext-dark">0%</p>
-                  </div>
-                </div>
-
-                <!-- Vendido -->
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-green-500">
-                  <p class="text-xs text-subtext-light dark:text-subtext-dark">Vendido</p>
-                  <div class="flex items-center justify-between">
-                    <p class="text-base sm:text-lg font-semibold text-green-600">{{ vendas.vendido }}</p>
-                    <p class="text-xs text-green-600">{{ calcularPercentual(vendas.vendido, vendas.totalMicroverdes) }}%</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-3">
-                <!-- Vender -->
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-yellow-500">
-                  <p class="text-xs text-subtext-light dark:text-subtext-dark">Vender</p>
-                  <div class="flex items-center justify-between">
-                    <p class="text-base sm:text-lg font-semibold text-yellow-600">{{ vendas.vender }}</p>
-                    <p class="text-xs text-yellow-600">{{ calcularPercentual(vendas.vender, vendas.totalMicroverdes) }}%</p>
-                  </div>
-                </div>
-
-                <!-- Colhido -->
-                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-green-500">
-                  <p class="text-xs text-subtext-light dark:text-subtext-dark">Colhido</p>
-                  <div class="flex items-center justify-between">
-                    <p class="text-base sm:text-lg font-semibold text-green-600">{{ vendas.colhido }}</p>
-                    <p class="text-xs text-green-600">{{ calcularPercentual(vendas.colhido, vendas.totalMicroverdes) }}%</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Colher -->
-              <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-yellow-500">
-                <p class="text-xs text-subtext-light dark:text-subtext-dark">Colher</p>
-                <div class="flex items-center justify-between">
-                  <p class="text-base sm:text-lg font-semibold text-yellow-600">{{ vendas.colher }}</p>
-                  <p class="text-xs text-yellow-600">{{ calcularPercentual(vendas.colher, vendas.totalMicroverdes) }}%</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Gráfico de Pizza Vendas -->
-            <div class="w-full lg:w-48 h-48 flex items-center justify-center mx-auto lg:mx-0">
-              <Pie v-if="hasVendasData" :data="chartVendasData" :options="chartOptions" />
-              <div v-else class="text-center text-subtext-light dark:text-subtext-dark text-sm">
-                Sem dados
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Eficiência -->
-      <div class="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        <!-- Eficiência da Produção -->
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="material-icons-outlined text-amber-600 dark:text-amber-400">trending_up</span>
-            </div>
-            <span class="text-xs sm:text-sm text-subtext-light dark:text-subtext-dark">Eficiência da Produção</span>
-          </div>
-          <p class="text-2xl sm:text-3xl font-semibold text-text-light dark:text-text-dark">{{ eficiencia.producao }}%</p>
-        </div>
-
-        <!-- Microverdes / Pessoa -->
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="material-icons-outlined text-amber-600 dark:text-amber-400">group</span>
-            </div>
-            <span class="text-xs sm:text-sm text-subtext-light dark:text-subtext-dark">Microverdes / Pessoa</span>
-          </div>
-          <p class="text-2xl sm:text-3xl font-semibold text-text-light dark:text-text-dark">{{ eficiencia.microverdesPorPessoa }}</p>
-        </div>
-
-        <!-- Eficiência das Vendas -->
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="material-icons-outlined text-amber-600 dark:text-amber-400">show_chart</span>
-            </div>
-            <span class="text-xs sm:text-sm text-subtext-light dark:text-subtext-dark">Eficiência das Vendas</span>
-          </div>
-          <p class="text-2xl sm:text-3xl font-semibold text-text-light dark:text-text-dark">{{ eficiencia.vendas }}%</p>
-        </div>
-
-        <!-- Ticket Médio -->
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="material-icons-outlined text-amber-600 dark:text-amber-400">receipt</span>
-            </div>
-            <span class="text-xs sm:text-sm text-subtext-light dark:text-subtext-dark">Ticket Médio</span>
-          </div>
-          <p class="text-2xl sm:text-3xl font-semibold text-text-light dark:text-text-dark">{{ formatarMoeda(eficiencia.ticketMedio) }}</p>
-        </div>
-      </div>
-
-      <!-- Fazendas e Vendas por Mês -->
-      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-        <!-- Tabela de Fazendas -->
-        <div class="card p-4 sm:p-6">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-            <h2 class="text-base font-medium text-text-light dark:text-text-dark">Fazendas</h2>
-            <div class="relative w-full sm:w-auto">
-              <input
-                v-model="buscarFazenda"
-                type="text"
-                placeholder="Buscar fazenda"
-                class="input w-full sm:w-40 pr-10 text-sm"
-              />
-              <span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
-            </div>
-          </div>
-
-          <div class="overflow-x-auto -mx-4 sm:mx-0">
-            <div class="min-w-[600px] px-4 sm:px-0">
-              <table class="w-full text-sm">
-                <thead>
-                  <tr class="border-b border-border-light dark:border-border-dark">
-                    <th class="text-left py-3 px-2 font-medium text-subtext-light dark:text-subtext-dark">Código</th>
-                    <th class="text-left py-3 px-2 font-medium text-subtext-light dark:text-subtext-dark">Nome</th>
-                    <th class="text-right py-3 px-2 font-medium text-subtext-light dark:text-subtext-dark">Capacidade</th>
-                    <th class="text-right py-3 px-2 font-medium text-subtext-light dark:text-subtext-dark">Alocado</th>
-                    <th class="text-right py-3 px-2 font-medium text-subtext-light dark:text-subtext-dark">Ocupação Atual</th>
-                    <th class="text-right py-3 px-2 font-medium text-subtext-light dark:text-subtext-dark">Efic. Produção</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="fazenda in fazendasFiltradas" :key="fazenda.id" class="border-b border-border-light/50 dark:border-border-dark/50 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                    <td class="py-3 px-2 text-text-light dark:text-text-dark">{{ fazenda.codigo }}</td>
-                    <td class="py-3 px-2 text-text-light dark:text-text-dark">{{ fazenda.nome }}</td>
-                    <td class="py-3 px-2 text-right text-subtext-light dark:text-subtext-dark">{{ fazenda.capacidade_bandejas || 0 }}</td>
-                    <td class="py-3 px-2 text-right text-subtext-light dark:text-subtext-dark">{{ fazenda.alocado || 0 }}</td>
-                    <td class="py-3 px-2 text-right">
-                      <span :class="['font-medium', getOcupacaoClass(fazenda.ocupacao)]">
-                        {{ fazenda.ocupacao || 0 }}%
-                      </span>
-                    </td>
-                    <td class="py-3 px-2 text-right">
-                      <span class="font-medium text-primary">{{ fazenda.eficienciaProducao || 0 }}%</span>
-                    </td>
-                  </tr>
-                  <tr v-if="fazendasFiltradas.length === 0">
-                    <td colspan="6" class="py-8 text-center text-subtext-light dark:text-subtext-dark">
-                      Nenhuma fazenda encontrada
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Gráfico de Vendas por Mês -->
-        <div class="card p-4 sm:p-6">
-          <h2 class="text-base font-medium text-text-light dark:text-text-dark mb-4">Vendas (Unidades por mês)</h2>
-          <div class="h-64">
-            <Bar :data="chartVendasMensaisData" :options="chartBarOptions" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Custo, Preço e Margem -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <!-- Custo médio -->
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="material-icons-outlined text-amber-600 dark:text-amber-400">payments</span>
-            </div>
-            <span class="text-sm text-subtext-light dark:text-subtext-dark">Custo médio</span>
-          </div>
-          <p class="text-2xl sm:text-3xl font-semibold text-text-light dark:text-text-dark">{{ formatarMoeda(custos.custoMedio) }}</p>
-        </div>
-
-        <!-- Preço Médio -->
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="material-icons-outlined text-amber-600 dark:text-amber-400">sell</span>
-            </div>
-            <span class="text-sm text-subtext-light dark:text-subtext-dark">Preço Médio</span>
-          </div>
-          <p class="text-2xl sm:text-3xl font-semibold text-text-light dark:text-text-dark">{{ formatarMoeda(custos.precoMedio) }}</p>
-        </div>
-
-        <!-- Margem Bruta -->
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="material-icons-outlined text-amber-600 dark:text-amber-400">percent</span>
-            </div>
-            <span class="text-sm text-subtext-light dark:text-subtext-dark">Margem Bruta</span>
-          </div>
-          <p class="text-2xl sm:text-3xl font-semibold text-text-light dark:text-text-dark">{{ custos.margemBruta }}%</p>
-        </div>
-      </div>
-
-      <!-- Eficiência por Espécie, Mais vendidos, Margem por espécie -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Eficiência por Espécie -->
-        <div class="card p-4 sm:p-6">
-          <h2 class="text-base font-medium text-text-light dark:text-text-dark mb-4">Eficiência por Espécie</h2>
-          <div class="space-y-3">
-            <div v-for="especie in eficienciaPorEspecie" :key="especie.id" class="flex items-center justify-between">
-              <span class="text-sm text-text-light dark:text-text-dark truncate mr-2">{{ especie.nome }}</span>
-              <span class="text-sm font-medium text-primary whitespace-nowrap">{{ especie.eficiencia }}%</span>
-            </div>
-            <div v-if="eficienciaPorEspecie.length === 0" class="py-4 text-center text-subtext-light dark:text-subtext-dark text-sm">
-              Sem dados disponíveis
-            </div>
-          </div>
-        </div>
-
-        <!-- Mais vendidos -->
-        <div class="card p-4 sm:p-6">
-          <h2 class="text-base font-medium text-text-light dark:text-text-dark mb-4">Mais vendidos</h2>
-          <div class="space-y-3">
-            <div v-for="item in maisVendidos" :key="item.id" class="flex items-center justify-between">
-              <span class="text-sm text-text-light dark:text-text-dark truncate mr-2">{{ item.nome }}</span>
-              <span class="text-sm font-medium text-text-light dark:text-text-dark whitespace-nowrap">{{ item.quantidade }} un.</span>
-            </div>
-            <div v-if="maisVendidos.length === 0" class="py-4 text-center text-subtext-light dark:text-subtext-dark text-sm">
-              Sem dados disponíveis
-            </div>
-          </div>
-        </div>
-
-        <!-- Margem por espécie -->
-        <div class="card p-4 sm:p-6">
-          <h2 class="text-base font-medium text-text-light dark:text-text-dark mb-4">Margem por espécie</h2>
-          <div class="space-y-3">
-            <div v-for="especie in margemPorEspecie" :key="especie.id" class="flex items-center justify-between">
-              <span class="text-sm text-text-light dark:text-text-dark truncate mr-2">{{ especie.nome }}</span>
-              <span class="text-sm font-medium text-primary whitespace-nowrap">{{ especie.margem }}%</span>
-            </div>
-            <div v-if="margemPorEspecie.length === 0" class="py-4 text-center text-subtext-light dark:text-subtext-dark text-sm">
-              Sem dados disponíveis
-            </div>
-          </div>
-        </div>
-      </div>
-    </template>
+    </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { useDashboardCompanies } from '~/composables/useDashboardCompanies'
-import { Pie, Bar } from 'vue-chartjs'
+<script setup>
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { Doughnut, Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
   ArcElement,
@@ -599,593 +259,421 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  Title
+  Title,
 } from 'chart.js'
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title)
 
-const supabase = useSupabaseClient()
+definePageMeta({ layout: 'default', middleware: 'auth' })
 
-// Composable de empresas
-const {
-  userCompanies,
-  selectedCompanyIds,
-  isLoadingCompanies,
-  loadUserCompanies,
-  toggleCompany,
-  isSelected,
-  selectAll
-} = useDashboardCompanies()
-
-// Estado
-const loading = ref(false)
-const buscarFazenda = ref('')
+// ─── State ───────────────────────────────────────────────
 const showDropdown = ref(false)
-const dropdownRef = ref<HTMLElement | null>(null)
+const dropdownRef = ref(null)
+const activeRankingTab = ref('eficiencia')
+const rankingBarAnimated = ref(false)
+const animatedValues = ref([0, 0, 0, 0, 0])
 
-// Período (semana atual)
-const hoje = new Date()
-const periodoInicio = ref(getStartOfWeek(hoje))
-const periodoFim = ref(getEndOfWeek(hoje))
-
-// Filtros de Produção
-const filtrosProducao = [
-  { label: 'Todos', value: 'todos' },
-  { label: 'Plantio', value: 'plantio' },
-  { label: 'Luz', value: 'luz' },
-  { label: 'Colheita', value: 'colheita' }
+// ─── Mock Data ───────────────────────────────────────────
+const heroKpis = [
+  {
+    label: 'Faturamento',
+    value: 24580,
+    format: 'currency',
+    sparkline: [18200, 21400, 22800, 24580],
+    change: 12,
+    icon: 'payments',
+    iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+    iconColor: 'text-emerald-600 dark:text-emerald-400',
+  },
+  {
+    label: 'Vendas',
+    value: 1842,
+    format: 'number',
+    suffix: 'un',
+    sparkline: [1520, 1680, 1750, 1842],
+    change: 8,
+    icon: 'shopping_cart',
+    iconBg: 'bg-blue-50 dark:bg-blue-500/10',
+    iconColor: 'text-blue-600 dark:text-blue-400',
+  },
+  {
+    label: 'Produção',
+    value: 156,
+    format: 'number',
+    suffix: 'bdj',
+    sparkline: [168, 172, 160, 156],
+    change: -3,
+    icon: 'eco',
+    iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+    iconColor: 'text-amber-600 dark:text-amber-400',
+  },
+  {
+    label: 'Margem Bruta',
+    value: 42,
+    format: 'percent',
+    sparkline: [38, 39, 41, 42],
+    change: 2,
+    icon: 'trending_up',
+    iconBg: 'bg-violet-50 dark:bg-violet-500/10',
+    iconColor: 'text-violet-600 dark:text-violet-400',
+  },
+  {
+    label: 'Eficiência',
+    value: 87,
+    format: 'percent',
+    sparkline: [78, 82, 84, 87],
+    change: 5,
+    icon: 'speed',
+    iconBg: 'bg-cyan-50 dark:bg-cyan-500/10',
+    iconColor: 'text-cyan-600 dark:text-cyan-400',
+  },
 ]
-const filtroProducaoAtivo = ref('todos')
 
-// Dados
-const metricas = ref({
-  microverdesEntregar: 0,
-  entregasProgramadas: 0,
-  faturamentoPrevisto: 0
-})
+const rankingTabs = [
+  { key: 'eficiencia', label: 'Eficiência' },
+  { key: 'vendidos', label: 'Mais Vendidos' },
+  { key: 'margem', label: 'Margem' },
+]
 
-const producao = ref({
-  total: 0,
-  perdas: 0,
-  previstos: 0,
-  realizados: 0,
-  atrasados: 0,
-  plantio: { total: 0, perdas: 0, previstos: 0, realizados: 0, atrasados: 0 },
-  luz: { total: 0, perdas: 0, previstos: 0, realizados: 0, atrasados: 0 },
-  colheita: { total: 0, perdas: 0, previstos: 0, realizados: 0, atrasados: 0 }
-})
-
-const vendas = ref({
-  totalMicroverdes: 0,
-  vendido: 0,
-  vender: 0,
-  colhido: 0,
-  colher: 0
-})
-
-const eficiencia = ref({
-  producao: 100,
-  microverdesPorPessoa: 0,
-  vendas: 100,
-  ticketMedio: 0
-})
-
-const fazendas = ref<any[]>([])
-const custos = ref({
-  custoMedio: 0,
-  precoMedio: 0,
-  margemBruta: 100
-})
-
-const eficienciaPorEspecie = ref<any[]>([])
-const maisVendidos = ref<any[]>([])
-const margemPorEspecie = ref<any[]>([])
-const vendasMensais = ref<any[]>([])
-
-// Dados novos (módulo produção reestruturado)
-const tarefasHoje = ref<any[]>([])
-const tarefasAtrasadas = ref<any[]>([])
-const proximasColheitas = ref<any[]>([])
-
-// Computed
-const empresasSelecionadasLabel = computed(() => {
-  if (selectedCompanyIds.value.length === 0) return 'Selecione empresas'
-  if (selectedCompanyIds.value.length === userCompanies.value.length) return 'Todas as empresas'
-  if (selectedCompanyIds.value.length === 1) {
-    const empresa = userCompanies.value.find(e => e.id === selectedCompanyIds.value[0])
-    return empresa?.nome_fantasia || empresa?.razao_social || '1 empresa'
-  }
-  return `${selectedCompanyIds.value.length} empresas`
-})
-
-const todasSelecionadas = computed(() => {
-  return userCompanies.value.length > 0 && selectedCompanyIds.value.length === userCompanies.value.length
-})
-
-const producaoFiltrada = computed(() => {
-  if (filtroProducaoAtivo.value === 'todos') {
-    return producao.value
-  }
-  return producao.value[filtroProducaoAtivo.value as keyof typeof producao.value] || producao.value
-})
-
-const fazendasFiltradas = computed(() => {
-  if (!buscarFazenda.value) return fazendas.value
-  const termo = buscarFazenda.value.toLowerCase()
-  return fazendas.value.filter(f =>
-    f.nome?.toLowerCase().includes(termo) ||
-    f.codigo?.toLowerCase().includes(termo)
-  )
-})
-
-const hasProducaoData = computed(() => {
-  return producaoFiltrada.value.total > 0
-})
-
-const hasVendasData = computed(() => {
-  return vendas.value.colher > 0 || vendas.value.colhido > 0
-})
-
-// Chart Data
-const chartProducaoData = computed(() => ({
-  labels: ['Atrasados', 'Previstos', 'Realizados'],
-  datasets: [{
-    data: [
-      producaoFiltrada.value.atrasados || 0,
-      producaoFiltrada.value.previstos || 0,
-      producaoFiltrada.value.realizados || 0
-    ],
-    backgroundColor: ['#EF4444', '#FBBF24', '#22C55E'],
-    borderWidth: 0
-  }]
-}))
-
-const chartVendasData = computed(() => ({
-  labels: ['Colher', 'Colhido'],
-  datasets: [{
-    data: [
-      vendas.value.colher || 0,
-      vendas.value.colhido || 0
-    ],
-    backgroundColor: ['#3B82F6', '#93C5FD'],
-    borderWidth: 0
-  }]
-}))
-
-const chartVendasMensaisData = computed(() => {
-  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez', 'Jan']
-  const dados = Array(13).fill(0)
-
-  vendasMensais.value.forEach(v => {
-    if (v.data_venda) {
-      const mes = new Date(v.data_venda).getMonth()
-      dados[mes] += v.quantidade_total || 0
-    }
-  })
-
-  return {
-    labels: meses,
-    datasets: [{
-      label: 'Unidades',
-      data: dados,
-      backgroundColor: '#22C55E',
-      borderRadius: 4
-    }]
-  }
-})
-
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: true,
-  plugins: {
-    legend: {
-      display: false
-    }
-  }
+const rankings = {
+  eficiencia: [
+    { nome: 'Rabanete', valor: 96 },
+    { nome: 'Girassol', valor: 93 },
+    { nome: 'Ervilha', valor: 89 },
+    { nome: 'Mostarda', valor: 86 },
+    { nome: 'Rúcula', valor: 82 },
+    { nome: 'Beterraba', valor: 78 },
+    { nome: 'Coentro', valor: 74 },
+    { nome: 'Brócolis', valor: 69 },
+    { nome: 'Repolho Roxo', valor: 63 },
+    { nome: 'Cenoura', valor: 58 },
+  ],
+  vendidos: [
+    { nome: 'Rúcula', valor: 342 },
+    { nome: 'Rabanete', valor: 298 },
+    { nome: 'Girassol', valor: 256 },
+    { nome: 'Coentro', valor: 214 },
+    { nome: 'Mostarda', valor: 187 },
+    { nome: 'Ervilha', valor: 165 },
+    { nome: 'Beterraba', valor: 142 },
+    { nome: 'Brócolis', valor: 118 },
+    { nome: 'Cenoura', valor: 95 },
+    { nome: 'Repolho Roxo', valor: 78 },
+  ],
+  margem: [
+    { nome: 'Girassol', valor: 58 },
+    { nome: 'Mostarda', valor: 52 },
+    { nome: 'Rabanete', valor: 48 },
+    { nome: 'Ervilha', valor: 45 },
+    { nome: 'Rúcula', valor: 41 },
+    { nome: 'Beterraba', valor: 38 },
+    { nome: 'Coentro', valor: 34 },
+    { nome: 'Brócolis', valor: 29 },
+    { nome: 'Repolho Roxo', valor: 24 },
+    { nome: 'Cenoura', valor: 19 },
+  ],
 }
 
-const chartBarOptions = {
+const producao = {
+  total: 156,
+  perdas: 8,
+  previstos: 42,
+  atrasados: 3,
+  fases: { plantio: 38, luz: 45, colheita: 28, concluido: 45 },
+}
+
+const producaoFases = [
+  { label: 'Plantio', value: producao.fases.plantio, color: '#3B82F6' },
+  { label: 'Luz', value: producao.fases.luz, color: '#EAB308' },
+  { label: 'Colheita', value: producao.fases.colheita, color: '#22C55E' },
+  { label: 'Concluído', value: producao.fases.concluido, color: '#9CA3AF' },
+]
+
+const producaoCards = [
+  {
+    label: 'Total',
+    value: producao.total,
+    icon: 'inventory_2',
+    iconClass: 'text-blue-500',
+    valueClass: 'text-gray-900 dark:text-white',
+    borderClass: 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50',
+  },
+  {
+    label: 'Perdas',
+    value: producao.perdas,
+    icon: 'delete_outline',
+    iconClass: 'text-red-500',
+    valueClass: 'text-red-600 dark:text-red-400',
+    borderClass: 'border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-500/5',
+  },
+  {
+    label: 'Previstos',
+    value: producao.previstos,
+    icon: 'schedule',
+    iconClass: 'text-blue-500',
+    valueClass: 'text-blue-600 dark:text-blue-400',
+    borderClass: 'border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-500/5',
+  },
+  {
+    label: 'Atrasados',
+    value: producao.atrasados,
+    icon: 'warning',
+    iconClass: 'text-amber-500',
+    valueClass: 'text-amber-600 dark:text-amber-400',
+    borderClass: 'border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-500/5',
+  },
+]
+
+const vendasMensais = [
+  { mes: 'Mar', valor: 15200 },
+  { mes: 'Abr', valor: 17800 },
+  { mes: 'Mai', valor: 16400 },
+  { mes: 'Jun', valor: 19200 },
+  { mes: 'Jul', valor: 21500 },
+  { mes: 'Ago', valor: 20100 },
+  { mes: 'Set', valor: 22800 },
+  { mes: 'Out', valor: 24200 },
+  { mes: 'Nov', valor: 23100 },
+  { mes: 'Dez', valor: 18900 },
+  { mes: 'Jan', valor: 20400 },
+  { mes: 'Fev', valor: 24580 },
+]
+
+const fazendas = [
+  { nome: 'Fazenda Central', ocupacao: 85, eficiencia: 92 },
+  { nome: 'Fazenda Norte', ocupacao: 62, eficiencia: 88 },
+  { nome: 'Fazenda Sul', ocupacao: 94, eficiencia: 76 },
+  { nome: 'Fazenda Leste', ocupacao: 45, eficiencia: 95 },
+  { nome: 'Fazenda Oeste', ocupacao: 73, eficiencia: 83 },
+  { nome: 'Fazenda Horizonte', ocupacao: 58, eficiencia: 90 },
+]
+
+// ─── Computed ────────────────────────────────────────────
+const currentRanking = computed(() => rankings[activeRankingTab.value] || [])
+
+const chartProducaoData = computed(() => ({
+  labels: producaoFases.map((f) => f.label),
+  datasets: [
+    {
+      data: producaoFases.map((f) => f.value),
+      backgroundColor: producaoFases.map((f) => f.color),
+      borderWidth: 0,
+      hoverOffset: 4,
+    },
+  ],
+}))
+
+const doughnutOptions = {
+  responsive: true,
+  maintainAspectRatio: true,
+  cutout: '72%',
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      padding: 12,
+      cornerRadius: 8,
+      titleFont: { size: 13, weight: 'bold' },
+      bodyFont: { size: 12 },
+    },
+  },
+}
+
+const chartVendasData = computed(() => ({
+  labels: vendasMensais.map((v) => v.mes),
+  datasets: [
+    {
+      data: vendasMensais.map((v) => v.valor),
+      backgroundColor: 'rgba(34, 197, 94, 0.7)',
+      hoverBackgroundColor: 'rgba(34, 197, 94, 0.9)',
+      borderRadius: 6,
+      borderSkipped: false,
+      maxBarThickness: 40,
+    },
+  ],
+}))
+
+const barOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: {
-      display: false
-    }
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      padding: 12,
+      cornerRadius: 8,
+      callbacks: {
+        label: (ctx) =>
+          new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ctx.raw),
+      },
+    },
   },
   scales: {
     y: {
       beginAtZero: true,
-      grid: {
-        color: 'rgba(0,0,0,0.05)'
-      }
+      grid: { color: 'rgba(0,0,0,0.04)' },
+      border: { display: false },
+      ticks: {
+        font: { size: 11 },
+        color: '#9CA3AF',
+        callback: (v) => (v >= 1000 ? `${v / 1000}k` : v),
+      },
     },
     x: {
-      grid: {
-        display: false
-      }
-    }
+      grid: { display: false },
+      border: { display: false },
+      ticks: { font: { size: 11 }, color: '#9CA3AF' },
+    },
+  },
+}
+
+// ─── Helpers ─────────────────────────────────────────────
+function formatKpiValue(kpi, animVal) {
+  const v = animVal ?? 0
+  if (kpi.format === 'currency') {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(v)
   }
+  if (kpi.format === 'percent') return `${Math.round(v)}%`
+  if (kpi.suffix) return `${Math.round(v).toLocaleString('pt-BR')} ${kpi.suffix}`
+  return Math.round(v).toLocaleString('pt-BR')
 }
 
-// Helpers
-function getStartOfWeek(date: Date): Date {
-  const d = new Date(date)
-  const day = d.getDay()
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-  d.setDate(diff)
-  return d
+function formatRankingValue(valor) {
+  if (activeRankingTab.value === 'vendidos') return `${valor} un`
+  return `${valor}%`
 }
 
-function getEndOfWeek(date: Date): Date {
-  const d = getStartOfWeek(date)
-  d.setDate(d.getDate() + 6)
-  return d
+function getRankColor(index) {
+  const colors = [
+    '#22C55E', '#3DD856', '#6BE05A', '#8DE45A', '#B0E85A',
+    '#D4E85A', '#E8D44A', '#E8B44A', '#E8884A', '#EF4444',
+  ]
+  return colors[index] || '#9CA3AF'
 }
 
-function periodoAnterior() {
-  periodoInicio.value = new Date(periodoInicio.value.getTime() - 7 * 24 * 60 * 60 * 1000)
-  periodoFim.value = new Date(periodoFim.value.getTime() - 7 * 24 * 60 * 60 * 1000)
-  loadDashboard()
+function sparklinePoints(data) {
+  if (!data?.length) return ''
+  const max = Math.max(...data)
+  const min = Math.min(...data)
+  const range = max - min || 1
+  return data
+    .map((v, i) => {
+      const x = (i / (data.length - 1)) * 64
+      const y = 26 - ((v - min) / range) * 22
+      return `${x},${y}`
+    })
+    .join(' ')
 }
 
-function proximoPeriodo() {
-  periodoInicio.value = new Date(periodoInicio.value.getTime() + 7 * 24 * 60 * 60 * 1000)
-  periodoFim.value = new Date(periodoFim.value.getTime() + 7 * 24 * 60 * 60 * 1000)
-  loadDashboard()
-}
-
-function formatarMoeda(valor: number) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(valor || 0)
-}
-
-function formatarPeriodo(data: Date) {
-  return data.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
+function sparklineArea(data) {
+  if (!data?.length) return ''
+  const max = Math.max(...data)
+  const min = Math.min(...data)
+  const range = max - min || 1
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * 64
+    const y = 26 - ((v - min) / range) * 22
+    return `${x},${y}`
   })
+  return `0,28 ${points.join(' ')} 64,28`
 }
 
-function formatarCNPJ(cnpj: string) {
-  if (!cnpj) return ''
-  const numeros = cnpj.replace(/\D/g, '')
-  if (numeros.length !== 14) return cnpj
-  return numeros.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+function getOcupacaoBarClass(ocupacao) {
+  if (ocupacao >= 90) return 'bg-red-500'
+  if (ocupacao >= 70) return 'bg-amber-500'
+  return 'bg-emerald-500'
 }
 
-function calcularPercentual(valor: number, total: number): number {
-  if (total === 0) return 0
-  return Math.round((valor / total) * 100)
+function getOcupacaoTextClass(ocupacao) {
+  if (ocupacao >= 90) return 'text-red-600 dark:text-red-400'
+  if (ocupacao >= 70) return 'text-amber-600 dark:text-amber-400'
+  return 'text-emerald-600 dark:text-emerald-400'
 }
 
-function formatarDataCurta(dateStr: string) {
-  if (!dateStr) return ''
-  const d = new Date(dateStr + 'T12:00:00')
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+function getEficienciaBadgeClass(eficiencia) {
+  if (eficiencia >= 90)
+    return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+  if (eficiencia >= 80)
+    return 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+  return 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
 }
 
-function getOcupacaoClass(ocupacao: number) {
-  if (ocupacao >= 90) return 'text-red-600'
-  if (ocupacao >= 70) return 'text-yellow-600'
-  return 'text-green-600'
-}
+// ─── Animations ──────────────────────────────────────────
+function animateCounters() {
+  const duration = 600
+  const startTime = performance.now()
 
-function selecionarTodas() {
-  if (todasSelecionadas.value) {
-    // Manter pelo menos uma selecionada
-    if (userCompanies.value.length > 0) {
-      selectedCompanyIds.value = [userCompanies.value[0].id]
-    }
-  } else {
-    selectAll()
-  }
-}
+  function tick(now) {
+    const elapsed = now - startTime
+    const progress = Math.min(elapsed / duration, 1)
+    const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
 
-// Click outside handler
-function handleClickOutside(event: MouseEvent) {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
-    showDropdown.value = false
-  }
-}
+    animatedValues.value = heroKpis.map((kpi) => kpi.value * eased)
 
-// Carregar dados
-async function loadDashboard() {
-  if (selectedCompanyIds.value.length === 0) {
-    resetData()
-    return
+    if (progress < 1) requestAnimationFrame(tick)
   }
 
-  loading.value = true
-  try {
-    const empresaIds = selectedCompanyIds.value
-    const inicio = periodoInicio.value.toISOString().split('T')[0]
-    const fim = periodoFim.value.toISOString().split('T')[0]
-    const hojeStr = new Date().toISOString().split('T')[0]
-
-    // Carregar tudo em paralelo
-    const [
-      producoesRes,
-      pedidosRes,
-      vendasRes,
-      fazendasRes,
-      produtosRes,
-      especiesRes
-    ] = await Promise.all([
-      // Produções
-      supabase
-        .from('producao')
-        .select('*, especies:especie_id (id, nome, codigo), fazendas:fazenda_id (id, nome, codigo)')
-        .in('empresa_id', empresaIds),
-
-      // Pedidos no período
-      supabase
-        .from('pedidos')
-        .select('*, pedido_itens (quantidade)')
-        .in('empresa_id', empresaIds)
-        .gte('data_entrega', inicio)
-        .lte('data_entrega', fim),
-
-      // Vendas
-      supabase
-        .from('vendas')
-        .select('*, venda_itens (quantidade)')
-        .in('empresa_id', empresaIds),
-
-      // Fazendas
-      supabase
-        .from('fazendas')
-        .select('*')
-        .in('empresa_id', empresaIds)
-        .eq('ativo', true)
-        .order('codigo'),
-
-      // Produtos
-      supabase
-        .from('produtos')
-        .select('*')
-        .in('empresa_id', empresaIds),
-
-      // Espécies
-      supabase
-        .from('especies')
-        .select('*')
-        .in('empresa_id', empresaIds)
-    ])
-
-    // Carregar dados do novo módulo de produção (tarefas, colheitas)
-    const [tarefasHojeRes, tarefasAtrasadasRes, colheitasProximasRes] = await Promise.all([
-      supabase
-        .from('tarefas')
-        .select('id, nome, bandejas, concluida, data_prevista, especies:especie_id (nome)')
-        .in('empresa_id', empresaIds)
-        .eq('data_prevista', hojeStr)
-        .order('concluida')
-        .limit(20),
-      supabase
-        .from('tarefas')
-        .select('id, nome, bandejas, data_prevista, especies:especie_id (nome)')
-        .in('empresa_id', empresaIds)
-        .eq('concluida', false)
-        .lt('data_prevista', hojeStr)
-        .order('data_prevista')
-        .limit(20),
-      supabase
-        .from('colheitas')
-        .select('id, data_colheita, status')
-        .in('empresa_id', empresaIds)
-        .gte('data_colheita', hojeStr)
-        .lte('data_colheita', new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0])
-        .order('data_colheita')
-        .limit(10)
-    ])
-
-    tarefasHoje.value = (tarefasHojeRes.data || []).map(t => ({
-      ...t,
-      especie_nome: t.especies?.nome || null
-    }))
-    tarefasAtrasadas.value = (tarefasAtrasadasRes.data || []).map(t => ({
-      ...t,
-      especie_nome: t.especies?.nome || null
-    }))
-    proximasColheitas.value = colheitasProximasRes.data || []
-
-    // Processar pedidos
-    const pedidos = pedidosRes.data || []
-    metricas.value.entregasProgramadas = pedidos.length
-    metricas.value.microverdesEntregar = pedidos.reduce((sum, p) => {
-      const itens = p.pedido_itens || []
-      return sum + itens.reduce((s: number, i: any) => s + (i.quantidade || 0), 0)
-    }, 0)
-    metricas.value.faturamentoPrevisto = pedidos.reduce((sum, p) => sum + (p.valor_total || 0), 0)
-
-    // Processar produções
-    const prods = producoesRes.data || []
-    const prodsNoPeriodo = prods.filter(p =>
-      (p.data_semeadura >= inicio && p.data_semeadura <= fim) ||
-      (p.data_colheita_prevista >= inicio && p.data_colheita_prevista <= fim)
-    )
-
-    // Totais
-    producao.value.total = prodsNoPeriodo.reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0)
-    producao.value.previstos = prodsNoPeriodo.filter(p => p.status === 'planejado').reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0)
-    producao.value.realizados = prodsNoPeriodo.filter(p => p.status === 'finalizado').reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0)
-    producao.value.atrasados = prodsNoPeriodo.filter(p => {
-      if (p.status === 'finalizado' || p.status === 'cancelado') return false
-      return p.data_colheita_prevista < hojeStr
-    }).reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0)
-    producao.value.perdas = prodsNoPeriodo.filter(p => p.status === 'cancelado').reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0)
-
-    // Por fase
-    const plantio = prodsNoPeriodo.filter(p => p.status === 'planejado')
-    const emLuz = prodsNoPeriodo.filter(p => ['germinando', 'vegetacao'].includes(p.status))
-    const colheitaProds = prodsNoPeriodo.filter(p => ['colhendo', 'finalizado'].includes(p.status))
-
-    producao.value.plantio = {
-      total: plantio.reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0),
-      perdas: 0,
-      previstos: plantio.reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0),
-      realizados: 0,
-      atrasados: 0
-    }
-
-    producao.value.luz = {
-      total: emLuz.reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0),
-      perdas: 0,
-      previstos: 0,
-      realizados: emLuz.reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0),
-      atrasados: 0
-    }
-
-    producao.value.colheita = {
-      total: colheitaProds.reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0),
-      perdas: 0,
-      previstos: 0,
-      realizados: colheitaProds.filter(p => p.status === 'finalizado').reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0),
-      atrasados: colheitaProds.filter(p => p.data_colheita_prevista < hojeStr && p.status !== 'finalizado').reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0)
-    }
-
-    // Vendas
-    const vendasData = vendasRes.data || []
-    const colhidos = prods.filter(p => p.status === 'finalizado')
-    const aColher = prods.filter(p => ['planejado', 'germinando', 'vegetacao', 'colhendo'].includes(p.status))
-
-    vendas.value.totalMicroverdes = prods.reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0)
-    vendas.value.colhido = colhidos.reduce((sum, p) => sum + (p.quantidade_colhida || p.quantidade_bandeja || 0), 0)
-    vendas.value.colher = aColher.reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0)
-    vendas.value.vendido = vendasData.reduce((sum, v) => {
-      const itens = v.venda_itens || []
-      return sum + itens.reduce((s: number, i: any) => s + (i.quantidade || 0), 0)
-    }, 0)
-    vendas.value.vender = Math.max(0, vendas.value.colhido - vendas.value.vendido)
-
-    // Eficiência
-    eficiencia.value.producao = producao.value.total > 0
-      ? Math.round((producao.value.realizados / producao.value.total) * 100)
-      : 100
-
-    const vendasNaoCanceladas = vendasData.filter(v => v.status !== 'cancelado')
-    eficiencia.value.vendas = vendas.value.colhido > 0
-      ? Math.round((vendas.value.vendido / vendas.value.colhido) * 100)
-      : 100
-    eficiencia.value.ticketMedio = vendasNaoCanceladas.length > 0
-      ? vendasNaoCanceladas.reduce((sum, v) => sum + (v.valor_total || 0), 0) / vendasNaoCanceladas.length
-      : 0
-
-    // Fazendas
-    const fazendasData = fazendasRes.data || []
-    const producoesAtivas = prods.filter(p => ['planejado', 'germinando', 'vegetacao', 'colhendo'].includes(p.status))
-
-    fazendas.value = fazendasData.map(f => {
-      const prodsFazenda = producoesAtivas.filter(p => p.fazenda_id === f.id)
-      const alocado = prodsFazenda.reduce((sum, p) => sum + (p.quantidade_bandeja || 0), 0)
-      const ocupacao = f.capacidade_bandejas > 0 ? Math.round((alocado / f.capacidade_bandejas) * 100) : 0
-      const finalizados = prods.filter(p => p.fazenda_id === f.id && p.status === 'finalizado')
-      const totalFazenda = prods.filter(p => p.fazenda_id === f.id)
-      const eficienciaProducao = totalFazenda.length > 0
-        ? Math.round((finalizados.length / totalFazenda.length) * 100)
-        : 0
-
-      return { ...f, alocado, ocupacao, eficienciaProducao }
-    })
-
-    // Custos e preços
-    const produtos = produtosRes.data || []
-    if (produtos.length > 0) {
-      const produtosComPreco = produtos.filter(p => p.preco > 0)
-      custos.value.precoMedio = produtosComPreco.length > 0
-        ? produtosComPreco.reduce((sum, p) => sum + (p.preco || 0), 0) / produtosComPreco.length
-        : 0
-      custos.value.custoMedio = 0
-      custos.value.margemBruta = custos.value.precoMedio > 0 && custos.value.custoMedio > 0
-        ? Math.round(((custos.value.precoMedio - custos.value.custoMedio) / custos.value.precoMedio) * 100)
-        : 100
-    }
-
-    // Eficiência por espécie
-    const especies = especiesRes.data || []
-    eficienciaPorEspecie.value = especies.map(e => {
-      const prodsEspecie = prods.filter(p => p.especie_id === e.id)
-      const finalizados = prodsEspecie.filter(p => p.status === 'finalizado')
-      const ef = prodsEspecie.length > 0
-        ? Math.round((finalizados.length / prodsEspecie.length) * 100)
-        : 0
-      return { id: e.id, nome: e.nome, eficiencia: ef }
-    }).filter(e => e.eficiencia > 0).slice(0, 5)
-
-    // Mais vendidos
-    const vendasPorEspecie: Record<string, { id: string; nome: string; quantidade: number }> = {}
-    prods.filter(p => p.status === 'finalizado').forEach(p => {
-      const especie = especies.find(e => e.id === p.especie_id)
-      if (especie) {
-        if (!vendasPorEspecie[especie.id]) {
-          vendasPorEspecie[especie.id] = { id: especie.id, nome: especie.nome, quantidade: 0 }
-        }
-        vendasPorEspecie[especie.id].quantidade += p.quantidade_colhida || p.quantidade_bandeja || 0
-      }
-    })
-    maisVendidos.value = Object.values(vendasPorEspecie)
-      .sort((a, b) => b.quantidade - a.quantidade)
-      .slice(0, 5)
-
-    // Margem por espécie
-    margemPorEspecie.value = especies.map(e => ({
-      id: e.id,
-      nome: e.nome,
-      margem: 100
-    })).slice(0, 5)
-
-    // Vendas mensais
-    vendasMensais.value = vendasData.map(v => ({
-      data_venda: v.data_venda,
-      quantidade_total: (v.venda_itens || []).reduce((s: number, i: any) => s + (i.quantidade || 0), 0)
-    }))
-
-  } catch (e: any) {
-    console.error('Erro ao carregar dashboard:', e)
-  } finally {
-    loading.value = false
-  }
+  requestAnimationFrame(tick)
 }
 
-function resetData() {
-  metricas.value = { microverdesEntregar: 0, entregasProgramadas: 0, faturamentoPrevisto: 0 }
-  producao.value = {
-    total: 0, perdas: 0, previstos: 0, realizados: 0, atrasados: 0,
-    plantio: { total: 0, perdas: 0, previstos: 0, realizados: 0, atrasados: 0 },
-    luz: { total: 0, perdas: 0, previstos: 0, realizados: 0, atrasados: 0 },
-    colheita: { total: 0, perdas: 0, previstos: 0, realizados: 0, atrasados: 0 }
-  }
-  vendas.value = { totalMicroverdes: 0, vendido: 0, vender: 0, colhido: 0, colher: 0 }
-  eficiencia.value = { producao: 100, microverdesPorPessoa: 0, vendas: 100, ticketMedio: 0 }
-  fazendas.value = []
-  custos.value = { custoMedio: 0, precoMedio: 0, margemBruta: 100 }
-  eficienciaPorEspecie.value = []
-  maisVendidos.value = []
-  margemPorEspecie.value = []
-  vendasMensais.value = []
-  tarefasHoje.value = []
-  tarefasAtrasadas.value = []
-  proximasColheitas.value = []
-}
+// ─── Lifecycle ───────────────────────────────────────────
+onMounted(() => {
+  animateCounters()
 
-// Watch
-watch(() => selectedCompanyIds.value, () => {
-  loadDashboard()
-}, { deep: true })
-
-// Lifecycle
-onMounted(async () => {
-  document.addEventListener('click', handleClickOutside)
-  await loadUserCompanies()
-  if (selectedCompanyIds.value.length > 0) {
-    loadDashboard()
-  }
+  nextTick(() => {
+    setTimeout(() => {
+      rankingBarAnimated.value = true
+    }, 300)
+  })
 })
 
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+watch(activeRankingTab, () => {
+  rankingBarAnimated.value = false
+  nextTick(() => {
+    setTimeout(() => {
+      rankingBarAnimated.value = true
+    }, 50)
+  })
 })
 </script>
+
+<style scoped>
+.kpi-card {
+  animation: fadeSlideUp 0.5s ease-out both;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ranking-list-enter-active {
+  transition: all 0.3s ease-out;
+}
+.ranking-list-leave-active {
+  transition: all 0.2s ease-in;
+}
+.ranking-list-enter-from {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+.ranking-list-leave-to {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+</style>

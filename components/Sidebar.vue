@@ -68,7 +68,7 @@
         @mouseleave="hideTooltip"
       >
         <span
-          class="material-icons text-lg transition-transform duration-300"
+          class="material-icons-outlined text-lg transition-transform duration-300"
           :class="{ 'rotate-180': isCollapsed }"
         >chevron_left</span>
       </button>
@@ -78,7 +78,7 @@
         @click="closeSidebar"
         class="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
       >
-        <span class="material-icons text-xl">close</span>
+        <span class="material-icons-outlined text-xl">close</span>
       </button>
     </div>
 
@@ -117,7 +117,7 @@
     <!-- Suporte -->
     <div class="sidebar-support">
       <button
-        @click="toggleSupport"
+        @click="openSupport"
         :class="[
           'sidebar-support-toggle group',
           isCollapsed ? 'sidebar-menu-item-collapsed' : ''
@@ -129,38 +129,7 @@
           support_agent
         </span>
         <span :class="['sidebar-menu-label', { 'lg:!hidden': isCollapsed }]">Suporte</span>
-        <span
-          :class="[
-            'material-icons text-xs text-gray-400 ml-auto transition-transform duration-200',
-            { 'lg:!hidden': isCollapsed, 'rotate-180': showSupportMenu }
-          ]"
-        >expand_more</span>
       </button>
-
-      <!-- Sub-itens expansíveis -->
-      <Transition
-        enter-active-class="transition-all duration-200 ease-out"
-        enter-from-class="opacity-0 max-h-0"
-        enter-to-class="opacity-100 max-h-24"
-        leave-active-class="transition-all duration-150 ease-in"
-        leave-from-class="opacity-100 max-h-24"
-        leave-to-class="opacity-0 max-h-0"
-      >
-        <div v-if="showSupportMenu && !isCollapsed" class="sidebar-support-items overflow-hidden">
-          <button @click="openHelp" class="sidebar-support-item group">
-            <span class="material-icons-outlined sidebar-menu-icon text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300">
-              menu_book
-            </span>
-            <span class="sidebar-menu-label">Central de Ajuda</span>
-          </button>
-          <button @click="openChat" class="sidebar-support-item group">
-            <span class="material-icons-outlined sidebar-menu-icon text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300">
-              chat
-            </span>
-            <span class="sidebar-menu-label">Falar com Atendente</span>
-          </button>
-        </div>
-      </Transition>
     </div>
 
     <!-- Footer: Empresa + Usuário -->
@@ -181,7 +150,6 @@
             <span v-else>{{ currentCompanyInitials }}</span>
           </div>
           <div :class="['sidebar-company-info', { 'lg:!hidden': isCollapsed }]">
-            <p class="sidebar-company-label">Empresa atual</p>
             <p class="sidebar-company-name">{{ currentCompanyName }}</p>
           </div>
           <span :class="['sidebar-company-icon material-icons-outlined transition-transform duration-200', { 'lg:!hidden': isCollapsed, 'rotate-180': showCompanyPopover }]">unfold_more</span>
@@ -230,14 +198,14 @@
                     </button>
                     <span
                       v-if="currentCompany?.id === empresa.id"
-                      class="material-icons text-primary text-lg shrink-0"
+                      class="material-icons-outlined text-primary text-lg shrink-0"
                     >check</span>
                     <button
                       @click.stop="openEditEmpresaModal(empresa)"
                       class="p-1 rounded-md text-gray-300 dark:text-gray-600 hover:text-primary hover:bg-primary/10 transition-all opacity-0 group-hover/item:opacity-100 shrink-0"
                       title="Editar empresa"
                     >
-                      <span class="material-icons text-base">edit</span>
+                      <span class="material-icons-outlined text-base">edit</span>
                     </button>
                   </div>
 
@@ -259,7 +227,7 @@
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm text-subtext-light dark:text-subtext-dark hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                     @click="openCreateEmpresaModal"
                   >
-                    <span class="material-icons text-lg">add</span>
+                    <span class="material-icons-outlined text-lg">add</span>
                     Adicionar empresa
                   </button>
                 </div>
@@ -268,9 +236,6 @@
           </Transition>
         </Teleport>
       </div>
-
-      <!-- Separador -->
-      <div :class="['sidebar-divider', { 'lg:!hidden': isCollapsed }]"></div>
 
       <!-- Usuário -->
       <div
@@ -283,7 +248,6 @@
         </div>
         <div :class="['sidebar-user-details', { 'lg:!hidden': isCollapsed }]">
           <span class="sidebar-user-name">{{ userName }}</span>
-          <span class="sidebar-user-email">{{ userEmail }}</span>
         </div>
         <button
           @click="handleLogout"
@@ -322,7 +286,7 @@
               <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Editar empresa</h2>
                 <button @click="closeEditEmpresaModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                  <span class="material-icons">close</span>
+                  <span class="material-icons-outlined">close</span>
                 </button>
               </div>
 
@@ -358,8 +322,8 @@
                       <div class="flex gap-3 items-center">
                         <input type="text" v-model="editEmpresaForm.cnpj" class="input flex-1" placeholder="00.000.000/0000-00" v-maska data-maska="##.###.###/####-##" />
                         <button type="button" @click="buscarCNPJ('edit')" :disabled="buscandoCNPJ" class="btn btn-secondary shrink-0">
-                          <span v-if="buscandoCNPJ" class="material-icons text-sm animate-spin">refresh</span>
-                          <span v-else class="material-icons text-sm">search</span>
+                          <span v-if="buscandoCNPJ" class="material-icons-outlined text-sm animate-spin">refresh</span>
+                          <span v-else class="material-icons-outlined text-sm">search</span>
                           {{ buscandoCNPJ ? 'Buscando...' : 'Buscar' }}
                         </button>
                         <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark whitespace-nowrap">
@@ -435,12 +399,12 @@
                   :disabled="savingEmpresa"
                   title="Excluir empresa"
                 >
-                  <span class="material-icons text-lg">delete</span>
+                  <span class="material-icons-outlined text-lg">delete</span>
                 </button>
                 <div class="flex items-center gap-3">
                   <button @click="closeEditEmpresaModal" class="btn btn-secondary" :disabled="savingEmpresa">Cancelar</button>
                   <button @click="updateEmpresa" class="btn btn-primary" :disabled="savingEmpresa">
-                    <span v-if="savingEmpresa" class="material-icons text-sm animate-spin">refresh</span>
+                    <span v-if="savingEmpresa" class="material-icons-outlined text-sm animate-spin">refresh</span>
                     {{ savingEmpresa ? 'Salvando...' : 'Salvar alterações' }}
                   </button>
                 </div>
@@ -478,7 +442,7 @@
               <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Nova empresa</h2>
                 <button @click="closeCreateEmpresaModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                  <span class="material-icons">close</span>
+                  <span class="material-icons-outlined">close</span>
                 </button>
               </div>
 
@@ -514,8 +478,8 @@
                       <div class="flex gap-3 items-center">
                         <input type="text" v-model="createEmpresaForm.cnpj" class="input flex-1" placeholder="00.000.000/0000-00" v-maska data-maska="##.###.###/####-##" />
                         <button type="button" @click="buscarCNPJ('create')" :disabled="buscandoCNPJ" class="btn btn-secondary shrink-0">
-                          <span v-if="buscandoCNPJ" class="material-icons text-sm animate-spin">refresh</span>
-                          <span v-else class="material-icons text-sm">search</span>
+                          <span v-if="buscandoCNPJ" class="material-icons-outlined text-sm animate-spin">refresh</span>
+                          <span v-else class="material-icons-outlined text-sm">search</span>
                           {{ buscandoCNPJ ? 'Buscando...' : 'Buscar' }}
                         </button>
                       </div>
@@ -583,7 +547,7 @@
               <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
                 <button @click="closeCreateEmpresaModal" class="btn btn-secondary" :disabled="savingEmpresa">Cancelar</button>
                 <button @click="saveEmpresa" class="btn btn-primary" :disabled="savingEmpresa || !createEmpresaForm.razao_social">
-                  <span v-if="savingEmpresa" class="material-icons text-sm animate-spin">refresh</span>
+                  <span v-if="savingEmpresa" class="material-icons-outlined text-sm animate-spin">refresh</span>
                   {{ savingEmpresa ? 'Criando...' : 'Criar empresa' }}
                 </button>
               </div>
@@ -1086,11 +1050,13 @@ const handleLogout = async () => {
 const baseMenuItems = [
   { label: 'Dashboard', path: '/', icon: 'home' },
   { label: 'Comercial', path: '/comercial', icon: 'storefront' },
-{ label: 'Clientes', path: '/clientes', icon: 'people' },
+  { label: 'Contratos', path: '/contratos', icon: 'description' },
+  { label: 'Clientes', path: '/clientes', icon: 'people' },
+  { label: 'Entregas', path: '/rotas', icon: 'local_shipping' },
   { label: 'Produção', path: '/producao', icon: 'factory' },
-  { label: 'Produtos', path: '/produtos', icon: 'local_florist' },
+  { label: 'Catálogo', path: '/produtos', icon: 'auto_stories' },
   { label: 'Fazendas', path: '/fazendas', icon: 'agriculture' },
-  { label: 'Sementes', path: '/sementes', icon: 'grass' },
+  { label: 'Monitoramento', path: '/monitoramento', icon: 'sensors' },
 ]
 
 // Menu (sem itens exclusivos por enquanto)
@@ -1112,28 +1078,9 @@ watch(() => route.path, () => {
 
 // ========== Suporte (Featurebase) ==========
 const { $featurebase } = useNuxtApp()
-const showSupportMenu = ref(false)
 
-function toggleSupport() {
-  if (isCollapsed.value) {
-    toggleCollapsed()
-    showSupportMenu.value = true
-  } else {
-    showSupportMenu.value = !showSupportMenu.value
-  }
-}
-
-function openHelp() {
-  console.log('[Featurebase] openHelp - $featurebase:', $featurebase)
-  console.log('[Featurebase] window.Featurebase type:', typeof window.Featurebase)
-  $featurebase?.showHelp()
-  closeSidebar()
-}
-
-function openChat() {
-  console.log('[Featurebase] openChat - $featurebase:', $featurebase)
-  console.log('[Featurebase] window.Featurebase type:', typeof window.Featurebase)
-  $featurebase?.showMessages()
+function openSupport() {
+  $featurebase?.show()
   closeSidebar()
 }
 </script>
@@ -1242,7 +1189,7 @@ function openChat() {
 
 /* Card da Empresa */
 .sidebar-company-card {
-  @apply flex items-center gap-3 px-3 py-3;
+  @apply flex items-center gap-3 px-3 py-2;
   @apply hover:bg-gray-50 dark:hover:bg-gray-800/50;
   @apply transition-colors cursor-pointer;
   @apply border-b border-border-light dark:border-border-dark dark:border-opacity-10;
@@ -1253,14 +1200,14 @@ function openChat() {
 }
 
 .sidebar-company-avatar {
-  @apply w-9 h-9 rounded-lg bg-primary/10;
+  @apply w-7 h-7 rounded-lg bg-primary/10;
   @apply flex items-center justify-center;
-  @apply text-xs font-bold text-primary;
+  @apply text-[10px] font-bold text-primary;
   @apply shrink-0 overflow-hidden;
 }
 
 .sidebar-company-info {
-  @apply flex-1 min-w-0;
+  @apply min-w-0;
 }
 
 .sidebar-company-label {
@@ -1272,7 +1219,7 @@ function openChat() {
 }
 
 .sidebar-company-icon {
-  @apply text-gray-400 group-hover:text-primary text-sm;
+  @apply text-gray-400 group-hover:text-primary text-sm ml-auto;
   @apply transition-colors duration-200;
 }
 
@@ -1283,7 +1230,7 @@ function openChat() {
 
 /* Card do Usuário */
 .sidebar-user-card {
-  @apply px-3 py-3 flex items-center gap-3;
+  @apply px-3 py-1.5 flex items-center gap-3;
 }
 
 .sidebar-user-card-collapsed {
@@ -1291,10 +1238,10 @@ function openChat() {
 }
 
 .sidebar-user-avatar {
-  @apply w-9 h-9 rounded-full;
+  @apply w-7 h-7 rounded-full;
   @apply bg-primary-light dark:bg-primary/20;
   @apply flex items-center justify-center;
-  @apply text-xs font-medium text-primary;
+  @apply text-[10px] font-medium text-primary;
   @apply shrink-0;
 }
 
@@ -1320,6 +1267,7 @@ function openChat() {
 /* Suporte */
 .sidebar-support {
   @apply border-t border-border-light dark:border-border-dark dark:border-opacity-10;
+  @apply px-3;
 }
 
 .sidebar-support-toggle {
@@ -1330,15 +1278,4 @@ function openChat() {
   @apply min-h-[40px];
 }
 
-.sidebar-support-items {
-  @apply px-3 pb-2 space-y-0.5;
-}
-
-.sidebar-support-item {
-  @apply w-full flex items-center gap-3 pl-6 pr-3 py-2 rounded-lg;
-  @apply text-subtext-light dark:text-subtext-dark;
-  @apply hover:bg-gray-100 dark:hover:bg-gray-800;
-  @apply transition-all duration-200;
-  @apply min-h-[36px];
-}
 </style>

@@ -7,7 +7,7 @@
         @click="adicionarEtapa"
         class="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium"
       >
-        <span class="material-icons text-sm">add</span>
+        <span class="material-icons-outlined text-sm">add</span>
         Adicionar etapa
       </button>
     </div>
@@ -27,7 +27,7 @@
             :disabled="index === 0"
             class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <span class="material-icons text-xs">keyboard_arrow_up</span>
+            <span class="material-icons-outlined text-xs">keyboard_arrow_up</span>
           </button>
           <button
             type="button"
@@ -35,7 +35,7 @@
             :disabled="index === etapas.length - 1"
             class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <span class="material-icons text-xs">keyboard_arrow_down</span>
+            <span class="material-icons-outlined text-xs">keyboard_arrow_down</span>
           </button>
         </div>
 
@@ -72,7 +72,7 @@
           @click="removerEtapa(index)"
           class="text-red-400 hover:text-red-600 shrink-0"
         >
-          <span class="material-icons text-sm">close</span>
+          <span class="material-icons-outlined text-sm">close</span>
         </button>
       </div>
     </div>

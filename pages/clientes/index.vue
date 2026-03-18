@@ -25,7 +25,7 @@
       </div>
       <!-- Direita: Botão -->
       <button @click="openCreateModal" class="btn btn-primary shrink-0 justify-center sm:justify-start">
-        <span class="material-icons text-sm">add</span>
+        <span class="material-icons-outlined text-sm">add</span>
         Novo cliente
       </button>
     </div>
@@ -114,7 +114,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <span class="material-icons text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Carregando...</p>
       </div>
 
@@ -126,7 +126,7 @@
           {{ searchQuery ? 'Tente ajustar a busca' : 'Comece cadastrando seu primeiro cliente' }}
         </p>
         <button v-if="!searchQuery" @click="openCreateModal" class="btn btn-primary">
-          <span class="material-icons text-sm">add</span>
+          <span class="material-icons-outlined text-sm">add</span>
           Novo cliente
         </button>
       </div>
@@ -151,7 +151,7 @@
               :disabled="currentPage === 1"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_left</span>
+              <span class="material-icons-outlined text-sm">chevron_left</span>
             </button>
             <span class="hidden xs:inline">Página</span>
             <input
@@ -167,7 +167,7 @@
               :disabled="currentPage === totalPages"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_right</span>
+              <span class="material-icons-outlined text-sm">chevron_right</span>
             </button>
           </div>
         </div>
@@ -202,7 +202,7 @@
                     {{ isEditing ? 'Editar cliente' : 'Cadastro de cliente' }}
                   </h2>
                   <button @click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <span class="material-icons">close</span>
+                    <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
 
@@ -244,7 +244,7 @@
                           :data-maska="formData.pessoa_fisica ? '###.###.###-##' : '##.###.###/####-##'"
                         />
                         <button @click="buscarCNPJ" class="btn btn-secondary whitespace-nowrap" :disabled="buscandoCNPJ">
-                          <span v-if="buscandoCNPJ" class="material-icons text-sm animate-spin">refresh</span>
+                          <span v-if="buscandoCNPJ" class="material-icons-outlined text-sm animate-spin">refresh</span>
                           {{ buscandoCNPJ ? 'Buscando...' : 'Buscar CNPJ' }}
                         </button>
                         <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark whitespace-nowrap">
@@ -309,7 +309,7 @@
                           @blur="buscarCep"
                         />
                         <span v-if="buscandoCep" class="text-sm text-subtext-light dark:text-subtext-dark">
-                          <span class="material-icons text-sm animate-spin">refresh</span>
+                          <span class="material-icons-outlined text-sm animate-spin">refresh</span>
                           Buscando...
                         </span>
                       </div>
@@ -479,7 +479,7 @@
                                 @blur="buscarCepEntrega"
                               />
                               <button @click="buscarCepEntrega" class="btn btn-primary px-3">
-                                <span class="material-icons text-sm">search</span>
+                                <span class="material-icons-outlined text-sm">search</span>
                               </button>
                             </div>
                           </div>
@@ -653,7 +653,7 @@
                   <div class="flex items-center gap-3">
                     <button @click="closeModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
                     <button @click="saveCliente" class="btn btn-primary" :disabled="saving || !isFormValid">
-                      <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
+                      <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
                       {{ saving ? 'Salvando...' : (isEditing ? 'Salvar alterações' : 'Cadastrar cliente') }}
                     </button>
                   </div>
@@ -699,7 +699,7 @@
                     </div>
                   </div>
                   <button @click="closeDetailsModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <span class="material-icons">close</span>
+                    <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
 
@@ -901,7 +901,7 @@
                   <div class="flex items-center gap-3">
                     <button @click="closeDetailsModal" class="btn btn-secondary">Fechar</button>
                     <button @click="openEditFromDetails" class="btn btn-primary">
-                      <span class="material-icons text-sm">edit</span>
+                      <span class="material-icons-outlined text-sm">edit</span>
                       Editar cliente
                     </button>
                   </div>

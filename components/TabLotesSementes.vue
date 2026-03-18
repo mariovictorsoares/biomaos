@@ -44,12 +44,12 @@
           class="hidden sm:flex btn btn-secondary text-sm shrink-0"
           title="Limpar filtros"
         >
-          <span class="material-icons text-sm">clear</span>
+          <span class="material-icons-outlined text-sm">clear</span>
         </button>
       </div>
       <!-- Direita: Botão -->
       <button @click="openCreateModal" class="btn btn-primary shrink-0 justify-center sm:justify-start">
-        <span class="material-icons text-sm">add</span>
+        <span class="material-icons-outlined text-sm">add</span>
         Novo lote
       </button>
     </div>
@@ -65,7 +65,7 @@
               <th class="table-header">
                 <button class="flex items-center gap-1 hover:text-text-light dark:hover:text-text-dark" @click="toggleSort('numero')">
                   Número do lote
-                  <span class="material-icons text-xs">{{ getSortIcon('numero') }}</span>
+                  <span class="material-icons-outlined text-xs">{{ getSortIcon('numero') }}</span>
                 </button>
               </th>
               <th class="table-header">Espécie</th>
@@ -75,7 +75,7 @@
               <th class="table-header text-center">
                 <button class="flex items-center gap-1 hover:text-text-light dark:hover:text-text-dark mx-auto" @click="toggleSort('validade')">
                   Validade
-                  <span class="material-icons text-xs">{{ getSortIcon('validade') }}</span>
+                  <span class="material-icons-outlined text-xs">{{ getSortIcon('validade') }}</span>
                 </button>
               </th>
               <th class="table-header text-center">Safra</th>
@@ -133,7 +133,7 @@
         >
           <div class="flex items-start gap-3">
             <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
-              <span class="material-icons">grain</span>
+              <span class="material-icons-outlined">grain</span>
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2">
@@ -166,7 +166,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <span class="material-icons text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Carregando...</p>
       </div>
 
@@ -178,7 +178,7 @@
           {{ searchQuery || hasActiveFilters ? 'Tente ajustar os filtros' : 'Comece criando seu primeiro lote de sementes' }}
         </p>
         <button v-if="!searchQuery && !hasActiveFilters" @click="openCreateModal" class="btn btn-primary">
-          <span class="material-icons text-sm">add</span>
+          <span class="material-icons-outlined text-sm">add</span>
           Novo lote
         </button>
       </div>
@@ -203,7 +203,7 @@
               :disabled="currentPage === 1"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_left</span>
+              <span class="material-icons-outlined text-sm">chevron_left</span>
             </button>
             <span class="hidden xs:inline">Página</span>
             <input
@@ -219,7 +219,7 @@
               :disabled="currentPage === totalPages"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_right</span>
+              <span class="material-icons-outlined text-sm">chevron_right</span>
             </button>
           </div>
         </div>
@@ -252,7 +252,7 @@
             <div class="sticky top-0 glass-panel border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between z-10">
               <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Cadastro de lote</h2>
               <button @click="closeCreateModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <span class="material-icons">close</span>
+                <span class="material-icons-outlined">close</span>
               </button>
             </div>
 
@@ -368,7 +368,7 @@
             <div class="sticky bottom-0 glass-panel border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
               <button @click="closeCreateModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
               <button @click="saveLote" class="btn btn-primary" :disabled="saving">
-                <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
+                <span v-if="saving" class="material-icons-outlined animate-spin text-sm">refresh</span>
                 {{ saving ? 'Salvando...' : 'Salvar lote' }}
               </button>
             </div>
@@ -405,7 +405,7 @@
             <div class="sticky top-0 glass-panel border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between z-10">
               <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Lotes de sementes</h2>
               <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <span class="material-icons">close</span>
+                <span class="material-icons-outlined">close</span>
               </button>
             </div>
 
@@ -534,7 +534,7 @@
             <div class="sticky bottom-0 glass-panel border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
               <button @click="closeEditModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
               <button @click="updateLote" class="btn btn-primary" :disabled="saving">
-                <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
+                <span v-if="saving" class="material-icons-outlined animate-spin text-sm">refresh</span>
                 {{ saving ? 'Salvando...' : 'Salvar alterações' }}
               </button>
             </div>
@@ -573,7 +573,7 @@
                   <div class="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100 dark:border-border-dark flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                       <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-primary/10 flex items-center justify-center text-sm sm:text-lg font-bold text-primary shrink-0">
-                        <span class="material-icons">grain</span>
+                        <span class="material-icons-outlined">grain</span>
                       </div>
                       <div class="min-w-0 flex-1">
                         <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-text-dark truncate">{{ selectedLote?.numero }}</h2>
@@ -581,7 +581,7 @@
                       </div>
                     </div>
                     <button @click="closeSlideover" class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shrink-0">
-                      <span class="material-icons text-xl">close</span>
+                      <span class="material-icons-outlined text-xl">close</span>
                     </button>
                   </div>
 
@@ -726,7 +726,7 @@
                   <!-- Footer -->
                   <div class="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-border-dark">
                     <button @click="openEditFromSlideover" class="w-full btn btn-primary justify-center">
-                      <span class="material-icons text-sm">edit</span>
+                      <span class="material-icons-outlined text-sm">edit</span>
                       Editar lote
                     </button>
                   </div>

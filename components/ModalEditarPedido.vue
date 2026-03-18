@@ -33,7 +33,7 @@
               @click="$emit('close')"
               class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
-              <span class="material-icons text-xl">close</span>
+              <span class="material-icons-outlined text-xl">close</span>
             </button>
           </div>
 

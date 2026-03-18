@@ -65,7 +65,7 @@
             class="flex-1 btn btn-primary justify-center text-sm"
             :disabled="!canSave || saving"
           >
-            <span v-if="saving" class="material-icons text-sm animate-spin mr-2">refresh</span>
+            <span v-if="saving" class="material-icons-outlined text-sm animate-spin mr-2">refresh</span>
             Salvar
           </button>
         </div>

@@ -56,7 +56,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-16">
-        <span class="material-icons text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+        <span class="material-icons-outlined text-5xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
         <p class="text-sm text-subtext-light dark:text-subtext-dark mt-3">Carregando incidentes...</p>
       </div>
 
@@ -72,7 +72,7 @@
                 <th class="table-header font-medium text-center whitespace-nowrap cursor-pointer hover:text-text-light dark:hover:text-text-dark select-none" @click="toggleSort('data_registro')">
                   <div class="flex items-center justify-center gap-0.5">
                     Data
-                    <span v-if="sortField === 'data_registro'" class="material-icons text-[10px]">{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                    <span v-if="sortField === 'data_registro'" class="material-icons-outlined text-[10px]">{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
                   </div>
                 </th>
                 <th class="table-header font-medium whitespace-nowrap">Notas</th>
@@ -125,11 +125,11 @@
           <!-- Info Principal -->
           <div class="flex items-center gap-3 mb-3">
             <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
-              <span class="material-icons text-sm text-red-500">warning</span>
+              <span class="material-icons-outlined text-sm text-red-500">warning</span>
             </div>
             <div class="min-w-0 flex-1">
               <p class="font-semibold text-sm text-text-light dark:text-text-dark truncate">{{ incidente.especies?.nome || '-' }}</p>
-              <p class="text-xs text-subtext-light dark:text-subtext-dark truncate">{{ incidente.notas || 'Sem observacoes' }}</p>
+              <p class="text-xs text-subtext-light dark:text-subtext-dark truncate">{{ incidente.notas || 'Sem observações' }}</p>
             </div>
           </div>
 
@@ -177,7 +177,7 @@
             :disabled="currentPage === 1"
             class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <span class="material-icons text-sm">chevron_left</span>
+            <span class="material-icons-outlined text-sm">chevron_left</span>
           </button>
           <span>Página</span>
           <input
@@ -193,7 +193,7 @@
             :disabled="currentPage === totalPages"
             class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <span class="material-icons text-sm">chevron_right</span>
+            <span class="material-icons-outlined text-sm">chevron_right</span>
           </button>
         </div>
       </div>
@@ -225,7 +225,7 @@
               <div class="px-6 py-4 border-b border-border-light dark:border-border-dark flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Novo Incidente</h2>
                 <button @click="closeNovoIncidenteModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                  <span class="material-icons">close</span>
+                  <span class="material-icons-outlined">close</span>
                 </button>
               </div>
 
@@ -298,7 +298,7 @@
               <div class="px-6 py-4 border-t border-border-light dark:border-border-dark flex items-center justify-end gap-3">
                 <button @click="closeNovoIncidenteModal" class="btn btn-secondary">Voltar</button>
                 <button @click="salvarNovoIncidente" class="btn btn-primary" :disabled="saving || !isFormValid">
-                  <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
+                  <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
                   {{ saving ? 'Salvando...' : 'Registrar Incidente' }}
                 </button>
               </div>

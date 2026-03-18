@@ -2,7 +2,7 @@
   <div>
     <!-- Loading do perfil -->
     <div v-if="loadingPerfil" class="text-center py-20">
-      <span class="material-icons text-4xl text-primary animate-spin">refresh</span>
+      <span class="material-icons-outlined text-4xl text-primary animate-spin">refresh</span>
       <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Carregando...</p>
     </div>
 
@@ -12,7 +12,7 @@
       <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-2">Acesso restrito</h2>
       <p class="text-subtext-light dark:text-subtext-dark mb-6">Você não tem permissão para acessar esta página.</p>
       <NuxtLink to="/" class="btn btn-primary">
-        <span class="material-icons text-sm">arrow_back</span>
+        <span class="material-icons-outlined text-sm">arrow_back</span>
         Voltar ao Dashboard
       </NuxtLink>
     </div>
@@ -50,7 +50,7 @@
         </div>
         <!-- Direita: Botão -->
         <button @click="openCreateModal" class="btn btn-primary shrink-0 justify-center sm:justify-start">
-          <span class="material-icons text-sm">add</span>
+          <span class="material-icons-outlined text-sm">add</span>
           Novo usuário
         </button>
       </div>
@@ -160,7 +160,7 @@
 
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-12">
-          <span class="material-icons text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
+          <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
           <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Carregando...</p>
         </div>
 
@@ -172,7 +172,7 @@
             Comece adicionando seu primeiro usuário
           </p>
           <button @click="openCreateModal" class="btn btn-primary">
-            <span class="material-icons text-sm">add</span>
+            <span class="material-icons-outlined text-sm">add</span>
             Novo usuário
           </button>
         </div>
@@ -197,7 +197,7 @@
                 :disabled="currentPage === 1"
                 class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <span class="material-icons text-sm">chevron_left</span>
+                <span class="material-icons-outlined text-sm">chevron_left</span>
               </button>
               <span class="hidden xs:inline">Página</span>
               <input
@@ -213,7 +213,7 @@
                 :disabled="currentPage === totalPages"
                 class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <span class="material-icons text-sm">chevron_right</span>
+                <span class="material-icons-outlined text-sm">chevron_right</span>
               </button>
             </div>
           </div>
@@ -224,7 +224,7 @@
       <div v-if="convitesPendentes.length > 0" class="card mt-6">
         <div class="p-3 sm:p-4 border-b border-border-light dark:border-border-dark">
           <div class="flex items-center gap-2">
-            <span class="material-icons text-amber-500 text-xl">schedule</span>
+            <span class="material-icons-outlined text-amber-500 text-xl">schedule</span>
             <h2 class="text-xs sm:text-sm font-medium text-subtext-light dark:text-subtext-dark uppercase tracking-wider">
               Convites Pendentes ({{ convitesPendentes.length }})
             </h2>
@@ -272,15 +272,15 @@
                       title="Reenviar convite"
                       :disabled="resendingId === convite.id"
                     >
-                      <span v-if="resendingId === convite.id" class="material-icons text-lg animate-spin">refresh</span>
-                      <span v-else class="material-icons text-lg">send</span>
+                      <span v-if="resendingId === convite.id" class="material-icons-outlined text-lg animate-spin">refresh</span>
+                      <span v-else class="material-icons-outlined text-lg">send</span>
                     </button>
                     <button
                       @click="cancelInvite(convite)"
                       class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                       title="Cancelar convite"
                     >
-                      <span class="material-icons text-lg">close</span>
+                      <span class="material-icons-outlined text-lg">close</span>
                     </button>
                   </div>
                 </td>
@@ -315,14 +315,14 @@
                   class="p-1.5 text-gray-400 hover:text-primary rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   :disabled="resendingId === convite.id"
                 >
-                  <span v-if="resendingId === convite.id" class="material-icons text-lg animate-spin">refresh</span>
-                  <span v-else class="material-icons text-lg">send</span>
+                  <span v-if="resendingId === convite.id" class="material-icons-outlined text-lg animate-spin">refresh</span>
+                  <span v-else class="material-icons-outlined text-lg">send</span>
                 </button>
                 <button
                   @click="cancelInvite(convite)"
                   class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
-                  <span class="material-icons text-lg">close</span>
+                  <span class="material-icons-outlined text-lg">close</span>
                 </button>
               </div>
             </div>
@@ -356,7 +356,7 @@
                   <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between shrink-0">
                     <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Novo usuário</h2>
                     <button @click="closeCreateModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                      <span class="material-icons">close</span>
+                      <span class="material-icons-outlined">close</span>
                     </button>
                   </div>
 
@@ -469,7 +469,7 @@
                     <!-- Aviso sobre convite -->
                     <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/50">
                       <div class="flex items-start gap-3">
-                        <span class="material-icons text-blue-500 text-xl">mail_outline</span>
+                        <span class="material-icons-outlined text-blue-500 text-xl">mail_outline</span>
                         <div>
                           <p class="text-sm font-medium text-blue-800 dark:text-blue-300">Convite por e-mail</p>
                           <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">
@@ -484,8 +484,8 @@
                   <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3 shrink-0">
                     <button @click="closeCreateModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
                     <button @click="createUsuario" class="btn btn-primary" :disabled="saving || !canCreate">
-                      <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
-                      <span v-else class="material-icons text-sm">send</span>
+                      <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
+                      <span v-else class="material-icons-outlined text-sm">send</span>
                       {{ saving ? 'Enviando...' : 'Enviar convite' }}
                     </button>
                   </div>
@@ -522,7 +522,7 @@
                   <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between shrink-0">
                     <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Editar usuário</h2>
                     <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                      <span class="material-icons">close</span>
+                      <span class="material-icons-outlined">close</span>
                     </button>
                   </div>
 
@@ -645,7 +645,7 @@
                   <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3 shrink-0">
                     <button @click="closeEditModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
                     <button @click="updateUsuario" class="btn btn-primary" :disabled="saving">
-                      <span v-if="saving" class="material-icons text-sm animate-spin">refresh</span>
+                      <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
                       {{ saving ? 'Salvando...' : 'Salvar alterações' }}
                     </button>
                   </div>
@@ -693,7 +693,7 @@
                         </div>
                       </div>
                       <button @click="closeDetailsSlideover" class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shrink-0">
-                        <span class="material-icons text-xl">close</span>
+                        <span class="material-icons-outlined text-xl">close</span>
                       </button>
                     </div>
 
@@ -766,7 +766,7 @@
                             Empresas vinculadas ({{ selectedUsuarioEmpresas.length }})
                           </h3>
                           <div v-if="loadingEmpresas" class="text-center py-4">
-                            <span class="material-icons text-2xl text-gray-300 animate-spin">refresh</span>
+                            <span class="material-icons-outlined text-2xl text-gray-300 animate-spin">refresh</span>
                           </div>
                           <div v-else-if="selectedUsuarioEmpresas.length === 0" class="text-center py-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                             <span class="material-icons-outlined text-3xl text-gray-300 dark:text-gray-600 mb-2">business</span>
@@ -797,7 +797,7 @@
                     <!-- Footer -->
                     <div class="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-border-dark">
                       <button @click="openEditFromSlideover" class="w-full btn btn-primary justify-center">
-                        <span class="material-icons text-sm">edit</span>
+                        <span class="material-icons-outlined text-sm">edit</span>
                         Editar usuário
                       </button>
                     </div>
@@ -1032,7 +1032,7 @@ function getInitials(name) {
 function getPerfilLabel(perfil) {
   const labels = {
     admin: 'Administrador',
-    user: 'Usuario'
+    user: 'Usuário'
   }
   return labels[perfil] || 'Usuário'
 }

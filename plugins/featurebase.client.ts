@@ -14,68 +14,72 @@ export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
   const appId = config.public.featurebaseAppId as string
 
+  const noopFeaturebase = {
+    show: () => {},
+    showHelp: () => {},
+    showMessages: () => {},
+    showNewMessage: (_text?: string) => {},
+    hide: () => {},
+  }
+
   if (!appId) {
-    console.warn('[Featurebase] FEATUREBASE_APP_ID não configurado')
-    return {
-      provide: {
-        featurebase: {
-          showHelp: () => {},
-          showMessages: () => {},
-          showNewMessage: (_text?: string) => {},
-          hide: () => {},
-          setTheme: (_theme: 'light' | 'dark') => {},
-        }
-      }
-    }
+    return { provide: { featurebase: noopFeaturebase } }
   }
 
-  // Queue de chamadas antes do SDK carregar
-  if (typeof window.Featurebase !== 'function') {
-    window.Featurebase = function () {
-      (window.Featurebase.q = window.Featurebase.q || []).push(arguments)
+  // Força widget a colar no bottom — espera SDK criar o wrapper, aplica uma vez
+  const observer = new MutationObserver((_mutations, obs) => {
+    const wrapper = document.getElementById('featurebase-iframe-wrapper')
+    if (wrapper) {
+      wrapper.style.setProperty('--fb-element-bottom', '0px')
+      obs.disconnect() // para de observar após aplicar
     }
-  }
-
-  // Injeta script do SDK
-  if (!document.getElementById('featurebase-sdk')) {
-    const script = document.createElement('script')
-    script.id = 'featurebase-sdk'
-    script.src = 'https://do.featurebase.app/js/sdk.js'
-    script.async = true
-    document.head.appendChild(script)
-  }
-
-  // Boot com launcher padrão escondido
-  const user = useSupabaseUser()
-
-  const bootMessenger = () => {
-    const bootConfig: Record<string, any> = {
-      appId,
-      theme: 'dark',
-      language: 'pt',
-      hideDefaultLauncher: true,
-    }
-
-    // Identifica usuário se logado
-    if (user.value) {
-      bootConfig.email = user.value.email
-      bootConfig.userId = user.value.id
-    }
-
-    window.Featurebase('boot', bootConfig)
-  }
-
-  bootMessenger()
-  console.log('[Featurebase] Boot realizado com appId:', appId)
-
-  // Re-boot quando usuário loga/desloga para atualizar identificação
-  watch(user, () => {
-    bootMessenger()
   })
+  observer.observe(document.body, { childList: true, subtree: true })
+
+  const user = useSupabaseUser()
+  let sdkReady = false
+  let identified = false
+
+  const identifyUser = () => {
+    if (!sdkReady || identified || !user.value) return
+    window.Featurebase('identify', {
+      organization: 'fazendasbioma',
+      email: user.value.email,
+      name: user.value.user_metadata?.full_name || user.value.email?.split('@')[0],
+      userId: user.value.id,
+    })
+    identified = true
+  }
+
+  // Carrega SDK
+  const script = document.createElement('script')
+  script.id = 'featurebase-sdk'
+  script.src = 'https://do.featurebase.app/js/sdk.js'
+  script.async = true
+  script.onload = () => {
+    sdkReady = true
+    window.Featurebase('boot', {
+      appId,
+      organization: 'fazendasbioma',
+      language: 'pt-BR',
+      placement: 'right',
+      verticalPadding: 0,
+      hideDefaultLauncher: true,
+    })
+    identifyUser()
+  }
+
+  const existing = document.getElementById('featurebase-sdk')
+  if (existing) existing.remove()
+  document.head.appendChild(script)
+
+  // Identifica quando o user ficar disponível (login após boot)
+  watch(user, () => identifyUser())
 
   return {
     provide: {
       featurebase: {
+        show: () => window.Featurebase('show'),
         showHelp: () => window.Featurebase('show', 'help'),
         showMessages: () => window.Featurebase('show', 'messages'),
         showNewMessage: (text?: string) => {
@@ -86,7 +90,6 @@ export default defineNuxtPlugin(() => {
           }
         },
         hide: () => window.Featurebase('hide'),
-        setTheme: (theme: 'light' | 'dark') => window.Featurebase('setTheme', theme),
       }
     }
   }

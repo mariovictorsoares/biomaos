@@ -1,71 +1,71 @@
 <template>
-  <div class="w-full max-w-md">
+  <div class="auth-animate-stagger">
     <!-- Loading -->
     <div v-if="loadingInvite" class="text-center py-12">
-      <span class="material-icons text-4xl text-primary animate-spin">refresh</span>
-      <p class="text-gray-500 dark:text-gray-400 mt-4">Verificando convite...</p>
+      <span class="material-icons-outlined text-4xl text-[#568D43] animate-spin">refresh</span>
+      <p class="text-gray-500 mt-4">Verificando convite...</p>
     </div>
 
-    <!-- Convite invalido ou expirado -->
+    <!-- Convite inválido ou expirado -->
     <div v-else-if="inviteError" class="text-center py-8">
       <span class="material-icons-outlined text-6xl text-red-400 mb-4">error_outline</span>
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">
         Convite inválido
       </h2>
-      <p class="text-gray-500 dark:text-gray-400 mb-6">
+      <p class="text-gray-500 mb-6">
         {{ inviteError }}
       </p>
-      <NuxtLink to="/auth/login" class="btn btn-primary">
+      <NuxtLink to="/auth/login" class="auth-btn-primary inline-flex items-center justify-center gap-2 px-6 !w-auto">
         Ir para o login
       </NuxtLink>
     </div>
 
-    <!-- Formulário de registro -->
+    <!-- Formulario de registro -->
     <template v-else>
       <!-- Header -->
-      <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+      <div class="mb-6">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">
           Criar sua conta
         </h2>
-        <p class="text-gray-500 dark:text-gray-400">
-          Olá, <strong>{{ convite.nome }}</strong>! Complete seu cadastro para acessar o sistema.
+        <p class="text-gray-500">
+          Olá, <strong class="text-gray-700">{{ convite.nome }}</strong>! Complete seu cadastro para acessar o sistema.
         </p>
       </div>
 
       <!-- Mensagem de erro -->
       <div
         v-if="errorMessage"
-        class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl flex items-start gap-3"
+        class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3"
       >
-        <span class="material-icons text-red-500 text-xl shrink-0">error_outline</span>
-        <p class="text-sm text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+        <span class="material-icons-outlined text-red-500 text-xl shrink-0">error_outline</span>
+        <p class="text-sm text-red-700">{{ errorMessage }}</p>
       </div>
 
       <!-- Mensagem de sucesso -->
       <div
         v-if="successMessage"
-        class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-xl flex items-start gap-3"
+        class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3"
       >
-        <span class="material-icons text-green-500 text-xl shrink-0">check_circle</span>
-        <p class="text-sm text-green-600 dark:text-green-400">{{ successMessage }}</p>
+        <span class="material-icons-outlined text-green-500 text-xl shrink-0">check_circle</span>
+        <p class="text-sm text-green-700">{{ successMessage }}</p>
       </div>
 
       <!-- Info do convite -->
-      <div class="mb-6 p-4 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-xl">
+      <div class="mb-6 p-4 bg-[#568D43]/5 border border-[#568D43]/15 rounded-xl">
         <div class="flex items-center gap-3">
-          <span class="material-icons text-primary text-xl">badge</span>
+          <span class="material-icons-outlined text-[#568D43] text-xl">badge</span>
           <div>
-            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ convite.nome }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">{{ convite.email }} - {{ convite.perfil === 'admin' ? 'Administrador' : 'Usuário' }}</p>
+            <p class="text-sm font-medium text-gray-900">{{ convite.nome }}</p>
+            <p class="text-xs text-gray-500">{{ convite.email }} - {{ convite.perfil === 'admin' ? 'Administrador' : 'Usuário' }}</p>
           </div>
         </div>
       </div>
 
-      <!-- Formulário -->
+      <!-- Formulario -->
       <form @submit.prevent="handleRegister" class="space-y-5">
         <!-- Email (readonly) -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
             E-mail
           </label>
           <div class="relative">
@@ -76,14 +76,14 @@
               type="email"
               :value="convite.email"
               readonly
-              class="w-full h-12 pl-12 pr-4 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-500 dark:text-gray-400 cursor-not-allowed"
+              class="auth-input pl-12 !bg-gray-100 cursor-not-allowed text-gray-500"
             />
           </div>
         </div>
 
         <!-- Senha -->
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
             Crie uma senha
           </label>
           <div class="relative">
@@ -97,13 +97,13 @@
               placeholder="Mínimo 6 caracteres"
               required
               minlength="6"
-              class="w-full h-12 pl-12 pr-12 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#568D43] focus:border-transparent transition-all"
+              class="auth-input pl-12 pr-12"
               :disabled="loading"
             />
             <button
               type="button"
               @click="showPassword = !showPassword"
-              class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <span class="material-icons-outlined text-xl">
                 {{ showPassword ? 'visibility_off' : 'visibility' }}
@@ -114,7 +114,7 @@
 
         <!-- Confirmar Senha -->
         <div>
-          <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
             Confirme a senha
           </label>
           <div class="relative">
@@ -128,13 +128,13 @@
               placeholder="Repita a senha"
               required
               minlength="6"
-              class="w-full h-12 pl-12 pr-12 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#568D43] focus:border-transparent transition-all"
+              class="auth-input pl-12 pr-12"
               :disabled="loading"
             />
             <button
               type="button"
               @click="showConfirmPassword = !showConfirmPassword"
-              class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <span class="material-icons-outlined text-xl">
                 {{ showConfirmPassword ? 'visibility_off' : 'visibility' }}
@@ -143,11 +143,11 @@
           </div>
         </div>
 
-        <!-- Botão de Registro -->
+        <!-- Botao de Registro -->
         <button
           type="submit"
           :disabled="loading || !canSubmit"
-          class="w-full h-12 bg-[#568D43] hover:bg-[#4a7a3a] text-white font-semibold rounded-xl shadow-lg shadow-[#568D43]/25 hover:shadow-[#568D43]/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          class="auth-btn-primary flex items-center justify-center gap-2"
         >
           <span v-if="loading" class="flex items-center gap-2">
             <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -158,13 +158,13 @@
           </span>
           <span v-else class="flex items-center gap-2">
             Criar conta
-            <span class="material-icons text-xl">arrow_forward</span>
+            <span class="material-icons-outlined text-xl">arrow_forward</span>
           </span>
         </button>
       </form>
 
       <!-- Link para login -->
-      <p class="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+      <p class="mt-6 text-center text-sm text-gray-500">
         Já tem uma conta?
         <NuxtLink to="/auth/login" class="text-[#568D43] hover:text-[#4a7a3a] font-medium transition-colors">
           Faça login
@@ -176,7 +176,8 @@
 
 <script setup>
 definePageMeta({
-  layout: 'auth'
+  layout: 'auth',
+  pageTransition: { name: 'auth-page', mode: 'out-in' }
 })
 
 const route = useRoute()
@@ -199,7 +200,6 @@ const canSubmit = computed(() => {
   return password.value.length >= 6 && password.value === confirmPassword.value
 })
 
-// Verificar token do convite
 onMounted(async () => {
   const token = route.query.token
 
@@ -223,7 +223,6 @@ onMounted(async () => {
       return
     }
 
-    // Verificar se expirou
     if (new Date(data.expires_at) < new Date()) {
       inviteError.value = 'Este convite expirou. Solicite um novo convite.'
       loadingInvite.value = false
@@ -254,7 +253,6 @@ const handleRegister = async () => {
   errorMessage.value = ''
 
   try {
-    // Criar usuário no Supabase Auth
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: convite.value.email,
       password: password.value,
@@ -267,7 +265,6 @@ const handleRegister = async () => {
 
     if (signUpError) throw signUpError
 
-    // Criar preferencias do usuario
     if (signUpData.user) {
       const { error: prefError } = await supabase.from('user_preferences').insert({
         user_id: signUpData.user.id,
@@ -288,7 +285,6 @@ const handleRegister = async () => {
         console.error('Erro ao salvar preferencias:', prefError)
       }
 
-      // Atualizar status do convite
       await supabase
         .from('convites_usuario')
         .update({ status: 'accepted', accepted_at: new Date().toISOString() })
@@ -297,7 +293,6 @@ const handleRegister = async () => {
 
     successMessage.value = 'Conta criada com sucesso! Redirecionando...'
 
-    // Redirecionar para o dashboard apos 2 segundos
     setTimeout(() => {
       router.push('/')
     }, 2000)

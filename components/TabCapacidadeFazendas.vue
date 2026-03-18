@@ -5,7 +5,7 @@
       <div class="card p-4">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
-            <span class="material-icons text-blue-500 text-[18px]">agriculture</span>
+            <span class="material-icons-outlined text-blue-500 text-[18px]">agriculture</span>
           </div>
           <div>
             <p class="text-xs text-subtext-light dark:text-subtext-dark">Fazendas</p>
@@ -16,7 +16,7 @@
       <div class="card p-4">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-            <span class="material-icons text-primary text-[18px]">grid_view</span>
+            <span class="material-icons-outlined text-primary text-[18px]">grid_view</span>
           </div>
           <div>
             <p class="text-xs text-subtext-light dark:text-subtext-dark">Capacidade Total</p>
@@ -29,7 +29,7 @@
           <div class="w-9 h-9 rounded-lg flex items-center justify-center"
             :class="ocupacaoSemanal > 80 ? 'bg-red-500/10 dark:bg-red-500/20' : ocupacaoSemanal > 50 ? 'bg-yellow-500/10 dark:bg-yellow-500/20' : 'bg-green-500/10 dark:bg-green-500/20'"
           >
-            <span class="material-icons text-[18px]"
+            <span class="material-icons-outlined text-[18px]"
               :class="ocupacaoSemanal > 80 ? 'text-red-500' : ocupacaoSemanal > 50 ? 'text-yellow-500' : 'text-green-500'"
             >speed</span>
           </div>
@@ -44,7 +44,7 @@
           <div class="w-9 h-9 rounded-lg flex items-center justify-center"
             :class="ocupacaoMensal > 80 ? 'bg-red-500/10 dark:bg-red-500/20' : ocupacaoMensal > 50 ? 'bg-yellow-500/10 dark:bg-yellow-500/20' : 'bg-green-500/10 dark:bg-green-500/20'"
           >
-            <span class="material-icons text-[18px]"
+            <span class="material-icons-outlined text-[18px]"
               :class="ocupacaoMensal > 80 ? 'text-red-500' : ocupacaoMensal > 50 ? 'text-yellow-500' : 'text-green-500'"
             >calendar_month</span>
           </div>
@@ -64,9 +64,9 @@
           @click="showMonthPicker = !showMonthPicker"
           class="flex items-center gap-2 px-3 py-2 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-card-dark hover:border-primary/50 transition-colors"
         >
-          <span class="material-icons text-primary text-[18px]">calendar_month</span>
+          <span class="material-icons-outlined text-primary text-[18px]">calendar_month</span>
           <span class="text-sm font-medium text-text-light dark:text-text-dark capitalize">{{ mesFormatado }}</span>
-          <span class="material-icons text-subtext-light dark:text-subtext-dark text-[16px]">unfold_more</span>
+          <span class="material-icons-outlined text-subtext-light dark:text-subtext-dark text-[16px]">unfold_more</span>
         </button>
         <!-- Dropdown mês/ano -->
         <div
@@ -76,11 +76,11 @@
           <!-- Ano -->
           <div class="flex items-center justify-between mb-3">
             <button @click="pickerYear--" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <span class="material-icons text-[18px] text-subtext-light dark:text-subtext-dark">chevron_left</span>
+              <span class="material-icons-outlined text-[18px] text-subtext-light dark:text-subtext-dark">chevron_left</span>
             </button>
             <span class="text-sm font-semibold text-text-light dark:text-text-dark">{{ pickerYear }}</span>
             <button @click="pickerYear++" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <span class="material-icons text-[18px] text-subtext-light dark:text-subtext-dark">chevron_right</span>
+              <span class="material-icons-outlined text-[18px] text-subtext-light dark:text-subtext-dark">chevron_right</span>
             </button>
           </div>
           <!-- Meses grid -->
@@ -102,53 +102,42 @@
         </div>
       </div>
 
-      <!-- Semanas segmented -->
-      <div class="relative flex items-center gap-1.5">
-        <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
-          <button
-            v-for="semana in semanas"
-            :key="semana.numero"
-            @click="selectedSemana = semana.numero"
-            @mouseenter="hoveredSemana = semana.numero"
-            @mouseleave="hoveredSemana = null"
-            :class="[
-              'relative px-3 py-1.5 text-xs font-medium rounded-md transition-all focus:outline-none',
-              selectedSemana === semana.numero
-                ? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
-                : 'text-subtext-light dark:text-subtext-dark hover:text-text-light dark:hover:text-text-dark'
-            ]"
-          >
-            S{{ semana.numero }}
-          </button>
-        </div>
-        <!-- Mini calendário tooltip -->
+      <!-- Seletor de Semana (dropdown) -->
+      <div class="relative">
+        <button
+          @click="showWeekPicker = !showWeekPicker"
+          class="flex items-center gap-2 px-3 py-2 h-[38px] text-sm font-medium border border-border-light dark:border-border-dark rounded-lg bg-white dark:bg-gray-800 text-text-light dark:text-text-dark hover:border-primary dark:hover:border-primary transition-colors cursor-pointer"
+        >
+          <span class="material-icons-outlined text-primary text-base">date_range</span>
+          <span>Semana {{ selectedSemana.toString().padStart(2, '0') }}</span>
+          <span class="text-xs text-subtext-light dark:text-subtext-dark">({{ selectedSemanaRange }})</span>
+          <span class="material-icons-outlined text-gray-400 text-base">expand_more</span>
+        </button>
+
         <Transition
-          enter-active-class="transition duration-150 ease-out"
-          enter-from-class="opacity-0 translate-y-1"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="transition duration-100 ease-in"
-          leave-from-class="opacity-100 translate-y-0"
-          leave-to-class="opacity-0 translate-y-1"
+          enter-active-class="transition-all duration-150 ease-out"
+          leave-active-class="transition-all duration-100 ease-in"
+          enter-from-class="opacity-0 scale-95 -translate-y-1"
+          leave-to-class="opacity-0 scale-95 -translate-y-1"
         >
           <div
-            v-if="hoveredSemana !== null"
-            class="absolute top-full right-0 mt-2 z-50 bg-white dark:bg-gray-800 border border-border-light dark:border-border-dark rounded-xl shadow-lg p-2 pointer-events-none"
+            v-if="showWeekPicker"
+            class="absolute top-full left-0 mt-1 z-30 bg-white dark:bg-card-dark border border-border-light dark:border-border-dark rounded-xl shadow-lg py-1 min-w-[240px]"
           >
-            <div class="grid grid-cols-7 gap-0 text-center" style="width: 154px">
-              <span v-for="d in ['S', 'T', 'Q', 'Q', 'S', 'S', 'D']" :key="d" class="text-[9px] font-medium text-subtext-light dark:text-subtext-dark w-[22px] h-4 flex items-center justify-center">{{ d }}</span>
-              <template v-for="(dia, i) in miniCalendario" :key="i">
-                <span
-                  :class="[
-                    'w-[22px] h-[22px] flex items-center justify-center text-[10px] rounded-full',
-                    dia.destaque
-                      ? 'bg-primary text-white font-semibold'
-                      : dia.foraDoMes
-                        ? 'text-gray-300 dark:text-gray-600'
-                        : 'text-text-light dark:text-text-dark'
-                  ]"
-                >{{ dia.numero }}</span>
-              </template>
-            </div>
+            <button
+              v-for="semana in semanas"
+              :key="semana.numero"
+              @click="selectedSemana = semana.numero; showWeekPicker = false"
+              :class="[
+                'w-full flex items-center gap-3 px-3 py-2 text-sm transition-colors',
+                selectedSemana === semana.numero
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : 'text-text-light dark:text-text-dark hover:bg-gray-50 dark:hover:bg-gray-800'
+              ]"
+            >
+              <span class="font-medium">Semana {{ semana.numero.toString().padStart(2, '0') }}</span>
+              <span class="text-xs text-subtext-light dark:text-subtext-dark">{{ semana.inicio }} - {{ semana.fim }}</span>
+            </button>
           </div>
         </Transition>
       </div>
@@ -256,7 +245,7 @@
               :disabled="currentPage === 1"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_left</span>
+              <span class="material-icons-outlined text-sm">chevron_left</span>
             </button>
             <span class="hidden xs:inline">Página</span>
             <input
@@ -272,7 +261,7 @@
               :disabled="currentPage === totalPages"
               class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span class="material-icons text-sm">chevron_right</span>
+              <span class="material-icons-outlined text-sm">chevron_right</span>
             </button>
           </div>
         </div>
@@ -358,7 +347,7 @@ const savedSemana = typeof window !== 'undefined' ? localStorage.getItem('capaci
 const selectedMonth = ref(savedMonth || defaultMonth)
 const selectedSemana = ref(savedSemana ? parseInt(savedSemana) : 1)
 const showMonthPicker = ref(false)
-const hoveredSemana = ref<number | null>(null)
+const showWeekPicker = ref(false)
 const pickerYear = ref(parseInt(selectedMonth.value.split('-')[0]))
 
 const mesesNomes = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
@@ -376,6 +365,11 @@ const semanaAtual = computed(() => {
   return semanas.value.find(s => s.numero === selectedSemana.value)
 })
 
+const selectedSemanaRange = computed(() => {
+  const s = semanas.value.find(s => s.numero === selectedSemana.value)
+  return s ? `${s.inicio} - ${s.fim}` : ''
+})
+
 function isCurrentMonth(monthIdx: number): boolean {
   const [ano, mes] = selectedMonth.value.split('-').map(Number)
   return pickerYear.value === ano && monthIdx === mes - 1
@@ -385,57 +379,6 @@ function selectMonth(monthIdx: number) {
   selectedMonth.value = `${pickerYear.value}-${String(monthIdx + 1).padStart(2, '0')}`
   showMonthPicker.value = false
 }
-
-// Mini calendário para tooltip da semana
-const miniCalendario = computed(() => {
-  const [ano, mes] = selectedMonth.value.split('-').map(Number)
-  const primeiroDia = new Date(ano, mes - 1, 1)
-  const ultimoDia = new Date(ano, mes, 0)
-
-  // Dias da semana hovered
-  const semanaHovered = semanas.value.find(s => s.numero === hoveredSemana.value)
-  if (!semanaHovered) return []
-
-  // Calcular datas de início/fim da semana hovered
-  const diaDaSemana = primeiroDia.getDay()
-  const offsetParaSegunda = diaDaSemana === 0 ? -6 : 1 - diaDaSemana
-  const primeiraSegunda = new Date(primeiroDia)
-  primeiraSegunda.setDate(primeiroDia.getDate() + offsetParaSegunda)
-
-  const inicioSemanaDate = new Date(primeiraSegunda)
-  inicioSemanaDate.setDate(primeiraSegunda.getDate() + (hoveredSemana.value! - 1) * 7)
-  const fimSemanaDate = new Date(inicioSemanaDate)
-  fimSemanaDate.setDate(inicioSemanaDate.getDate() + 6)
-
-  const inicioStr = inicioSemanaDate.toISOString().split('T')[0]
-  const fimStr = fimSemanaDate.toISOString().split('T')[0]
-
-  // Primeira segunda-feira do grid (pode ser do mês anterior)
-  const primeiraCelula = new Date(primeiroDia)
-  const dow = primeiraCelula.getDay()
-  const offset = dow === 0 ? -6 : 1 - dow
-  primeiraCelula.setDate(primeiraCelula.getDate() + offset)
-
-  const dias = []
-  const totalCelulas = 42 // 6 semanas x 7 dias
-  for (let i = 0; i < totalCelulas; i++) {
-    const d = new Date(primeiraCelula)
-    d.setDate(primeiraCelula.getDate() + i)
-    const dStr = d.toISOString().split('T')[0]
-    dias.push({
-      numero: d.getDate(),
-      foraDoMes: d.getMonth() !== mes - 1,
-      destaque: dStr >= inicioStr && dStr <= fimStr
-    })
-  }
-
-  // Cortar linhas vazias no final (se último dia do mês cai antes da 6ª semana)
-  while (dias.length > 35 && dias.slice(-7).every(d => d.foraDoMes)) {
-    dias.splice(-7)
-  }
-
-  return dias
-})
 
 // Computed - semanas do mês
 const semanas = computed(() => {
@@ -700,8 +643,12 @@ watch(itemsPerPage, () => {
 
 // Fechar month picker ao clicar fora
 function handleClickOutside(e: MouseEvent) {
-  if (showMonthPicker.value && !(e.target as HTMLElement).closest('.relative')) {
+  const target = e.target as HTMLElement
+  if (showMonthPicker.value && !target.closest('.relative')) {
     showMonthPicker.value = false
+  }
+  if (showWeekPicker.value && !target.closest('.relative')) {
+    showWeekPicker.value = false
   }
 }
 
