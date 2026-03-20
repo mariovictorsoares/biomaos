@@ -239,6 +239,8 @@ async function handleSincronizar() {
     let totalNovos = 0
     let totalAtualizados = 0
 
+    const erros = []
+
     for (const conta of contas) {
       const result = await $fetch('/api/ewelink/sincronizar-dispositivos', {
         method: 'POST',
@@ -251,10 +253,16 @@ async function handleSincronizar() {
       if (result.success) {
         totalNovos += result.novos || 0
         totalAtualizados += result.atualizados || 0
+      } else {
+        erros.push(result.error || 'Erro desconhecido')
       }
     }
 
-    success(`Sincronizado! ${totalNovos} novos, ${totalAtualizados} atualizados`)
+    if (erros.length > 0) {
+      showError(erros.join('; '))
+    } else {
+      success(`Sincronizado! ${totalNovos} novos, ${totalAtualizados} atualizados`)
+    }
     fetchDispositivos()
   } catch (e) {
     showError('Erro ao sincronizar dispositivos')

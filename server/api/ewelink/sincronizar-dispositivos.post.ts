@@ -75,18 +75,20 @@ export default defineEventHandler(async (event) => {
     const pageSize = 30
 
     while (true) {
-      const response = await fetch(
-        `${baseUrl}/v2/device/thing?num=${pageSize}&beginIndex=${beginIndex}`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${conta.access_token}`,
-            'X-CK-Appid': appId,
-          }
+      const url = `${baseUrl}/v2/device/thing?num=${pageSize}&beginIndex=${beginIndex}`
+      console.log(`[eWeLink Sync] Fetching devices: ${url}`)
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${conta.access_token}`,
+          'Content-Type': 'application/json',
+          'X-CK-Appid': appId,
         }
-      )
+      })
 
       const data = await response.json()
+      console.log(`[eWeLink Sync] Response error=${data.error}, thingList count=${data.data?.thingList?.length ?? 'N/A'}`)
 
       if (data.error !== 0) {
         // Se token expirou, marcar conta com erro

@@ -4,9 +4,10 @@
     <div>
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-base font-semibold text-text-light dark:text-text-dark">Contas eWeLink</h2>
-        <button @click="showModal = true" class="btn btn-primary">
-          <span class="material-icons-outlined text-base mr-1">add</span>
-          Conectar Conta
+        <button @click="handleConectar" class="btn btn-primary" :disabled="conectando">
+          <span v-if="conectando" class="material-icons-outlined animate-spin text-base mr-1">refresh</span>
+          <span v-else class="material-icons-outlined text-base mr-1">add</span>
+          {{ conectando ? 'Redirecionando...' : 'Conectar Conta' }}
         </button>
       </div>
 
@@ -169,12 +170,6 @@
       </div>
     </div>
 
-    <!-- Modal -->
-    <ModalConectarEwelink
-      v-if="showModal && currentCompany?.id"
-      :empresa-id="currentCompany.id"
-      @close="showModal = false"
-    />
   </div>
 </template>
 
@@ -183,7 +178,7 @@ const supabase = useSupabaseClient()
 const { currentCompany } = useCurrentCompany()
 const { success, error: showError } = useToast()
 
-const showModal = ref(false)
+const conectando = ref(false)
 const loadingContas = ref(false)
 const contas = ref([])
 const dispositivos = ref([])
@@ -285,6 +280,43 @@ async function handleDesconectar(conta) {
     }
   } catch (e) {
     showError('Erro ao desconectar conta')
+  }
+}
+
+async function handleConectar() {
+  if (!currentCompany.value?.id) {
+    showError('Empresa não selecionada')
+    return
+  }
+
+  conectando.value = true
+  try {
+    const array = new Uint8Array(16)
+    crypto.getRandomValues(array)
+    const state = 'ew_' + Array.from(array, b => b.toString(16).padStart(2, '0')).join('')
+
+    localStorage.setItem('ewelink_oauth_state', state)
+    localStorage.setItem('ewelink_oauth_data', JSON.stringify({
+      empresa_id: currentCompany.value.id,
+      regiao: 'us',
+      nome: 'Conta eWeLink',
+    }))
+
+    const result = await $fetch('/api/ewelink/oauth-url', {
+      method: 'POST',
+      body: { regiao: 'us', state }
+    })
+
+    if (result.url) {
+      window.location.href = result.url
+    } else {
+      showError('Erro ao gerar URL de autorização')
+      conectando.value = false
+    }
+  } catch (e) {
+    conectando.value = false
+    showError('Erro ao comunicar com o servidor')
+    console.error('Erro OAuth eWeLink:', e)
   }
 }
 
