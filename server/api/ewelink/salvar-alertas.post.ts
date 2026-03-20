@@ -18,6 +18,21 @@ export default defineEventHandler(async (event) => {
   const supabase = createClient(supabaseUrl, supabaseKey)
 
   try {
+    // Validar que o dispositivo pertence à empresa
+    const { data: dispositivo, error: deviceError } = await supabase
+      .from('dispositivos_iot')
+      .select('id')
+      .eq('id', dispositivo_id)
+      .eq('empresa_id', empresa_id)
+      .single()
+
+    if (deviceError || !dispositivo) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Dispositivo não pertence à empresa informada'
+      })
+    }
+
     const resultados = []
 
     for (const alerta of alertas) {

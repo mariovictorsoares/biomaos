@@ -230,16 +230,27 @@ const chartUmidData = computed(() => {
   }
 })
 
+const isDark = ref(false)
+
+onMounted(() => {
+  isDark.value = document.documentElement.classList.contains('dark')
+  const darkObserver = new MutationObserver(() => {
+    isDark.value = document.documentElement.classList.contains('dark')
+  })
+  darkObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+  onBeforeUnmount(() => darkObserver.disconnect())
+})
+
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: { display: false },
     tooltip: {
-      backgroundColor: '#ffffff',
-      titleColor: '#111827',
-      bodyColor: '#4b5563',
-      borderColor: '#e5e7eb',
+      backgroundColor: isDark.value ? '#374151' : '#ffffff',
+      titleColor: isDark.value ? '#e5e7eb' : '#111827',
+      bodyColor: isDark.value ? '#d1d5db' : '#4b5563',
+      borderColor: isDark.value ? '#4b5563' : '#e5e7eb',
       borderWidth: 1,
       padding: 12,
       cornerRadius: 8,
@@ -249,7 +260,7 @@ const chartOptions = computed(() => ({
     x: {
       grid: { display: false },
       ticks: {
-        color: '#6b7280',
+        color: isDark.value ? '#9ca3af' : '#6b7280',
         font: { size: 10 },
         maxTicksLimit: 12,
       },
@@ -257,10 +268,10 @@ const chartOptions = computed(() => ({
     y: {
       beginAtZero: false,
       grid: {
-        color: '#f3f4f6',
+        color: isDark.value ? '#374151' : '#f3f4f6',
       },
       ticks: {
-        color: '#6b7280',
+        color: isDark.value ? '#9ca3af' : '#6b7280',
         font: { size: 11 },
       },
     },

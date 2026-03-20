@@ -171,10 +171,9 @@
 
     <!-- Modal -->
     <ModalConectarEwelink
-      v-if="showModal"
-      :empresa-id="currentCompany?.id"
+      v-if="showModal && currentCompany?.id"
+      :empresa-id="currentCompany.id"
       @close="showModal = false"
-      @connected="handleConnected"
     />
   </div>
 </template>
@@ -289,11 +288,6 @@ async function handleDesconectar(conta) {
   }
 }
 
-function handleConnected() {
-  fetchContas()
-  fetchDispositivos()
-}
-
 async function handleSalvarAlertas() {
   salvandoAlertas.value = true
   try {
@@ -324,6 +318,23 @@ async function handleSalvarAlertas() {
     salvandoAlertas.value = false
   }
 }
+
+// Detectar callback do OAuth eWeLink
+const route = useRoute()
+const router = useRouter()
+
+onMounted(() => {
+  if (route.query.ewelink_connected === 'true') {
+    success('Conta eWeLink conectada com sucesso!')
+    fetchContas()
+    fetchDispositivos()
+    router.replace({ query: { tab: 'configuracao' } })
+  }
+  if (route.query.ewelink_error) {
+    showError(decodeURIComponent(route.query.ewelink_error))
+    router.replace({ query: { tab: 'configuracao' } })
+  }
+})
 
 watch(selectedDeviceId, () => {
   if (selectedDeviceId.value) fetchAlertasConfig()

@@ -86,7 +86,11 @@
       "Bash(grep -r \"TabProducao\" --include=\"*.vue\" --include=\"*.ts\" ! -path \"*/node_modules/*\" ! -path \"*/.output/*\")",
       "Bash(sort -t: -k2 -rn)",
       "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\mario\\\\Desktop\\\\fix-icons.ps1\")",
-      "Bash(del \"C:\\\\Users\\\\mario\\\\Desktop\\\\fix-icons.ps1\")"
+      "Bash(del \"C:\\\\Users\\\\mario\\\\Desktop\\\\fix-icons.ps1\")",
+      "Bash(xargs grep -l \"venda\\\\|sales\")",
+      "WebFetch(domain:forum.ewelink.cc)",
+      "WebFetch(domain:coolkit-technologies.github.io)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

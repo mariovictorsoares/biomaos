@@ -82,7 +82,6 @@ export default defineEventHandler(async (event) => {
           headers: {
             'Authorization': `Bearer ${conta.access_token}`,
             'X-CK-Appid': appId,
-            'Content-Type': 'application/json',
           }
         }
       )
@@ -165,9 +164,17 @@ export default defineEventHandler(async (event) => {
 
     // Upsert em batch
     if (upsertBatch.length > 0) {
-      await supabase
+      const { error: upsertError } = await supabase
         .from('dispositivos_iot')
         .upsert(upsertBatch, { onConflict: 'empresa_id,device_id' })
+
+      if (upsertError) {
+        console.error('Erro ao upsert dispositivos:', upsertError)
+        return {
+          success: false,
+          error: 'Erro ao salvar dispositivos: ' + upsertError.message
+        }
+      }
     }
 
     // Atualizar ultimo_sync

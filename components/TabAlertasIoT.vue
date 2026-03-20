@@ -275,6 +275,7 @@ async function handleMarcarLido(alerta) {
     .from('alertas_historico_iot')
     .update({ lido: true })
     .eq('id', alerta.id)
+    .eq('empresa_id', currentCompany.value.id)
 
   if (!error) {
     alerta.lido = true
@@ -289,6 +290,7 @@ async function handleMarcarLidoLote() {
     .from('alertas_historico_iot')
     .update({ lido: true })
     .in('id', alertasSelecionados.value)
+    .eq('empresa_id', currentCompany.value.id)
 
   if (!error) {
     alertas.value.forEach(a => {

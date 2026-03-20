@@ -103,21 +103,30 @@
         </div>
 
         <!-- Date Range -->
-        <div class="date-range-wrapper">
-          <VueDatePicker
-            v-model="filtroDateRange"
-            range
-            :preset-dates="[]"
-            :dark="isDark"
-            :enable-time-picker="false"
-            auto-apply
-            :format="formatDateDisplay"
-            locale="pt-BR"
-            placeholder="Período..."
-            :clearable="true"
-            input-class-name="dp-input-custom"
-            menu-class-name="dp-menu-custom"
-          />
+        <div class="flex items-center gap-1">
+          <button @click="periodoAnterior" class="p-1.5 self-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+            <span class="material-icons-outlined text-sm text-subtext-light">chevron_left</span>
+          </button>
+          <div class="date-range-wrapper">
+            <VueDatePicker
+              v-model="filtroDateRange"
+              range
+              :preset-dates="presetDates"
+              :dark="isDark"
+              :enable-time-picker="false"
+              auto-apply
+              :format="formatDateDisplay"
+              locale="pt-BR"
+              placeholder="Período..."
+              :clearable="false"
+              input-class-name="dp-input-custom"
+              menu-class-name="dp-menu-custom"
+              teleport
+            />
+          </div>
+          <button @click="proximoPeriodo" class="p-1.5 self-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+            <span class="material-icons-outlined text-sm text-subtext-light">chevron_right</span>
+          </button>
         </div>
       </div>
 
@@ -542,6 +551,25 @@ function formatDateDisplay(dates: Date[]) {
     return `${dd}/${mm}/${yy}`
   }
   return `${fmt(dates[0])} - ${fmt(dates[1])}`
+}
+
+// Navegação de período com setas (padrão vendas — 7 dias)
+function periodoAnterior() {
+  if (!filtroDateRange.value || filtroDateRange.value.length < 2) return
+  const inicio = new Date(filtroDateRange.value[0])
+  const fim = new Date(filtroDateRange.value[1])
+  inicio.setDate(inicio.getDate() - 7)
+  fim.setDate(fim.getDate() - 7)
+  filtroDateRange.value = [inicio, fim]
+}
+
+function proximoPeriodo() {
+  if (!filtroDateRange.value || filtroDateRange.value.length < 2) return
+  const inicio = new Date(filtroDateRange.value[0])
+  const fim = new Date(filtroDateRange.value[1])
+  inicio.setDate(inicio.getDate() + 7)
+  fim.setDate(fim.getDate() + 7)
+  filtroDateRange.value = [inicio, fim]
 }
 
 // Todos os campos de data que uma produção pode ter (inclui colheitas reais)

@@ -23,21 +23,43 @@ const REGION_URLS: Record<string, string> = {
 }
 
 /**
+ * Gera HMAC-SHA256 assinatura em base64 (obrigatório para endpoints de auth CoolKit v2)
+ */
+async function createHmacSign(body: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(body))
+  return btoa(String.fromCharCode(...new Uint8Array(signature)))
+}
+
+/**
  * Tenta renovar o access_token usando o refresh_token
  */
 async function refreshToken(
   baseUrl: string,
-  refreshToken: string,
-  appId: string
+  rt: string,
+  appId: string,
+  appSecret: string
 ): Promise<{ accessToken: string; refreshToken: string; expiresAt: string } | null> {
   try {
+    const body = { rt }
+    const bodyStr = JSON.stringify(body)
+    const signature = await createHmacSign(bodyStr, appSecret)
+
     const response = await fetch(`${baseUrl}/v2/user/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CK-Appid': appId,
+        'Authorization': `Sign ${signature}`,
       },
-      body: JSON.stringify({ rt: refreshToken }),
+      body: bodyStr,
     })
 
     const data = await response.json()
@@ -75,7 +97,6 @@ async function fetchDevices(
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'X-CK-Appid': appId,
-          'Content-Type': 'application/json',
         },
       }
     )
@@ -103,6 +124,7 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const appId = Deno.env.get('EWELINK_APP_ID') || ''
+    const appSecret = Deno.env.get('EWELINK_APP_SECRET') || ''
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     const logs: string[] = []
@@ -128,15 +150,25 @@ serve(async (req) => {
 
       // 2. Verificar expiração do token
       if (conta.token_expira_em && new Date(conta.token_expira_em) <= new Date()) {
-        logs.push(`Conta ${conta.email}: token expirado, tentando refresh...`)
-        const newTokens = await refreshToken(baseUrl, conta.refresh_token, appId)
+        logs.push(`Conta ${conta.email || conta.id}: token expirado, tentando refresh...`)
+
+        if (!appSecret) {
+          logs.push(`Conta ${conta.email || conta.id}: EWELINK_APP_SECRET não configurado, não é possível renovar token`)
+          await supabase
+            .from('contas_ewelink')
+            .update({ status: 'erro_auth', erro_mensagem: 'APP_SECRET não configurado para refresh.' })
+            .eq('id', conta.id)
+          continue
+        }
+
+        const newTokens = await refreshToken(baseUrl, conta.refresh_token, appId, appSecret)
 
         if (!newTokens) {
           await supabase
             .from('contas_ewelink')
             .update({ status: 'erro_auth', erro_mensagem: 'Falha ao renovar token. Reconecte a conta.' })
             .eq('id', conta.id)
-          logs.push(`Conta ${conta.email}: falha no refresh, marcada como erro_auth`)
+          logs.push(`Conta ${conta.email || conta.id}: falha no refresh, marcada como erro_auth`)
           continue
         }
 
@@ -150,7 +182,7 @@ serve(async (req) => {
           .eq('id', conta.id)
 
         accessToken = newTokens.accessToken
-        logs.push(`Conta ${conta.email}: token renovado com sucesso`)
+        logs.push(`Conta ${conta.email || conta.id}: token renovado com sucesso`)
       }
 
       // 3. Buscar dispositivos ativos com sensores
@@ -162,7 +194,7 @@ serve(async (req) => {
         .or('tem_temperatura.eq.true,tem_umidade.eq.true')
 
       if (!dispositivos || dispositivos.length === 0) {
-        logs.push(`Conta ${conta.email}: nenhum dispositivo sensor ativo`)
+        logs.push(`Conta ${conta.email || conta.id}: nenhum dispositivo sensor ativo`)
         continue
       }
 
@@ -173,7 +205,7 @@ serve(async (req) => {
       const ewelinkDevices = await fetchDevices(baseUrl, accessToken, appId)
 
       if (ewelinkDevices.length === 0) {
-        logs.push(`Conta ${conta.email}: nenhum dispositivo retornado pela API`)
+        logs.push(`Conta ${conta.email || conta.id}: nenhum dispositivo retornado pela API`)
         continue
       }
 
@@ -218,10 +250,10 @@ serve(async (req) => {
           .insert(leiturasParaInserir)
 
         if (insertError) {
-          logs.push(`Conta ${conta.email}: erro ao inserir leituras - ${insertError.message}`)
+          logs.push(`Conta ${conta.email || conta.id}: erro ao inserir leituras - ${insertError.message}`)
         } else {
           totalLeituras += leiturasParaInserir.length
-          logs.push(`Conta ${conta.email}: ${leiturasParaInserir.length} leituras inseridas`)
+          logs.push(`Conta ${conta.email || conta.id}: ${leiturasParaInserir.length} leituras inseridas`)
         }
       }
 
@@ -252,9 +284,9 @@ serve(async (req) => {
       if (alertasConfig && alertasConfig.length > 0) {
         // Buscar alertas recentes de uma vez para checar cooldowns
         const configIds = alertasConfig.map(ac => ac.id)
-        const menorCooldown = Math.min(...alertasConfig.map(ac => ac.cooldown_minutos || 30))
+        const maiorCooldown = Math.max(...alertasConfig.map(ac => ac.cooldown_minutos || 30))
         const cooldownGlobal = new Date()
-        cooldownGlobal.setMinutes(cooldownGlobal.getMinutes() - menorCooldown)
+        cooldownGlobal.setMinutes(cooldownGlobal.getMinutes() - maiorCooldown)
 
         const { data: alertasRecentes } = await supabase
           .from('alertas_historico_iot')

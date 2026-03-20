@@ -37,11 +37,15 @@ export default defineEventHandler(async (event) => {
   }
 
   // Desativar dispositivos da conta
-  await supabase
+  const { error: devError } = await supabase
     .from('dispositivos_iot')
     .update({ ativo: false })
     .eq('conta_ewelink_id', conta_ewelink_id)
     .eq('empresa_id', empresa_id)
+
+  if (devError) {
+    console.error('Erro ao desativar dispositivos:', devError)
+  }
 
   return { success: true }
 })

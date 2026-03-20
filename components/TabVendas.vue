@@ -1357,9 +1357,10 @@ const matrizProdutos = computed(() => {
 const entregasPorData = computed(() => {
   const agrupado = new Map<string, EntregaPrevista>()
 
-  // Filtrar pedidos com data_entrega no periodo
+  // Filtrar pedidos com data_entrega no periodo (excluir cancelados)
   const pedidosFiltrados = pedidos.value.filter(p => {
     if (!p.data_entrega) return false
+    if (p.status === 'cancelado') return false
     return p.data_entrega >= periodo.value.inicio && p.data_entrega <= periodo.value.fim
   })
 
@@ -1647,6 +1648,41 @@ async function baixarEstoquePedido(pedido: Pedido) {
   }
 }
 
+// Estornar estoque quando pedido finalizado é cancelado
+async function estornarEstoquePedido(pedido: Pedido) {
+  if (!currentCompany.value?.id) return
+  const itens = pedido.pedido_itens || []
+  if (itens.length === 0) return
+
+  const nomeCliente = pedido.clientes?.nome_fantasia || pedido.clientes?.razao_social || `pedido ${pedido.id.slice(0, 8)}`
+
+  for (const item of itens) {
+    if (!item.produto_id || !item.quantidade || item.quantidade <= 0) continue
+
+    const qtdAtual = estoqueData.value.find(e => e.produto_id === item.produto_id)?.quantidade || 0
+    const qtdNova = qtdAtual + item.quantidade
+
+    try {
+      await upsertEstoqueItem(item.produto_id, qtdNova)
+
+      await supabase
+        .from('movimentacoes_estoque')
+        .insert({
+          empresa_id: currentCompany.value.id,
+          produto_id: item.produto_id,
+          tipo: 'entrada',
+          quantidade: item.quantidade,
+          quantidade_anterior: qtdAtual,
+          quantidade_nova: qtdNova,
+          motivo: `Estorno automático — pedido cancelado (${nomeCliente})`,
+          usuario_id: user.value?.id || null
+        })
+    } catch (e) {
+      console.error('Erro ao estornar estoque do produto', item.produto_id, e)
+    }
+  }
+}
+
 // Funcoes de atualizacao
 async function updatePedidoStatus(pedidoId: string, newStatus: string) {
   if (!currentCompany.value?.id) return
@@ -1699,6 +1735,15 @@ async function updatePedidoStatus(pedidoId: string, newStatus: string) {
       pedidoParaBaixa.value = pedido
       showBaixaEstoqueModal.value = true
       success('Status atualizado')
+    } else if (newStatus === 'cancelado' && statusAnterior === 'finalizado' && pedido) {
+      // Estornar estoque quando pedido finalizado é cancelado
+      try {
+        await estornarEstoquePedido(pedido)
+        success('Status atualizado — estoque estornado')
+      } catch (e) {
+        console.error('Erro ao estornar estoque:', e)
+        success('Status atualizado (erro ao estornar estoque)')
+      }
     } else {
       success('Status atualizado')
     }
