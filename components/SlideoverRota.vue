@@ -24,7 +24,7 @@
             leave-from-class="opacity-100 scale-100"
             leave-to-class="opacity-0 scale-95"
           >
-            <div class="relative w-full max-w-2xl glass-panel rounded-xl shadow-xl">
+            <div class="relative w-full max-w-3xl glass-panel rounded-xl shadow-xl">
               <!-- Header -->
               <div class="px-6 py-5 border-b border-border-light dark:border-border-dark flex items-center justify-between">
               <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
@@ -72,6 +72,26 @@
                   </div>
                 </div>
 
+                <!-- Linha 2: KM e Horários -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label class="block text-xs font-medium text-text-light dark:text-text-dark mb-1">KM Início</label>
+                    <input type="number" v-model.number="form.kmInicio" class="input" placeholder="0" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light dark:text-text-dark mb-1">KM Término</label>
+                    <input type="number" v-model.number="form.kmTermino" class="input" placeholder="0" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light dark:text-text-dark mb-1">Horário Início</label>
+                    <input type="time" v-model="form.horarioInicio" class="input" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light dark:text-text-dark mb-1">Horário Término</label>
+                    <input type="time" v-model="form.horarioTermino" class="input" />
+                  </div>
+                </div>
+
                 <!-- Observações -->
                 <div>
                   <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Observações</label>
@@ -83,6 +103,9 @@
                   <div class="flex items-center justify-between mb-4">
                     <h3 class="text-base font-semibold text-text-light dark:text-text-dark">
                       Paradas ({{ paradas.length }})
+                      <span v-if="paradasEntregues > 0" class="text-sm font-normal text-green-600 dark:text-green-400 ml-2">
+                        {{ paradasEntregues }}/{{ paradas.length }} entregues
+                      </span>
                     </h3>
                     <div class="flex items-center gap-2">
                       <button
@@ -125,62 +148,132 @@
                     <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Nenhum pedido encontrado para esta data</p>
                   </div>
 
-                  <!-- Lista de paradas -->
+                  <!-- Lista de paradas agrupadas -->
                   <div v-else class="space-y-2">
-                    <!-- Agrupamento por bairro -->
-                    <div v-for="(grupo, bairro) in paradasPorBairro" :key="bairro">
+                    <div v-for="(grupo, grupoKey) in paradasAgrupadas" :key="grupoKey">
+                      <!-- Header do grupo (seção ou bairro) -->
                       <p class="text-xs font-semibold text-subtext-light dark:text-subtext-dark uppercase tracking-wider mb-1 mt-3 first:mt-0">
-                        {{ bairro || 'Sem bairro' }}
+                        {{ grupoKey || 'Sem bairro' }}
                       </p>
                       <div
-                        v-for="(parada, idx) in grupo"
+                        v-for="parada in grupo"
                         :key="parada.pedidoId"
-                        class="flex items-center gap-3 p-3 rounded-lg border border-border-light dark:border-border-dark bg-gray-50 dark:bg-gray-800/50"
+                        :class="[
+                          'p-3 rounded-lg border transition-colors',
+                          parada.entregue
+                            ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10'
+                            : 'border-border-light dark:border-border-dark bg-gray-50 dark:bg-gray-800/50'
+                        ]"
                       >
-                        <!-- Número ordem -->
-                        <span class="text-xs font-bold text-subtext-light dark:text-subtext-dark w-6 text-center shrink-0">
-                          {{ parada.ordem }}
-                        </span>
+                        <div class="flex items-start gap-3">
+                          <!-- Número ordem -->
+                          <span class="text-xs font-bold text-subtext-light dark:text-subtext-dark w-6 text-center shrink-0 mt-1">
+                            {{ parada.ordem }}
+                          </span>
 
-                        <!-- Info -->
-                        <div class="flex-1 min-w-0">
-                          <p class="text-sm font-medium text-text-light dark:text-text-dark truncate">
-                            {{ parada.clienteNome }}
-                          </p>
-                          <p class="text-xs text-subtext-light dark:text-subtext-dark truncate">
-                            {{ parada.endereco }}
-                          </p>
-                          <p v-if="parada.itensResumo" class="text-xs text-subtext-light dark:text-subtext-dark mt-0.5">
-                            {{ parada.itensResumo }}
-                          </p>
+                          <!-- Info -->
+                          <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-1.5">
+                              <p class="text-sm font-medium text-text-light dark:text-text-dark truncate">
+                                {{ parada.clienteNome }}
+                              </p>
+                              <span v-if="parada.rotuloEmbalagem" :class="[
+                                'inline-flex items-center px-1 py-0.5 rounded text-[9px] font-bold shrink-0',
+                                parada.rotuloEmbalagem === 'C'
+                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+                                  : 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
+                              ]">{{ parada.rotuloEmbalagem }}</span>
+                              <span v-if="parada.embalagemSecundaria" class="inline-flex items-center px-1 py-0.5 rounded text-[9px] font-medium bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 shrink-0">
+                                {{ parada.embalagemSecundaria }}
+                              </span>
+                            </div>
+                            <p class="text-xs text-subtext-light dark:text-subtext-dark truncate">
+                              {{ parada.endereco }}
+                            </p>
+                            <p v-if="parada.itensResumo" class="text-xs text-subtext-light dark:text-subtext-dark mt-0.5">
+                              {{ parada.itensResumo }}
+                            </p>
+                          </div>
+
+                          <!-- Checkboxes operacionais -->
+                          <div class="flex items-center gap-1 shrink-0">
+                            <button
+                              @click="parada.pedidoPronto = !parada.pedidoPronto"
+                              :class="['p-1 rounded transition-colors', parada.pedidoPronto ? 'text-green-500' : 'text-gray-300 dark:text-gray-600 hover:text-gray-400']"
+                              title="Pedido pronto"
+                            >
+                              <span class="material-icons-outlined text-base">inventory</span>
+                            </button>
+                            <button
+                              @click="parada.conferidoChegada = !parada.conferidoChegada"
+                              :class="['p-1 rounded transition-colors', parada.conferidoChegada ? 'text-blue-500' : 'text-gray-300 dark:text-gray-600 hover:text-gray-400']"
+                              title="Conferido na chegada"
+                            >
+                              <span class="material-icons-outlined text-base">fact_check</span>
+                            </button>
+                            <button
+                              @click="toggleEntregue(parada)"
+                              :class="['p-1 rounded transition-colors', parada.entregue ? 'text-green-600' : 'text-gray-300 dark:text-gray-600 hover:text-gray-400']"
+                              title="Entregue"
+                            >
+                              <span class="material-icons-outlined text-base">check_circle</span>
+                            </button>
+                          </div>
+
+                          <!-- Ações reordenar / remover -->
+                          <div class="flex flex-col gap-0.5 shrink-0">
+                            <button
+                              @click="moveParada(parada.pedidoId, -1)"
+                              class="text-gray-400 hover:text-primary transition-colors p-0.5"
+                              :disabled="parada.ordem === 1"
+                              title="Mover para cima"
+                            >
+                              <span class="material-icons-outlined text-sm">arrow_upward</span>
+                            </button>
+                            <button
+                              @click="moveParada(parada.pedidoId, 1)"
+                              class="text-gray-400 hover:text-primary transition-colors p-0.5"
+                              :disabled="parada.ordem === paradas.length"
+                              title="Mover para baixo"
+                            >
+                              <span class="material-icons-outlined text-sm">arrow_downward</span>
+                            </button>
+                          </div>
+                          <button
+                            @click="removeParada(parada.pedidoId)"
+                            class="text-gray-400 hover:text-red-500 transition-colors p-1 shrink-0"
+                            title="Remover parada"
+                          >
+                            <span class="material-icons-outlined text-sm">close</span>
+                          </button>
                         </div>
 
-                        <!-- Ações reordenar / remover -->
-                        <div class="flex flex-col gap-0.5 shrink-0">
-                          <button
-                            @click="moveParada(parada.pedidoId, -1)"
-                            class="text-gray-400 hover:text-primary transition-colors p-0.5"
-                            :disabled="parada.ordem === 1"
-                            title="Mover para cima"
+                        <!-- Linha inferior: Seção + Canhoto -->
+                        <div class="flex items-center gap-3 mt-2 ml-9">
+                          <select
+                            v-model="parada.secao"
+                            class="text-[11px] border border-border-light dark:border-border-dark rounded px-1.5 py-0.5 bg-white dark:bg-gray-800 text-text-light dark:text-text-dark w-28"
                           >
-                            <span class="material-icons-outlined text-sm">arrow_upward</span>
-                          </button>
-                          <button
-                            @click="moveParada(parada.pedidoId, 1)"
-                            class="text-gray-400 hover:text-primary transition-colors p-0.5"
-                            :disabled="parada.ordem === paradas.length"
-                            title="Mover para baixo"
-                          >
-                            <span class="material-icons-outlined text-sm">arrow_downward</span>
-                          </button>
+                            <option value="">Seção...</option>
+                            <option value="ROTA 1">ROTA 1</option>
+                            <option value="ROTA 2">ROTA 2</option>
+                            <option value="ROTA EXTRA">ROTA EXTRA</option>
+                            <option value="DISTRIBUIDOR">DISTRIBUIDOR</option>
+                          </select>
+                          <div class="flex items-center gap-1">
+                            <span class="text-[10px] text-subtext-light dark:text-subtext-dark">NF:</span>
+                            <span v-if="parada.notaFiscal" class="text-[11px] text-text-light dark:text-text-dark">{{ parada.notaFiscal }}</span>
+                          </div>
+                          <div class="flex items-center gap-1">
+                            <span class="text-[10px] text-subtext-light dark:text-subtext-dark">Canhoto:</span>
+                            <input
+                              type="text"
+                              v-model="parada.canhoto"
+                              class="text-[11px] border border-border-light dark:border-border-dark rounded px-1.5 py-0.5 bg-white dark:bg-gray-800 text-text-light dark:text-text-dark w-24"
+                              placeholder="N° canhoto"
+                            />
+                          </div>
                         </div>
-                        <button
-                          @click="removeParada(parada.pedidoId)"
-                          class="text-gray-400 hover:text-red-500 transition-colors p-1 shrink-0"
-                          title="Remover parada"
-                        >
-                          <span class="material-icons-outlined text-sm">close</span>
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -215,6 +308,15 @@ interface Parada {
   itensResumo: string
   ordem: number
   observacoes: string
+  secao: string
+  pedidoPronto: boolean
+  conferidoChegada: boolean
+  entregue: boolean
+  canhoto: string
+  status: string
+  rotuloEmbalagem: string
+  embalagemSecundaria: string
+  notaFiscal: string
 }
 
 interface RotaData {
@@ -223,11 +325,21 @@ interface RotaData {
   motoristaId: string
   status: string
   observacoes: string
+  kmInicio: number | null
+  kmTermino: number | null
+  horarioInicio: string
+  horarioTermino: string
   paradas: Array<{
     pedido_id: string
     cliente_id: string
     ordem: number
     observacoes: string
+    secao: string | null
+    pedido_pronto: boolean
+    conferido_chegada: boolean
+    entregue: boolean
+    canhoto: string | null
+    status: string
   }>
 }
 
@@ -239,11 +351,21 @@ const props = defineProps<{
     motorista_id: string | null
     status: string
     observacoes: string | null
+    km_inicio: number | null
+    km_termino: number | null
+    horario_inicio: string | null
+    horario_termino: string | null
     rota_paradas: Array<{
       pedido_id: string
       cliente_id: string
       ordem: number
       observacoes: string | null
+      secao: string | null
+      pedido_pronto: boolean
+      conferido_chegada: boolean
+      entregue: boolean
+      canhoto: string | null
+      status: string
     }>
   } | null
 }>()
@@ -265,11 +387,17 @@ const isEditing = computed(() => !!props.editData?.id)
 const form = ref({
   dataRota: '',
   motoristaId: '',
-  observacoes: ''
+  observacoes: '',
+  kmInicio: null as number | null,
+  kmTermino: null as number | null,
+  horarioInicio: '',
+  horarioTermino: ''
 })
 
 // Paradas
 const paradas = ref<Parada[]>([])
+
+const paradasEntregues = computed(() => paradas.value.filter(p => p.entregue).length)
 
 // Inicializar form se estiver editando
 watch(() => props.editData, async (data) => {
@@ -277,24 +405,34 @@ watch(() => props.editData, async (data) => {
     form.value = {
       dataRota: data.data_rota || '',
       motoristaId: data.motorista_id || '',
-      observacoes: data.observacoes || ''
+      observacoes: data.observacoes || '',
+      kmInicio: data.km_inicio ?? null,
+      kmTermino: data.km_termino ?? null,
+      horarioInicio: data.horario_inicio ? data.horario_inicio.substring(0, 5) : '',
+      horarioTermino: data.horario_termino ? data.horario_termino.substring(0, 5) : ''
     }
-    // Carregar paradas existentes
     if (data.rota_paradas?.length) {
       await loadExistingParadas(data.rota_paradas)
     }
   } else {
-    form.value = { dataRota: '', motoristaId: '', observacoes: '' }
+    form.value = { dataRota: '', motoristaId: '', observacoes: '', kmInicio: null, kmTermino: null, horarioInicio: '', horarioTermino: '' }
     paradas.value = []
   }
 }, { immediate: true })
 
-// Computed
-const paradasPorBairro = computed(() => {
+// Computed - agrupa por seção primeiro (se houver), depois por bairro
+const paradasAgrupadas = computed(() => {
   const grupos: Record<string, Parada[]> = {}
   const sorted = [...paradas.value].sort((a, b) => a.ordem - b.ordem)
+  const hasSecao = sorted.some(p => p.secao)
+
   for (const p of sorted) {
-    const key = p.bairro || 'Sem bairro'
+    let key: string
+    if (hasSecao && p.secao) {
+      key = `${p.secao} — ${p.bairro || 'Sem bairro'}`
+    } else {
+      key = p.bairro || 'Sem bairro'
+    }
     if (!grupos[key]) grupos[key] = []
     grupos[key].push(p)
   }
@@ -306,7 +444,7 @@ const isFormValid = computed(() => {
 })
 
 // Carregar paradas existentes (edição)
-async function loadExistingParadas(rotaParadas: Array<{ pedido_id: string; cliente_id: string; ordem: number; observacoes: string | null }>) {
+async function loadExistingParadas(rotaParadas: Array<any>) {
   if (!currentCompany.value?.id) return
   loadingPedidos.value = true
 
@@ -315,12 +453,13 @@ async function loadExistingParadas(rotaParadas: Array<{ pedido_id: string; clien
     const clienteIds = rotaParadas.map(p => p.cliente_id)
 
     const [pedidosRes, clientesRes, itensRes] = await Promise.all([
-      supabase.from('pedidos').select('id, cliente_id, numero').in('id', pedidoIds),
-      supabase.from('clientes').select('id, razao_social, nome_fantasia, bairro, bairro_entrega, logradouro_entrega, numero_entrega, cidade_entrega, estado_entrega, logradouro, numero, cidade, estado').in('id', clienteIds),
+      supabase.from('pedidos').select('id, cliente_id, numero, nota_fiscal').in('id', pedidoIds),
+      supabase.from('clientes').select('id, razao_social, nome_fantasia, bairro, bairro_entrega, logradouro_entrega, numero_entrega, cidade_entrega, estado_entrega, logradouro, numero, cidade, estado, rotulo_embalagem, embalagem_secundaria').in('id', clienteIds),
       supabase.from('pedido_itens').select('pedido_id, quantidade, produto_id, produtos(nome)').in('pedido_id', pedidoIds)
     ])
 
     const clientesMap = new Map((clientesRes.data || []).map(c => [c.id, c]))
+    const pedidosMap = new Map((pedidosRes.data || []).map(p => [p.id, p]))
     const itensMap = new Map<string, any[]>()
     for (const item of (itensRes.data || [])) {
       if (!itensMap.has(item.pedido_id)) itensMap.set(item.pedido_id, [])
@@ -329,8 +468,9 @@ async function loadExistingParadas(rotaParadas: Array<{ pedido_id: string; clien
 
     paradas.value = rotaParadas.map(rp => {
       const cliente = clientesMap.get(rp.cliente_id)
+      const pedido = pedidosMap.get(rp.pedido_id)
       const itens = itensMap.get(rp.pedido_id) || []
-      return buildParada(rp.pedido_id, rp.cliente_id, cliente, itens, rp.ordem)
+      return buildParada(rp.pedido_id, rp.cliente_id, cliente, pedido, itens, rp.ordem, rp)
     })
   } catch (e) {
     console.error('Erro ao carregar paradas:', e)
@@ -345,13 +485,13 @@ async function autoPopulate() {
 
   loadingPedidos.value = true
   try {
-    // Buscar pedidos para a data
+    const dataRota = form.value.dataRota
     const { data: pedidosData, error: pedidosErr } = await supabase
       .from('pedidos')
-      .select('id, cliente_id, numero, status')
+      .select('id, cliente_id, numero, status, nota_fiscal')
       .eq('empresa_id', currentCompany.value.id)
-      .eq('data_entrega', form.value.dataRota)
-      .in('status', ['confirmado', 'em_producao', 'finalizado'])
+      .eq('data_entrega', dataRota)
+      .neq('status', 'cancelado')
 
     if (pedidosErr) throw pedidosErr
 
@@ -364,7 +504,7 @@ async function autoPopulate() {
     const clienteIds = [...new Set(pedidosData.map(p => p.cliente_id).filter(Boolean))]
 
     const [clientesRes, itensRes] = await Promise.all([
-      supabase.from('clientes').select('id, razao_social, nome_fantasia, bairro, bairro_entrega, logradouro_entrega, numero_entrega, cidade_entrega, estado_entrega, logradouro, numero, cidade, estado').in('id', clienteIds),
+      supabase.from('clientes').select('id, razao_social, nome_fantasia, bairro, bairro_entrega, logradouro_entrega, numero_entrega, cidade_entrega, estado_entrega, logradouro, numero, cidade, estado, rotulo_embalagem, embalagem_secundaria').in('id', clienteIds),
       supabase.from('pedido_itens').select('pedido_id, quantidade, produto_id, produtos(nome)').in('pedido_id', pedidoIds)
     ])
 
@@ -375,23 +515,19 @@ async function autoPopulate() {
       itensMap.get(item.pedido_id)!.push(item)
     }
 
-    // Montar paradas agrupadas por bairro
     const novasParadas: Parada[] = pedidosData.map(p => {
       const cliente = clientesMap.get(p.cliente_id)
       const itens = itensMap.get(p.id) || []
-      return buildParada(p.id, p.cliente_id, cliente, itens, 0)
+      return buildParada(p.id, p.cliente_id, cliente, p, itens, 0, null)
     })
 
-    // Ordenar por bairro, depois por nome do cliente
     novasParadas.sort((a, b) => {
       const bairroComp = (a.bairro || '').localeCompare(b.bairro || '')
       if (bairroComp !== 0) return bairroComp
       return a.clienteNome.localeCompare(b.clienteNome)
     })
 
-    // Atribuir ordem
     novasParadas.forEach((p, i) => { p.ordem = i + 1 })
-
     paradas.value = novasParadas
   } catch (e: any) {
     console.error('Erro ao buscar pedidos:', e)
@@ -401,11 +537,10 @@ async function autoPopulate() {
   }
 }
 
-function buildParada(pedidoId: string, clienteId: string, cliente: any, itens: any[], ordem: number): Parada {
+function buildParada(pedidoId: string, clienteId: string, cliente: any, pedido: any, itens: any[], ordem: number, existingData: any): Parada {
   const nome = cliente?.nome_fantasia || cliente?.razao_social || 'Cliente'
   const bairro = cliente?.bairro_entrega || cliente?.bairro || ''
 
-  // Endereço de entrega (preferir entrega, fallback para principal)
   const logradouro = cliente?.logradouro_entrega || cliente?.logradouro || ''
   const numero = cliente?.numero_entrega || cliente?.numero || ''
   const cidade = cliente?.cidade_entrega || cliente?.cidade || ''
@@ -414,7 +549,6 @@ function buildParada(pedidoId: string, clienteId: string, cliente: any, itens: a
   const localidade = [bairro, cidade, estado].filter(Boolean).join(' - ')
   const endereco = [enderecoParts, localidade].filter(Boolean).join(' - ')
 
-  // Resumo de itens
   const itensResumo = itens.map(i => {
     const prodNome = (i.produtos as any)?.nome || 'Produto'
     return `${prodNome} x${i.quantidade}`
@@ -428,8 +562,22 @@ function buildParada(pedidoId: string, clienteId: string, cliente: any, itens: a
     endereco,
     itensResumo,
     ordem,
-    observacoes: ''
+    observacoes: existingData?.observacoes || '',
+    secao: existingData?.secao || '',
+    pedidoPronto: existingData?.pedido_pronto ?? false,
+    conferidoChegada: existingData?.conferido_chegada ?? false,
+    entregue: existingData?.entregue ?? false,
+    canhoto: existingData?.canhoto || '',
+    status: existingData?.status || 'pendente',
+    rotuloEmbalagem: cliente?.rotulo_embalagem || '',
+    embalagemSecundaria: cliente?.embalagem_secundaria || '',
+    notaFiscal: pedido?.nota_fiscal || ''
   }
+}
+
+function toggleEntregue(parada: Parada) {
+  parada.entregue = !parada.entregue
+  parada.status = parada.entregue ? 'entregue' : 'pendente'
 }
 
 function onDateChange() {
@@ -460,7 +608,6 @@ function removeParada(pedidoId: string) {
 function optimizeRoute() {
   if (paradas.value.length <= 1) return
 
-  // Sort by bairro (alphabetically), then by clienteNome within each bairro
   const sorted = [...paradas.value].sort((a, b) => {
     const bairroA = (a.bairro || 'zzz').toLowerCase()
     const bairroB = (b.bairro || 'zzz').toLowerCase()
@@ -484,11 +631,21 @@ function handleSave() {
     motoristaId: form.value.motoristaId,
     status: props.editData?.status || 'planejada',
     observacoes: form.value.observacoes,
+    kmInicio: form.value.kmInicio || null,
+    kmTermino: form.value.kmTermino || null,
+    horarioInicio: form.value.horarioInicio,
+    horarioTermino: form.value.horarioTermino,
     paradas: paradas.value.map(p => ({
       pedido_id: p.pedidoId,
       cliente_id: p.clienteId,
       ordem: p.ordem,
-      observacoes: p.observacoes
+      observacoes: p.observacoes,
+      secao: p.secao || null,
+      pedido_pronto: p.pedidoPronto,
+      conferido_chegada: p.conferidoChegada,
+      entregue: p.entregue,
+      canhoto: p.canhoto || null,
+      status: p.status
     }))
   }
   emit('save', data)

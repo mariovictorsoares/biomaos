@@ -3,7 +3,7 @@
  *
  * Quando o eWeLink redireciona de volta para a app com ?code=XXX&state=YYY,
  * este plugin detecta os params, troca o code por token via API, e
- * redireciona o usuário para /monitoramento?tab=configuracao com o resultado.
+ * redireciona o usuário para /fazendas com o resultado.
  */
 export default defineNuxtPlugin(async () => {
   if (typeof window === 'undefined') return
@@ -51,11 +51,11 @@ export default defineNuxtPlugin(async () => {
     })
 
     if (result.success) {
-      window.location.href = '/monitoramento?tab=configuracao&ewelink_connected=true'
+      window.location.href = '/fazendas?ewelink_connected=true'
     } else {
-      window.location.href = `/monitoramento?tab=configuracao&ewelink_error=${encodeURIComponent(result.error || 'Erro ao conectar')}`
+      window.location.href = `/fazendas?ewelink_error=${encodeURIComponent(result.error || 'Erro ao conectar')}`
     }
   } catch {
-    window.location.href = '/monitoramento?tab=configuracao&ewelink_error=Erro%20de%20comunica%C3%A7%C3%A3o%20com%20o%20servidor'
+    window.location.href = '/fazendas?ewelink_error=Erro%20de%20comunica%C3%A7%C3%A3o%20com%20o%20servidor'
   }
 })

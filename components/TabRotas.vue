@@ -30,11 +30,17 @@
             <option value="finalizada">Finalizada</option>
           </select>
         </div>
-        <!-- Direita: Botão -->
-        <button @click="openCreateSlideover" class="btn btn-primary shrink-0 justify-center sm:justify-start">
-          <span class="material-icons-outlined text-sm">add</span>
-          Nova rota
-        </button>
+        <!-- Direita: Botões -->
+        <div class="flex items-center gap-2">
+          <button @click="emit('motoristas')" class="btn btn-secondary shrink-0 justify-center sm:justify-start">
+            <span class="material-icons-outlined text-sm">badge</span>
+            Motoristas
+          </button>
+          <button @click="openCreateSlideover" class="btn btn-primary shrink-0 justify-center sm:justify-start">
+            <span class="material-icons-outlined text-sm">add</span>
+            Nova rota
+          </button>
+        </div>
       </div>
 
       <!-- Card da Tabela -->
@@ -52,7 +58,7 @@
                 </th>
                 <th class="table-header">Motorista</th>
                 <th class="table-header">Regiões</th>
-                <th class="table-header text-center">Paradas</th>
+                <th class="table-header text-center">Entregas</th>
                 <th class="table-header text-center">Status</th>
                 <th class="table-header text-center w-32">Ações</th>
               </tr>
@@ -85,8 +91,21 @@
                   </div>
                   <span v-else class="text-xs text-subtext-light dark:text-subtext-dark">-</span>
                 </td>
-                <td class="table-cell text-center text-subtext-light dark:text-subtext-dark">
-                  {{ rota.paradas_count || 0 }}
+                <td class="table-cell text-center">
+                  <div class="flex items-center justify-center gap-1.5">
+                    <span :class="[
+                      'text-sm font-medium',
+                      rota.paradas_entregues === rota.paradas_count && rota.paradas_count > 0
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-subtext-light dark:text-subtext-dark'
+                    ]">{{ rota.paradas_entregues }}/{{ rota.paradas_count }}</span>
+                    <div v-if="rota.paradas_count > 0" class="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        class="h-full bg-green-500 rounded-full transition-all"
+                        :style="{ width: `${(rota.paradas_entregues / rota.paradas_count) * 100}%` }"
+                      ></div>
+                    </div>
+                  </div>
                 </td>
                 <td class="table-cell text-center">
                   <span :class="['badge', statusBadgeClass(rota.status)]">
@@ -151,7 +170,10 @@
                       {{ formatDate(rota.data_rota) }} - {{ getDiaSemana(rota.data_rota) }}
                     </p>
                     <p class="text-xs text-subtext-light dark:text-subtext-dark">
-                      {{ getMotoristaName(rota.motorista_id) || 'Sem motorista' }} &middot; {{ rota.paradas_count || 0 }} paradas
+                      {{ getMotoristaName(rota.motorista_id) || 'Sem motorista' }} &middot;
+                      <span :class="rota.paradas_entregues === rota.paradas_count && rota.paradas_count > 0 ? 'text-green-600 dark:text-green-400' : ''">
+                        {{ rota.paradas_entregues }}/{{ rota.paradas_count }} entregas
+                      </span>
                     </p>
                   </div>
                   <span :class="['badge shrink-0', statusBadgeClass(rota.status)]">
@@ -257,6 +279,25 @@
           <span v-if="printData.motoristaNome"><strong>Motorista:</strong> {{ printData.motoristaNome }}</span>
           <span v-if="printData.motoristaVeiculo"><strong>Veículo:</strong> {{ printData.motoristaVeiculo }}</span>
         </div>
+        <!-- KM e Horários preenchíveis -->
+        <div class="print-controls">
+          <div class="print-control-field">
+            <span>KM Início:</span>
+            <span class="print-blank-line">{{ printData.km_inicio || '' }}</span>
+          </div>
+          <div class="print-control-field">
+            <span>KM Término:</span>
+            <span class="print-blank-line">{{ printData.km_termino || '' }}</span>
+          </div>
+          <div class="print-control-field">
+            <span>Hr Início:</span>
+            <span class="print-blank-line">{{ printData.horario_inicio ? printData.horario_inicio.substring(0, 5) : '' }}</span>
+          </div>
+          <div class="print-control-field">
+            <span>Hr Término:</span>
+            <span class="print-blank-line">{{ printData.horario_termino ? printData.horario_termino.substring(0, 5) : '' }}</span>
+          </div>
+        </div>
         <div class="print-summary">
           <span><strong>{{ printData.paradas.length }}</strong> paradas</span>
           <span>&middot;</span>
@@ -264,35 +305,54 @@
         </div>
       </div>
 
-      <!-- Paradas agrupadas por bairro -->
-      <div v-for="(grupo, bairroIdx) in printData.paradasPorBairro" :key="bairroIdx" class="print-bairro-group">
-        <div class="print-bairro-header">
-          <span class="print-bairro-icon">&#9679;</span>
-          <span class="print-bairro-name">{{ grupo.bairro }}</span>
-          <span class="print-bairro-count">({{ grupo.paradas.length }} {{ grupo.paradas.length === 1 ? 'parada' : 'paradas' }})</span>
+      <!-- Tabela de paradas -->
+      <div v-for="(grupo, idx) in printData.paradasAgrupadas" :key="idx" class="print-group">
+        <div class="print-group-header">
+          {{ grupo.label }}
+          <span class="print-group-count">({{ grupo.paradas.length }})</span>
         </div>
 
-        <div v-for="parada in grupo.paradas" :key="parada.ordem" class="print-parada">
-          <div class="print-parada-number">{{ parada.ordem }}</div>
-          <div class="print-parada-content">
-            <div class="print-parada-header-row">
-              <span class="print-parada-name">{{ parada.clienteNome }}</span>
-              <span v-if="parada.horario" class="print-parada-time">{{ parada.horario }}</span>
-            </div>
-            <p class="print-parada-address">{{ parada.endereco }}</p>
-            <div v-if="parada.itens.length" class="print-parada-items">
-              <span v-for="(item, iIdx) in parada.itens" :key="iIdx" class="print-item">
-                {{ item.nome }} x{{ item.quantidade }}<span v-if="iIdx < parada.itens.length - 1">, </span>
-              </span>
-            </div>
-            <p v-if="parada.observacoes" class="print-parada-obs">
-              <em>Obs: {{ parada.observacoes }}</em>
-            </p>
-          </div>
-          <div class="print-parada-check">
-            <div class="print-checkbox"></div>
-          </div>
-        </div>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th class="print-th print-th-num">#</th>
+              <th class="print-th">Cliente</th>
+              <th class="print-th">Endereço / Contato</th>
+              <th class="print-th">Itens</th>
+              <th class="print-th print-th-sm">NF</th>
+              <th class="print-th print-th-check">Pronto</th>
+              <th class="print-th print-th-check">Conf.</th>
+              <th class="print-th print-th-check">Entreg.</th>
+              <th class="print-th print-th-canhoto">Canhoto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="parada in grupo.paradas" :key="parada.ordem" class="print-tr">
+              <td class="print-td print-td-num">{{ parada.ordem }}</td>
+              <td class="print-td print-td-cliente">
+                <strong>{{ parada.clienteNome }}</strong>
+                <span v-if="parada.rotuloEmbalagem" class="print-badge">{{ parada.rotuloEmbalagem }}</span>
+                <span v-if="parada.embalagemSecundaria" class="print-badge-sec">{{ parada.embalagemSecundaria }}</span>
+                <div v-if="parada.horario" class="print-small">{{ parada.horario }}</div>
+              </td>
+              <td class="print-td print-td-endereco">
+                <div>{{ parada.endereco }}</div>
+                <div v-if="parada.telefone" class="print-small">Tel: {{ parada.telefone }}</div>
+                <div v-if="parada.observacoes" class="print-obs"><em>{{ parada.observacoes }}</em></div>
+              </td>
+              <td class="print-td print-td-itens">
+                <span v-for="(item, iIdx) in parada.itens" :key="iIdx">
+                  {{ item.nome }} x{{ item.quantidade }}<span v-if="iIdx < parada.itens.length - 1">, </span>
+                </span>
+              </td>
+              <td class="print-td print-td-nf">{{ parada.notaFiscal }}</td>
+              <td class="print-td print-td-check"><div class="print-checkbox"></div></td>
+              <td class="print-td print-td-check"><div class="print-checkbox"></div></td>
+              <td class="print-td print-td-check"><div class="print-checkbox"></div></td>
+              <td class="print-td print-td-canhoto"><div class="print-blank-sm"></div></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- Rodapé da impressão -->
@@ -325,7 +385,12 @@ interface Rota {
   motorista_id: string | null
   status: string
   observacoes: string | null
+  km_inicio: number | null
+  km_termino: number | null
+  horario_inicio: string | null
+  horario_termino: string | null
   paradas_count: number
+  paradas_entregues: number
   bairros: string[]
   created_at: string
   updated_at: string
@@ -344,12 +409,17 @@ interface PrintParada {
   endereco: string
   bairro: string
   horario: string
+  telefone: string
   itens: Array<{ nome: string; quantidade: number }>
   observacoes: string
+  notaFiscal: string
+  rotuloEmbalagem: string
+  embalagemSecundaria: string
+  secao: string
 }
 
-interface PrintBairroGroup {
-  bairro: string
+interface PrintGroup {
+  label: string
   paradas: PrintParada[]
 }
 
@@ -357,10 +427,18 @@ interface PrintData {
   data_rota: string
   motoristaNome: string
   motoristaVeiculo: string
+  km_inicio: number | null
+  km_termino: number | null
+  horario_inicio: string | null
+  horario_termino: string | null
   paradas: PrintParada[]
-  paradasPorBairro: PrintBairroGroup[]
+  paradasAgrupadas: PrintGroup[]
   totalBairros: number
 }
+
+const emit = defineEmits<{
+  motoristas: []
+}>()
 
 const supabase = useSupabaseClient()
 const { currentCompany } = useCurrentCompany()
@@ -523,7 +601,7 @@ async function loadData() {
     const [rotasRes, motoristasRes] = await Promise.all([
       supabase
         .from('rotas')
-        .select('*, rota_paradas(id, cliente_id, clientes(bairro, bairro_entrega))')
+        .select('*, rota_paradas(id, cliente_id, entregue, clientes(bairro, bairro_entrega))')
         .eq('empresa_id', currentCompany.value.id)
         .order('data_rota', { ascending: false }),
       supabase
@@ -538,18 +616,20 @@ async function loadData() {
     if (motoristasRes.error) throw motoristasRes.error
 
     rotas.value = (rotasRes.data || []).map(r => {
-      // Extract unique bairros from paradas
       const bairros = new Set<string>()
+      let entregues = 0
       if (r.rota_paradas) {
         for (const p of r.rota_paradas) {
           const cliente = p.clientes as any
           const bairro = cliente?.bairro_entrega || cliente?.bairro
           if (bairro) bairros.add(bairro)
+          if (p.entregue) entregues++
         }
       }
       return {
         ...r,
         paradas_count: r.rota_paradas?.length || 0,
+        paradas_entregues: entregues,
         bairros: [...bairros].sort()
       }
     })
@@ -572,7 +652,7 @@ async function openEditSlideover(rota: Rota) {
   try {
     const { data, error } = await supabase
       .from('rota_paradas')
-      .select('pedido_id, cliente_id, ordem, observacoes')
+      .select('pedido_id, cliente_id, ordem, observacoes, secao, pedido_pronto, conferido_chegada, entregue, canhoto, status')
       .eq('rota_id', rota.id)
       .order('ordem', { ascending: true })
 
@@ -584,6 +664,10 @@ async function openEditSlideover(rota: Rota) {
       motorista_id: rota.motorista_id,
       status: rota.status,
       observacoes: rota.observacoes,
+      km_inicio: rota.km_inicio,
+      km_termino: rota.km_termino,
+      horario_inicio: rota.horario_inicio,
+      horario_termino: rota.horario_termino,
       rota_paradas: data || []
     }
     showSlideover.value = true
@@ -610,7 +694,11 @@ async function handleSave(data: any) {
       data_rota: data.dataRota,
       motorista_id: data.motoristaId || null,
       status: data.status,
-      observacoes: data.observacoes || null
+      observacoes: data.observacoes || null,
+      km_inicio: data.kmInicio || null,
+      km_termino: data.kmTermino || null,
+      horario_inicio: data.horarioInicio || null,
+      horario_termino: data.horarioTermino || null
     }
 
     let rotaId: string
@@ -643,7 +731,13 @@ async function handleSave(data: any) {
         pedido_id: p.pedido_id,
         cliente_id: p.cliente_id,
         ordem: p.ordem,
-        observacoes: p.observacoes || null
+        observacoes: p.observacoes || null,
+        secao: p.secao || null,
+        pedido_pronto: p.pedido_pronto ?? false,
+        conferido_chegada: p.conferido_chegada ?? false,
+        entregue: p.entregue ?? false,
+        canhoto: p.canhoto || null,
+        status: p.status || 'pendente'
       }))
 
       const { error: paradasErr } = await supabase
@@ -695,7 +789,7 @@ async function printRota(rota: Rota) {
   try {
     const { data: paradasData, error: paradasErr } = await supabase
       .from('rota_paradas')
-      .select('pedido_id, cliente_id, ordem, observacoes')
+      .select('pedido_id, cliente_id, ordem, observacoes, secao, pedido_pronto, conferido_chegada, entregue, canhoto')
       .eq('rota_id', rota.id)
       .order('ordem', { ascending: true })
 
@@ -708,12 +802,14 @@ async function printRota(rota: Rota) {
     const pedidoIds = paradasData.map(p => p.pedido_id)
     const clienteIds = [...new Set(paradasData.map(p => p.cliente_id))]
 
-    const [clientesRes, itensRes] = await Promise.all([
-      supabase.from('clientes').select('id, razao_social, nome_fantasia, bairro, bairro_entrega, logradouro_entrega, numero_entrega, complemento_entrega, cidade_entrega, estado_entrega, logradouro, numero, complemento, cidade, estado, hora_manha_inicio, hora_manha_fim, hora_tarde_inicio, hora_tarde_fim, observacoes_entrega').in('id', clienteIds),
-      supabase.from('pedido_itens').select('pedido_id, quantidade, produto_id, produtos(nome)').in('pedido_id', pedidoIds)
+    const [clientesRes, itensRes, pedidosRes] = await Promise.all([
+      supabase.from('clientes').select('id, razao_social, nome_fantasia, bairro, bairro_entrega, logradouro_entrega, numero_entrega, complemento_entrega, cidade_entrega, estado_entrega, logradouro, numero, complemento, cidade, estado, hora_manha_inicio, hora_manha_fim, hora_tarde_inicio, hora_tarde_fim, observacoes_entrega, telefone, contato, rotulo_embalagem, embalagem_secundaria').in('id', clienteIds),
+      supabase.from('pedido_itens').select('pedido_id, quantidade, produto_id, produtos(nome)').in('pedido_id', pedidoIds),
+      supabase.from('pedidos').select('id, nota_fiscal').in('id', pedidoIds)
     ])
 
     const clientesMap = new Map((clientesRes.data || []).map(c => [c.id, c]))
+    const pedidosMap = new Map((pedidosRes.data || []).map(p => [p.id, p]))
     const itensMap = new Map<string, any[]>()
     for (const item of (itensRes.data || [])) {
       if (!itensMap.has(item.pedido_id)) itensMap.set(item.pedido_id, [])
@@ -724,65 +820,85 @@ async function printRota(rota: Rota) {
 
     const paradas: PrintParada[] = paradasData.map(p => {
       const cliente = clientesMap.get(p.cliente_id)
+      const pedido = pedidosMap.get(p.pedido_id)
       const itens = itensMap.get(p.pedido_id) || []
 
       const logradouro = cliente?.logradouro_entrega || cliente?.logradouro || ''
       const numero = cliente?.numero_entrega || cliente?.numero || ''
       const complemento = cliente?.complemento_entrega || cliente?.complemento || ''
       const bairro = cliente?.bairro_entrega || cliente?.bairro || ''
-      const cidade = cliente?.cidade_entrega || cliente?.cidade || ''
-      const estado = cliente?.estado_entrega || cliente?.estado || ''
 
       const enderecoParts = [logradouro, numero].filter(Boolean).join(', ')
-      const enderecoComplemento = complemento ? `${enderecoParts} - ${complemento}` : enderecoParts
-      const localidade = [cidade, estado].filter(Boolean).join(' - ')
-      const endereco = [enderecoComplemento, localidade].filter(Boolean).join(' - ')
+      const enderecoFull = complemento ? `${enderecoParts} - ${complemento}` : enderecoParts
 
       const horarioParts: string[] = []
       if (cliente?.hora_manha_inicio && cliente?.hora_manha_fim) {
-        horarioParts.push(`${cliente.hora_manha_inicio.substring(0, 5)} - ${cliente.hora_manha_fim.substring(0, 5)}`)
+        horarioParts.push(`${cliente.hora_manha_inicio.substring(0, 5)}-${cliente.hora_manha_fim.substring(0, 5)}`)
       }
       if (cliente?.hora_tarde_inicio && cliente?.hora_tarde_fim) {
-        horarioParts.push(`${cliente.hora_tarde_inicio.substring(0, 5)} - ${cliente.hora_tarde_fim.substring(0, 5)}`)
+        horarioParts.push(`${cliente.hora_tarde_inicio.substring(0, 5)}-${cliente.hora_tarde_fim.substring(0, 5)}`)
       }
+
+      const telefone = cliente?.telefone || ''
+      const contato = cliente?.contato || ''
+      const telDisplay = [contato, telefone].filter(Boolean).join(' - ')
 
       return {
         ordem: p.ordem,
         clienteNome: cliente?.nome_fantasia || cliente?.razao_social || 'Cliente',
-        endereco,
+        endereco: enderecoFull,
         bairro: bairro || 'Sem bairro',
         horario: horarioParts.join(' / '),
+        telefone: telDisplay,
         itens: itens.map(i => ({
           nome: (i.produtos as any)?.nome || 'Produto',
           quantidade: i.quantidade
         })),
-        observacoes: cliente?.observacoes_entrega || ''
+        observacoes: cliente?.observacoes_entrega || '',
+        notaFiscal: pedido?.nota_fiscal || '',
+        rotuloEmbalagem: cliente?.rotulo_embalagem || '',
+        embalagemSecundaria: cliente?.embalagem_secundaria || '',
+        secao: p.secao || ''
       }
     })
 
-    // Agrupar por bairro (mantendo ordem original)
-    const bairroOrder: string[] = []
-    const bairroMap = new Map<string, PrintParada[]>()
+    // Agrupar: por seção + bairro (se houver seções) ou só bairro
+    const hasSecao = paradas.some(p => p.secao)
+    const groupOrder: string[] = []
+    const groupMap = new Map<string, PrintParada[]>()
+
     for (const p of paradas) {
-      if (!bairroMap.has(p.bairro)) {
-        bairroOrder.push(p.bairro)
-        bairroMap.set(p.bairro, [])
+      let label: string
+      if (hasSecao && p.secao) {
+        label = `${p.secao} — ${p.bairro}`
+      } else {
+        label = p.bairro
       }
-      bairroMap.get(p.bairro)!.push(p)
+      if (!groupMap.has(label)) {
+        groupOrder.push(label)
+        groupMap.set(label, [])
+      }
+      groupMap.get(label)!.push(p)
     }
 
-    const paradasPorBairro: PrintBairroGroup[] = bairroOrder.map(bairro => ({
-      bairro,
-      paradas: bairroMap.get(bairro)!
+    const paradasAgrupadas: PrintGroup[] = groupOrder.map(label => ({
+      label,
+      paradas: groupMap.get(label)!
     }))
+
+    const bairrosUnicos = new Set(paradas.map(p => p.bairro))
 
     printData.value = {
       data_rota: rota.data_rota,
       motoristaNome: motorista?.nome || '',
       motoristaVeiculo: motorista?.veiculo || '',
+      km_inicio: rota.km_inicio,
+      km_termino: rota.km_termino,
+      horario_inicio: rota.horario_inicio,
+      horario_termino: rota.horario_termino,
       paradas,
-      paradasPorBairro,
-      totalBairros: bairroOrder.length
+      paradasAgrupadas,
+      totalBairros: bairrosUnicos.size
     }
 
     await nextTick()
@@ -826,6 +942,8 @@ watch(itemsPerPage, () => {
 onMounted(() => {
   loadData()
 })
+
+defineExpose({ loadData })
 </script>
 
 <style scoped>
@@ -833,19 +951,19 @@ onMounted(() => {
   .print-layout {
     font-family: 'Inter', Arial, sans-serif;
     color: #000;
-    font-size: 11px;
-    padding: 8mm;
+    font-size: 10px;
+    padding: 6mm;
   }
 
   .print-header {
     text-align: center;
-    margin-bottom: 5mm;
+    margin-bottom: 4mm;
     padding-bottom: 3mm;
     border-bottom: 2px solid #000;
   }
 
   .print-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -856,8 +974,30 @@ onMounted(() => {
     display: flex;
     justify-content: center;
     gap: 20px;
-    margin-top: 4px;
+    margin-top: 3px;
     font-size: 11px;
+  }
+
+  .print-controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 4px;
+    font-size: 10px;
+  }
+
+  .print-control-field {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .print-blank-line {
+    display: inline-block;
+    min-width: 60px;
+    border-bottom: 1px solid #999;
+    text-align: center;
+    font-weight: 600;
   }
 
   .print-summary {
@@ -865,133 +1005,159 @@ onMounted(() => {
     justify-content: center;
     gap: 8px;
     margin-top: 2px;
-    font-size: 11px;
+    font-size: 10px;
     color: #555;
   }
 
-  .print-bairro-group {
-    margin-bottom: 4mm;
+  .print-group {
+    margin-bottom: 3mm;
   }
 
-  .print-bairro-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 0;
-    margin-bottom: 2mm;
-    border-bottom: 1px solid #ccc;
-    font-size: 12px;
+  .print-group-header {
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    padding: 2px 4px;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    margin-bottom: 0;
   }
 
-  .print-bairro-icon {
-    font-size: 8px;
-    color: #666;
-  }
-
-  .print-bairro-name {
-    flex: 1;
-  }
-
-  .print-bairro-count {
+  .print-group-count {
     font-weight: 400;
-    font-size: 10px;
+    font-size: 9px;
     color: #888;
     text-transform: none;
   }
 
-  .print-parada {
-    display: flex;
-    gap: 8px;
-    padding: 2mm 0;
-    border-bottom: 1px dotted #ddd;
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9px;
+  }
+
+  .print-th {
+    padding: 2px 4px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+  }
+
+  .print-th-num { width: 22px; text-align: center; }
+  .print-th-sm { width: 40px; }
+  .print-th-check { width: 30px; text-align: center; }
+  .print-th-canhoto { width: 55px; }
+
+  .print-tr {
     page-break-inside: avoid;
   }
 
-  .print-parada-number {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #f3f4f6;
-    border: 1px solid #d1d5db;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .print-td {
+    padding: 3px 4px;
+    border: 1px solid #ddd;
+    vertical-align: top;
+    font-size: 9px;
+  }
+
+  .print-td-num {
+    text-align: center;
+    font-weight: 700;
     font-size: 10px;
-    font-weight: 700;
-    flex-shrink: 0;
-    margin-top: 1px;
   }
 
-  .print-parada-content {
-    flex: 1;
-    min-width: 0;
+  .print-td-cliente {
+    max-width: 120px;
+    font-size: 9px;
   }
 
-  .print-parada-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 8px;
-  }
-
-  .print-parada-name {
-    font-size: 12px;
-    font-weight: 700;
+  .print-td-cliente strong {
+    font-size: 10px;
     text-transform: uppercase;
   }
 
-  .print-parada-time {
-    font-size: 10px;
-    color: #555;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .print-parada-address {
-    font-size: 10px;
-    color: #444;
-    margin: 1px 0;
-  }
-
-  .print-parada-items {
-    font-size: 10px;
+  .print-td-endereco {
+    max-width: 150px;
+    font-size: 8px;
     color: #333;
-    margin-top: 1px;
   }
 
-  .print-item {
-    white-space: nowrap;
+  .print-td-itens {
+    font-size: 8px;
+    max-width: 100px;
   }
 
-  .print-parada-obs {
-    font-size: 10px;
+  .print-td-nf {
+    font-size: 8px;
+    text-align: center;
+  }
+
+  .print-td-check {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .print-td-canhoto {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .print-badge {
+    display: inline-block;
+    font-size: 7px;
+    font-weight: 700;
+    padding: 0 3px;
+    border: 1px solid #666;
+    border-radius: 2px;
+    margin-left: 2px;
+    vertical-align: middle;
+  }
+
+  .print-badge-sec {
+    display: inline-block;
+    font-size: 7px;
+    padding: 0 2px;
     color: #666;
-    margin-top: 1px;
+    margin-left: 1px;
+    vertical-align: middle;
   }
 
-  .print-parada-check {
-    display: flex;
-    align-items: flex-start;
-    padding-top: 2px;
-    flex-shrink: 0;
+  .print-small {
+    font-size: 8px;
+    color: #666;
+  }
+
+  .print-obs {
+    font-size: 8px;
+    color: #555;
+    margin-top: 1px;
   }
 
   .print-checkbox {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     border: 1.5px solid #999;
-    border-radius: 3px;
+    border-radius: 2px;
+    margin: 0 auto;
+  }
+
+  .print-blank-sm {
+    width: 45px;
+    border-bottom: 1px solid #999;
+    height: 12px;
+    margin: 0 auto;
   }
 
   .print-footer {
-    margin-top: 5mm;
+    margin-top: 4mm;
     padding-top: 2mm;
     border-top: 1px solid #ccc;
     text-align: center;
-    font-size: 9px;
+    font-size: 8px;
     color: #999;
   }
 }

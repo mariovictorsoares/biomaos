@@ -17,7 +17,7 @@
           <option value="">Todos os Motivos</option>
           <option value="mofo">Mofo</option>
           <option value="praga">Praga</option>
-          <option value="erro_irrigacao">Erro de Irrigacao</option>
+          <option value="erro_irrigacao">Erro de Irrigação</option>
           <option value="semente_ruim">Semente Ruim</option>
           <option value="outro">Outro</option>
         </select>
@@ -29,9 +29,9 @@
             type="date"
             v-model="filterDataInicio"
             class="input text-xs sm:text-sm w-[130px]"
-            placeholder="Inicio"
+            placeholder="Início"
           />
-          <span class="text-xs text-subtext-light dark:text-subtext-dark">ate</span>
+          <span class="text-xs text-subtext-light dark:text-subtext-dark">até</span>
           <input
             type="date"
             v-model="filterDataFim"
@@ -257,7 +257,7 @@
                       <option value="">Selecione</option>
                       <option value="mofo">Mofo</option>
                       <option value="praga">Praga</option>
-                      <option value="erro_irrigacao">Erro de Irrigacao</option>
+                      <option value="erro_irrigacao">Erro de Irrigação</option>
                       <option value="semente_ruim">Semente Ruim</option>
                       <option value="outro">Outro</option>
                     </select>
@@ -287,7 +287,7 @@
                       <p class="text-sm font-medium text-gray-900 dark:text-text-dark">{{ formatDateBR(plantioSelecionado.data_colheita) || '-' }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Ja Perdidas</p>
+                      <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Já Perdidas</p>
                       <p class="text-sm font-medium text-red-600 dark:text-red-400">{{ formatNumber(plantioSelecionado.bandejas_perdidas || 0) }}</p>
                     </div>
                   </div>
@@ -406,7 +406,7 @@ function getMotivoLabel(motivo?: string): string {
   const labels: Record<string, string> = {
     mofo: 'Mofo',
     praga: 'Praga',
-    erro_irrigacao: 'Erro de Irrigacao',
+    erro_irrigacao: 'Erro de Irrigação',
     semente_ruim: 'Semente Ruim',
     outro: 'Outro'
   }

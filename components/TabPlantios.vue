@@ -36,9 +36,9 @@
             type="date"
             v-model="filterDataInicio"
             class="input text-xs sm:text-sm w-[130px]"
-            placeholder="Inicio"
+            placeholder="Início"
           />
-          <span class="text-xs text-subtext-light dark:text-subtext-dark">ate</span>
+          <span class="text-xs text-subtext-light dark:text-subtext-dark">até</span>
           <input
             type="date"
             v-model="filterDataFim"

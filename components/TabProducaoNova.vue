@@ -509,10 +509,25 @@ const statusDropdownRef = ref<HTMLElement | null>(null)
 const fazendaDropdownRef = ref<HTMLElement | null>(null)
 
 // Filtro de data (range geral — se qualquer data da produção cai no range, mostra)
+// Padrão: semana atual (seg-dom), igual vendas
+function getInicioSemana(date: Date): Date {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+  d.setDate(diff)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+function getFimSemana(date: Date): Date {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? 0 : 7)
+  d.setDate(diff)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
 const now = new Date()
-const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-const lastOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-const filtroDateRange = ref<Date[] | null>([firstOfMonth, lastOfMonth])
+const filtroDateRange = ref<Date[] | null>([getInicioSemana(now), getFimSemana(now)])
 
 // Dark mode detection para o datepicker
 const isDark = ref(false)
@@ -528,6 +543,12 @@ onMounted(() => {
 // Preset dates para seleção rápida
 const presetDates = computed(() => {
   const today = new Date()
+  const startThisWeek = getInicioSemana(today)
+  const endThisWeek = getFimSemana(today)
+  const lastWeekStart = new Date(startThisWeek)
+  lastWeekStart.setDate(lastWeekStart.getDate() - 7)
+  const lastWeekEnd = new Date(endThisWeek)
+  lastWeekEnd.setDate(lastWeekEnd.getDate() - 7)
   const startThisMonth = new Date(today.getFullYear(), today.getMonth(), 1)
   const endThisMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
   const startLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
@@ -535,6 +556,8 @@ const presetDates = computed(() => {
   const startThisYear = new Date(today.getFullYear(), 0, 1)
   const endThisYear = new Date(today.getFullYear(), 11, 31)
   return [
+    { label: 'Esta semana', value: [startThisWeek, endThisWeek] },
+    { label: 'Semana passada', value: [lastWeekStart, lastWeekEnd] },
     { label: 'Este mês', value: [startThisMonth, endThisMonth] },
     { label: 'Mês passado', value: [startLastMonth, endLastMonth] },
     { label: 'Este ano', value: [startThisYear, endThisYear] },

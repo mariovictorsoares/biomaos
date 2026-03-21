@@ -2,25 +2,14 @@
   <div>
     <div class="flex items-center justify-between mb-12">
       <h1 class="text-lg font-medium text-text-light/70 dark:text-text-dark/70 tracking-wide uppercase">Produção</h1>
-      <TabsNav
-        v-model="activeTab"
-        :tabs="tabs"
-      />
     </div>
 
-    <div>
-      <!-- Nova producao -->
-      <TabProducaoNova
-        v-if="activeTab === 'nova'"
-        :reload-key="reloadKey"
-        @nova-producao="showModalNova = true"
-        @detalhe-producao="abrirDetalhe"
-        @ver-recorrentes="showModalRecorrentes = true"
-      />
-
-      <!-- Previsao -->
-      <TabPrevisaoColheita v-if="activeTab === 'previsao'" />
-    </div>
+    <TabProducaoNova
+      :reload-key="reloadKey"
+      @nova-producao="showModalNova = true"
+      @detalhe-producao="abrirDetalhe"
+      @ver-recorrentes="showModalRecorrentes = true"
+    />
 
     <!-- Modais -->
     <ModalNovaProducao
@@ -74,18 +63,6 @@
 </template>
 
 <script setup>
-const route = useRoute()
-const router = useRouter()
-
-const validTabs = ['nova', 'previsao']
-const queryTab = route.query.tab
-const activeTab = ref(validTabs.includes(queryTab) ? queryTab : 'nova')
-
-const tabs = [
-  { key: 'nova', label: 'Produção' },
-  { key: 'previsao', label: 'Previsão' }
-]
-
 // Modais
 const showModalNova = ref(false)
 const showModalDetalhe = ref(false)
@@ -102,7 +79,6 @@ function abrirDetalhe(producao) {
 
 function fecharDetalhe() {
   showModalDetalhe.value = false
-  // Delay para a animação de saída completar antes de destruir o componente
   setTimeout(() => {
     producaoSelecionada.value = null
   }, 250)
@@ -116,8 +92,4 @@ function onProducaoCriada() {
 function onProducaoAtualizada() {
   reloadKey.value++
 }
-
-watch(activeTab, (tab) => {
-  router.replace({ query: tab === 'nova' ? {} : { tab } })
-})
 </script>

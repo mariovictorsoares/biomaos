@@ -85,31 +85,53 @@
     <!-- Navegação -->
     <nav class="sidebar-nav">
       <div class="sidebar-nav-inner">
-        <template v-for="item in menuItems" :key="item.path">
-          <NuxtLink
-            :to="item.path"
+        <template v-for="(section, sIndex) in menuSections" :key="sIndex">
+          <!-- Section label -->
+          <div
+            v-if="section.label"
             :class="[
-              'sidebar-menu-item group',
-              isCollapsed ? 'sidebar-menu-item-collapsed' : '',
-              isActive(item.path) ? 'sidebar-menu-item-active' : 'sidebar-menu-item-inactive'
+              'sidebar-section-label',
+              { 'lg:!hidden': isCollapsed },
+              sIndex > 0 ? 'mt-2.5' : ''
             ]"
-            @click="closeSidebar"
-            @mouseenter="showTooltip($event, item.label)"
-            @mouseleave="hideTooltip"
           >
-            <!-- Ícone -->
-            <span
-              :class="[
-                'material-icons-outlined sidebar-menu-icon',
-                isActive(item.path) ? 'text-primary' : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300'
-              ]"
-            >{{ item.icon }}</span>
+            <span class="sidebar-section-text">{{ section.label }}</span>
+          </div>
 
-            <!-- Label com animação (sempre visível no mobile) -->
-            <span :class="['sidebar-menu-label', { 'lg:!hidden': isCollapsed }]">
-              {{ item.label }}
-            </span>
-          </NuxtLink>
+          <!-- Collapsed: section divider -->
+          <div
+            v-if="section.label && isCollapsed"
+            class="sidebar-section-divider hidden lg:block"
+            :class="sIndex > 0 ? 'mt-3' : ''"
+          >
+            <div class="h-px bg-border-light/50 dark:bg-border-dark/30 mx-3"></div>
+          </div>
+
+          <!-- Section items -->
+          <template v-for="item in section.items" :key="item.path">
+            <NuxtLink
+              :to="item.path"
+              :class="[
+                'sidebar-menu-item group',
+                isCollapsed ? 'sidebar-menu-item-collapsed' : '',
+                isActive(item.path) ? 'sidebar-menu-item-active' : 'sidebar-menu-item-inactive'
+              ]"
+              @click="closeSidebar"
+              @mouseenter="showTooltip($event, item.label)"
+              @mouseleave="hideTooltip"
+            >
+              <span
+                :class="[
+                  'material-icons-outlined sidebar-menu-icon',
+                  isActive(item.path) ? 'text-primary' : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300'
+                ]"
+              >{{ item.icon }}</span>
+
+              <span :class="['sidebar-menu-label', { 'lg:!hidden': isCollapsed }]">
+                {{ item.label }}
+              </span>
+            </NuxtLink>
+          </template>
         </template>
       </div>
     </nav>
@@ -1046,29 +1068,91 @@ const handleLogout = async () => {
   router.push('/auth/login')
 }
 
-// Itens base do menu
-const baseMenuItems = [
-  { label: 'Dashboard', path: '/', icon: 'home' },
-  { label: 'Comercial', path: '/comercial', icon: 'storefront' },
-  { label: 'Contratos', path: '/contratos', icon: 'description' },
-  { label: 'Clientes', path: '/clientes', icon: 'people' },
-  { label: 'Entregas', path: '/rotas', icon: 'local_shipping' },
-  { label: 'Produção', path: '/producao', icon: 'factory' },
-  { label: 'Catálogo', path: '/produtos', icon: 'auto_stories' },
-  { label: 'Fazendas', path: '/fazendas', icon: 'agriculture' },
-  { label: 'Monitoramento', path: '/monitoramento', icon: 'sensors' },
+// Menu organizado por seções
+const menuSections = [
+  {
+    items: [
+      { label: 'Dashboard', path: '/', icon: 'space_dashboard' },
+    ]
+  },
+  {
+    label: 'Comercial',
+    items: [
+      { label: 'Vendas', path: '/comercial', icon: 'paid' },
+      { label: 'Clientes', path: '/clientes', icon: 'people' },
+      { label: 'Contratos', path: '/contratos', icon: 'description' },
+    ]
+  },
+  {
+    label: 'Produção',
+    items: [
+      { label: 'Produção', path: '/producao', icon: 'factory' },
+      { label: 'Previsão', path: '/previsao', icon: 'date_range' },
+      { label: 'Estoque', path: '/estoque', icon: 'inventory_2' },
+    ]
+  },
+  {
+    label: 'Catálogo',
+    items: [
+      { label: 'Espécies', path: '/especies', icon: 'eco' },
+      { label: 'Produtos', path: '/produtos', icon: 'category' },
+    ]
+  },
+  {
+    label: 'Logística',
+    items: [
+      { label: 'Rotas', path: '/rotas', icon: 'local_shipping' },
+    ]
+  },
+  {
+    label: 'Fazendas',
+    items: [
+      { label: 'Fazendas', path: '/fazendas', icon: 'agriculture' },
+      { label: 'Capacidade', path: '/capacidade', icon: 'analytics' },
+    ]
+  },
 ]
 
-// Menu (sem itens exclusivos por enquanto)
-const menuItems = computed(() => {
-  return baseMenuItems
+// Collect all paths with query params to detect specificity conflicts
+const queryPaths = computed(() => {
+  const paths = []
+  for (const section of menuSections) {
+    for (const item of section.items) {
+      if (item.path.includes('?')) {
+        const [basePath, queryStr] = item.path.split('?')
+        paths.push({ basePath, params: new URLSearchParams(queryStr) })
+      }
+    }
+  }
+  return paths
 })
 
 const isActive = (path) => {
   if (path === '/') {
     return route.path === '/'
   }
-  return route.path.startsWith(path)
+  // Handle paths with query params (e.g. /fazendas?tab=monitoramento)
+  if (path.includes('?')) {
+    const [basePath, queryStr] = path.split('?')
+    if (route.path !== basePath && !route.path.startsWith(basePath + '/')) return false
+    const params = new URLSearchParams(queryStr)
+    for (const [key, value] of params) {
+      if (route.query[key] !== value) return false
+    }
+    return true
+  }
+  // For simple paths, check that a more specific query-param item isn't active
+  if (route.path.startsWith(path)) {
+    const moreSpecific = queryPaths.value.find(qp => {
+      if (route.path !== qp.basePath && !route.path.startsWith(qp.basePath + '/')) return false
+      for (const [key, value] of qp.params) {
+        if (route.query[key] !== value) return false
+      }
+      return true
+    })
+    return !moreSpecific
+  }
+  return false
 }
 
 // Fechar sidebar ao mudar de rota
@@ -1150,14 +1234,28 @@ function openSupport() {
 }
 
 .sidebar-nav-inner {
-  @apply px-3 space-y-1;
+  @apply px-3;
+}
+
+/* Section Labels */
+.sidebar-section-label {
+  @apply px-3 pt-1 pb-0.5;
+}
+
+.sidebar-section-text {
+  @apply text-[10px] font-semibold uppercase tracking-[0.08em];
+  @apply text-gray-400/60 dark:text-gray-500/60;
+}
+
+.sidebar-section-divider {
+  @apply pb-1.5;
 }
 
 /* Item do Menu */
 .sidebar-menu-item {
-  @apply flex items-center gap-3 px-3 py-2 rounded-lg;
+  @apply flex items-center gap-2.5 px-3 py-1.5 rounded-lg;
   @apply transition-all duration-200 ease-in-out;
-  @apply min-h-[40px];
+  @apply min-h-[32px];
 }
 
 .sidebar-menu-item-collapsed {
@@ -1174,12 +1272,12 @@ function openSupport() {
 }
 
 .sidebar-menu-icon {
-  @apply text-xl transition-colors duration-200 shrink-0;
+  @apply text-lg transition-colors duration-200 shrink-0;
 }
 
 /* Label do Menu */
 .sidebar-menu-label {
-  @apply text-sm font-medium whitespace-nowrap;
+  @apply text-[13px] font-medium whitespace-nowrap;
 }
 
 /* Footer */

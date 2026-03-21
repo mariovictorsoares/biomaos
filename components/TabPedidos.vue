@@ -1359,6 +1359,7 @@ function getStatusLabel(status: string | undefined): string {
     previsto: 'Previsto',
     reservado: 'Reservado',
     confirmado: 'Confirmado',
+    em_producao: 'Em Produção',
     finalizado: 'Finalizado',
     cancelado: 'Cancelado'
   }
@@ -1371,6 +1372,7 @@ function getStatusBadgeClass(status: string | undefined): string {
     previsto: 'badge badge-inactive',
     reservado: 'badge badge-warning',
     confirmado: 'badge badge-success',
+    em_producao: 'badge badge-info',
     finalizado: 'badge badge-info',
     cancelado: 'badge badge-danger'
   }

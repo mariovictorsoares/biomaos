@@ -150,7 +150,7 @@
       <!-- Loading -->
       <div v-if="loading" class="p-8 text-center">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
-        <p class="mt-2 text-subtext-light dark:text-subtext-dark">Carregando previsao...</p>
+        <p class="mt-2 text-subtext-light dark:text-subtext-dark">Carregando previsão...</p>
       </div>
 
       <!-- Tabela -->
@@ -224,9 +224,9 @@
       <!-- Empty State -->
       <div v-else class="text-center py-12">
         <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 mb-2">eco</span>
-        <h3 class="text-lg font-medium text-text-light dark:text-text-dark mb-1">Nenhuma especie cadastrada</h3>
+        <h3 class="text-lg font-medium text-text-light dark:text-text-dark mb-1">Nenhuma espécie cadastrada</h3>
         <p class="text-sm text-subtext-light dark:text-subtext-dark">
-          Cadastre especies para visualizar a previsao de colheita
+          Cadastre espécies para visualizar a previsão de colheita
         </p>
       </div>
 
@@ -252,7 +252,7 @@
             >
               <span class="material-icons-outlined text-sm">chevron_left</span>
             </button>
-            <span class="hidden xs:inline">Pagina</span>
+            <span class="hidden xs:inline">Página</span>
             <input
               v-model="pageInput"
               type="text"
@@ -384,7 +384,7 @@ const pageInput = ref('1')
 // Computed - label do mes selecionado
 const selectedMonthLabel = computed(() => {
   const [ano, mes] = selectedMonth.value.split('-').map(Number)
-  const mesesFull = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+  const mesesFull = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
   return `${mesesFull[mes - 1]} ${ano}`
 })
 
@@ -472,7 +472,7 @@ const diasDaSemana = computed(() => {
   inicioSemana.setDate(primeiraSegunda.getDate() + (selectedSemana.value - 1) * 7)
 
   const dias = []
-  const diasSemanaNames = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado', 'Domingo']
+  const diasSemanaNames = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
 
   for (let i = 0; i < 7; i++) {
     const data = new Date(inicioSemana)

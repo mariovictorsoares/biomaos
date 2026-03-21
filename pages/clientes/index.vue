@@ -615,6 +615,35 @@
                           </div>
                         </div>
 
+                        <!-- Embalagem -->
+                        <div>
+                          <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-3">Embalagem</label>
+                          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <label class="block text-xs text-subtext-light dark:text-subtext-dark mb-1">Rótulo</label>
+                              <select v-model="formData.rotulo_embalagem" class="input">
+                                <option value="">Selecione...</option>
+                                <option value="C">Bandeja (C)</option>
+                                <option value="E">Embalagem/Saco (E)</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label class="block text-xs text-subtext-light dark:text-subtext-dark mb-1">Embalagem Secundária</label>
+                              <select v-model="formData.embalagem_secundaria" class="input">
+                                <option value="">Selecione...</option>
+                                <option value="S">Saco (S)</option>
+                                <option value="C">Caixa (C)</option>
+                                <option value="S/C">Saco ou Caixa (S/C)</option>
+                                <option value="CPL">Caixa Plástica (CPL)</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label class="block text-xs text-subtext-light dark:text-subtext-dark mb-1">Corte/Semeadura (C.S.)</label>
+                              <input type="text" v-model="formData.corte_semeadura" class="input" placeholder="Ex: D, T(P), T(G)" />
+                            </div>
+                          </div>
+                        </div>
+
                         <!-- Observacoes -->
                         <div>
                           <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">Observações de Entrega</label>
@@ -833,6 +862,19 @@
                             </div>
                           </div>
 
+                          <!-- Embalagem -->
+                          <div v-if="selectedCliente?.rotulo_embalagem || selectedCliente?.embalagem_secundaria || selectedCliente?.corte_semeadura" class="flex flex-wrap gap-2">
+                            <span v-if="selectedCliente?.rotulo_embalagem" class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                              {{ selectedCliente.rotulo_embalagem === 'C' ? 'Bandeja (C)' : 'Embalagem (E)' }}
+                            </span>
+                            <span v-if="selectedCliente?.embalagem_secundaria" class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                              {{ { S: 'Saco', C: 'Caixa', 'S/C': 'Saco/Caixa', CPL: 'Cx. Plástica' }[selectedCliente.embalagem_secundaria] || selectedCliente.embalagem_secundaria }}
+                            </span>
+                            <span v-if="selectedCliente?.corte_semeadura" class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                              C.S. {{ selectedCliente.corte_semeadura }}
+                            </span>
+                          </div>
+
                           <div v-if="!selectedCliente?.responsavel_pedido && !selectedCliente?.logradouro_entrega" class="text-sm text-subtext-light dark:text-subtext-dark">
                             Nenhuma informação de entrega
                           </div>
@@ -966,6 +1008,9 @@ interface Cliente {
   hora_tarde_inicio: string | null
   hora_tarde_fim: string | null
   observacoes_entrega: string | null
+  rotulo_embalagem: string | null
+  embalagem_secundaria: string | null
+  corte_semeadura: string | null
   ativo: boolean
   created_at: string
   updated_at: string
@@ -1091,7 +1136,10 @@ const getEmptyForm = () => ({
   hora_manha_fim: '',
   hora_tarde_inicio: '',
   hora_tarde_fim: '',
-  observacoes_entrega: ''
+  observacoes_entrega: '',
+  rotulo_embalagem: '',
+  embalagem_secundaria: '',
+  corte_semeadura: ''
 })
 
 const formData = ref(getEmptyForm())
@@ -1314,7 +1362,10 @@ function openEditModal(cliente: Cliente) {
     hora_manha_fim: formatTimeForSelect(cliente.hora_manha_fim),
     hora_tarde_inicio: formatTimeForSelect(cliente.hora_tarde_inicio),
     hora_tarde_fim: formatTimeForSelect(cliente.hora_tarde_fim),
-    observacoes_entrega: cliente.observacoes_entrega || ''
+    observacoes_entrega: cliente.observacoes_entrega || '',
+    rotulo_embalagem: cliente.rotulo_embalagem || '',
+    embalagem_secundaria: cliente.embalagem_secundaria || '',
+    corte_semeadura: cliente.corte_semeadura || ''
   }
   editingId.value = cliente.id
   editingCliente.value = cliente
@@ -1382,7 +1433,10 @@ async function saveCliente() {
       hora_manha_fim: formData.value.hora_manha_fim || null,
       hora_tarde_inicio: formData.value.hora_tarde_inicio || null,
       hora_tarde_fim: formData.value.hora_tarde_fim || null,
-      observacoes_entrega: formData.value.observacoes_entrega || null
+      observacoes_entrega: formData.value.observacoes_entrega || null,
+      rotulo_embalagem: formData.value.rotulo_embalagem || null,
+      embalagem_secundaria: formData.value.embalagem_secundaria || null,
+      corte_semeadura: formData.value.corte_semeadura || null
     }
 
     if (isEditing.value && editingId.value) {

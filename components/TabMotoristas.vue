@@ -187,7 +187,7 @@
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="showModal" class="fixed inset-0 z-[60] overflow-y-auto">
+        <div v-if="showModal" class="fixed inset-0 z-[80] overflow-y-auto">
           <div class="fixed inset-0 glass-backdrop" @click="closeModal"></div>
           <div class="flex min-h-full items-center justify-center p-4">
             <Transition

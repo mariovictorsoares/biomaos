@@ -34,8 +34,8 @@
         </div>
         <!-- Filtro Validade Ate -->
         <div class="flex items-center gap-1 shrink-0">
-          <span class="text-xs text-subtext-light dark:text-subtext-dark hidden sm:inline">ate</span>
-          <input type="date" v-model="validadeFim" class="input text-sm w-full sm:w-36" placeholder="Ate" />
+          <span class="text-xs text-subtext-light dark:text-subtext-dark hidden sm:inline">até</span>
+          <input type="date" v-model="validadeFim" class="input text-sm w-full sm:w-36" placeholder="Até" />
         </div>
         <!-- Limpar Filtros -->
         <button

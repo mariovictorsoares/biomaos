@@ -1,29 +1,44 @@
 <template>
   <div>
-    <!-- Toolbar: Filtros + Ação -->
+    <!-- Toolbar: Busca + Data + Ação -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 mb-4">
-      <!-- Esquerda: Busca + Filtros -->
+      <!-- Esquerda: Busca + Filtro Data -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-        <!-- Busca -->
         <div class="relative">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-outlined text-gray-400 text-base">search</span>
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Buscar estoque..."
+            placeholder="Buscar produto..."
             class="input w-full sm:w-64 text-sm pl-9"
           />
         </div>
-        <!-- Filtro Status -->
-        <select v-model="filterStatus" class="input text-sm w-full sm:w-auto shrink-0">
+        <div class="estoque-date-range-wrapper">
+          <VueDatePicker
+            v-model="dateRange"
+            range
+            :preset-dates="presetDates"
+            :dark="isDark"
+            :enable-time-picker="false"
+            auto-apply
+            :format="formatDateDisplay"
+            locale="pt-BR"
+            placeholder="Período..."
+            :clearable="true"
+            input-class-name="dp-input-custom"
+            menu-class-name="dp-menu-custom"
+          />
+        </div>
+        <!-- Filtro Tipo -->
+        <select v-model="filterTipo" class="input text-sm h-9 w-full sm:w-28 shrink-0">
           <option value="">Todos</option>
-          <option value="normal">Normal</option>
-          <option value="baixo">Estoque Baixo</option>
-          <option value="esgotado">Esgotado</option>
+          <option value="entrada">Entrada</option>
+          <option value="saida">Saída</option>
+          <option value="ajuste">Ajuste</option>
         </select>
       </div>
       <!-- Direita: Botão -->
-      <button @click="openMovimentacaoModal" class="btn btn-primary shrink-0 justify-center sm:justify-start">
+      <button @click="openMovimentacaoModal(null)" class="btn btn-primary shrink-0 justify-center sm:justify-start">
         <span class="material-icons-outlined text-sm">swap_horiz</span>
         Movimentação
       </button>
@@ -32,218 +47,316 @@
     <!-- Card da Tabela -->
     <div class="card">
 
-      <!-- Tabela - Desktop -->
-      <div class="hidden md:block overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-gray-100 dark:bg-gray-700/50 border-b border-border-light dark:border-border-dark">
-              <th class="table-header">Código</th>
-              <th class="table-header">Espécie</th>
-              <th class="table-header text-right">Quantidade</th>
-              <th class="table-header text-right">Estoque Min.</th>
-              <th class="table-header text-center w-28">Status</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-border-light dark:divide-border-dark">
-            <tr
-              v-for="item in paginatedEstoque"
-              :key="item.id"
-              class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-              @click="openSlideover(item)"
-            >
-              <td class="table-cell font-medium">{{ item.especies?.codigo || '-' }}</td>
-              <td class="table-cell">{{ item.especies?.nome || '-' }}</td>
-              <td class="table-cell text-right font-medium">
-                <span :class="getQuantidadeClass(item)">{{ item.quantidade || 0 }}</span>
-              </td>
-              <td class="table-cell text-right">{{ item.estoque_minimo || 0 }}</td>
-              <td class="table-cell text-center">
-                <span :class="['badge', getEstoqueStatusClass(item)]">
-                  {{ getEstoqueStatusLabel(item) }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Cards - Mobile -->
-      <div class="md:hidden divide-y divide-border-light dark:divide-border-dark">
-        <div
-          v-for="item in paginatedEstoque"
-          :key="item.id"
-          class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-          @click="openSlideover(item)"
-        >
-          <div class="flex items-start gap-3">
-            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-sm font-bold text-primary overflow-hidden shrink-0">
-              <span class="material-icons-outlined text-xl">inventory_2</span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0">
-                  <p class="font-medium text-text-light dark:text-text-dark truncate">{{ item.especies?.nome || '-' }}</p>
-                  <p class="text-xs text-subtext-light dark:text-subtext-dark truncate">{{ item.especies?.codigo || '-' }}</p>
-                </div>
-                <span :class="['badge shrink-0', getEstoqueStatusClass(item)]">
-                  {{ getEstoqueStatusLabel(item) }}
-                </span>
-              </div>
-              <div class="flex items-center gap-4 mt-2 text-xs text-subtext-light dark:text-subtext-dark">
-                <span>Qtd: <strong :class="getQuantidadeClass(item)">{{ item.quantidade || 0 }}</strong></span>
-                <span>Min: {{ item.estoque_minimo || 0 }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Loading State -->
-      <div v-if="loading" class="text-center py-12">
-        <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 animate-spin">refresh</span>
-        <p class="text-sm text-subtext-light dark:text-subtext-dark mt-2">Carregando...</p>
+      <div v-if="loading" class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
 
-      <!-- Empty State -->
-      <div v-else-if="filteredEstoque.length === 0 && !loading" class="text-center py-12 flex flex-col items-center px-4">
-        <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 mb-2">inventory_2</span>
-        <h3 class="text-lg font-medium text-text-light dark:text-text-dark mb-1">Nenhum produto encontrado</h3>
-        <p class="text-sm text-subtext-light dark:text-subtext-dark mb-4">
-          {{ searchQuery || filterStatus ? 'Tente ajustar os filtros' : 'Cadastre produtos e faça movimentações' }}
-        </p>
-        <button @click="openMovimentacaoModal" class="btn btn-primary">
-          <span class="material-icons-outlined text-sm">swap_horiz</span>
-          Movimentação
-        </button>
-      </div>
+      <template v-else>
+        <!-- Tabela - Desktop -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-100 dark:bg-gray-700/50 border-b border-border-light dark:border-border-dark">
+                <th class="table-header w-40">Data</th>
+                <th class="table-header">Produto</th>
+                <th class="table-header text-center w-24">Tipo</th>
+                <th class="table-header text-right w-24">Qtd</th>
+                <th class="table-header text-right w-24">Saldo</th>
+                <th class="table-header">Obs</th>
+                <th class="table-header text-center w-20">Ações</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-light dark:divide-border-dark">
+              <tr
+                v-for="mov in movimentacoesData"
+                :key="mov.id"
+                :class="[
+                  'transition-colors h-12',
+                  mov.cancelado ? 'opacity-50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                ]"
+              >
+                <td class="table-cell text-xs text-subtext-light dark:text-subtext-dark whitespace-nowrap">{{ formatDateTime(mov.created_at) }}</td>
+                <td class="table-cell font-medium max-w-[200px] truncate">{{ mov.produtos?.nome || '—' }}</td>
+                <td class="table-cell text-center">
+                  <span :class="[
+                    'inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium',
+                    mov.tipo === 'entrada' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                    mov.tipo === 'saida'   ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                                             'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                  ]">
+                    {{ mov.tipo === 'entrada' ? 'Entrada' : mov.tipo === 'saida' ? 'Saída' : 'Ajuste' }}
+                  </span>
+                  <span v-if="mov.cancelado" class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400 ml-1">
+                    Cancelado
+                  </span>
+                </td>
+                <td class="table-cell text-right font-semibold tabular-nums">
+                  <span :class="[
+                    mov.cancelado ? 'text-gray-400 line-through' :
+                    mov.tipo === 'entrada' ? 'text-green-600 dark:text-green-400' :
+                    mov.tipo === 'saida'   ? 'text-red-600 dark:text-red-400' :
+                                             'text-blue-600 dark:text-blue-400'
+                  ]">
+                    {{ mov.tipo === 'entrada' ? '+' : mov.tipo === 'saida' ? '-' : '=' }}{{ mov.quantidade }}
+                  </span>
+                </td>
+                <td class="table-cell text-right tabular-nums text-subtext-light dark:text-subtext-dark">→ {{ mov.quantidade_nova }}</td>
+                <td class="table-cell text-sm text-subtext-light dark:text-subtext-dark max-w-[200px] truncate">{{ mov.motivo || '—' }}</td>
+                <td class="table-cell text-center">
+                  <button
+                    v-if="!mov.cancelado"
+                    @click="openCancelModal(mov)"
+                    class="text-gray-400 hover:text-red-500 transition-colors p-0.5"
+                    title="Cancelar lançamento"
+                  >
+                    <span class="material-icons-outlined text-sm">cancel</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <!-- Paginacao -->
-      <div v-if="filteredEstoque.length > 0" class="p-3 sm:p-4 border-t border-border-light dark:border-border-dark text-xs text-subtext-light dark:text-subtext-dark">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-          <div class="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
-            <div class="flex items-center gap-2">
-              <span class="hidden sm:inline">Mostrar</span>
-              <select v-model="itemsPerPage" class="border border-border-light dark:border-border-dark rounded px-2 py-1 bg-white dark:bg-gray-800 text-xs sm:text-sm cursor-pointer">
-                <option :value="10">10</option>
-                <option :value="25">25</option>
-                <option :value="50">50</option>
-              </select>
+        <!-- Cards - Mobile -->
+        <div class="md:hidden divide-y divide-border-light dark:divide-border-dark">
+          <div
+            v-for="mov in movimentacoesData"
+            :key="mov.id"
+            :class="[
+              'p-4 transition-colors',
+              mov.cancelado ? 'opacity-50' : ''
+            ]"
+          >
+            <div class="flex items-start gap-3">
+              <!-- Ícone tipo -->
+              <div :class="[
+                'w-9 h-9 rounded-full flex items-center justify-center shrink-0',
+                mov.cancelado ? 'bg-gray-100 dark:bg-gray-700' :
+                mov.tipo === 'entrada' ? 'bg-green-100 dark:bg-green-900/30' :
+                mov.tipo === 'saida'   ? 'bg-red-100 dark:bg-red-900/30' :
+                                         'bg-blue-100 dark:bg-blue-900/30'
+              ]">
+                <span :class="[
+                  'material-icons-outlined text-sm',
+                  mov.cancelado ? 'text-gray-400' :
+                  mov.tipo === 'entrada' ? 'text-green-600 dark:text-green-400' :
+                  mov.tipo === 'saida'   ? 'text-red-600 dark:text-red-400' :
+                                           'text-blue-600 dark:text-blue-400'
+                ]">
+                  {{ mov.cancelado ? 'block' : mov.tipo === 'entrada' ? 'add' : mov.tipo === 'saida' ? 'remove' : 'tune' }}
+                </span>
+              </div>
+
+              <!-- Info -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap mb-0.5">
+                  <span class="text-sm font-medium text-text-light dark:text-text-dark truncate">{{ mov.produtos?.nome || '—' }}</span>
+                  <span :class="[
+                    'inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium',
+                    mov.tipo === 'entrada' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                    mov.tipo === 'saida'   ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                                             'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                  ]">
+                    {{ mov.tipo === 'entrada' ? 'Entrada' : mov.tipo === 'saida' ? 'Saída' : 'Ajuste' }}
+                  </span>
+                  <span v-if="mov.cancelado" class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">Cancelado</span>
+                </div>
+                <p class="text-xs text-subtext-light dark:text-subtext-dark">{{ formatDateTime(mov.created_at) }}</p>
+                <p v-if="mov.motivo" class="text-xs text-subtext-light dark:text-subtext-dark mt-0.5">{{ mov.motivo }}</p>
+              </div>
+
+              <!-- Qty + Cancel -->
+              <div class="flex items-start gap-2 shrink-0">
+                <div class="text-right">
+                  <p :class="[
+                    'text-sm font-semibold tabular-nums',
+                    mov.cancelado ? 'text-gray-400 line-through' :
+                    mov.tipo === 'entrada' ? 'text-green-600 dark:text-green-400' :
+                    mov.tipo === 'saida'   ? 'text-red-600 dark:text-red-400' :
+                                             'text-blue-600 dark:text-blue-400'
+                  ]">
+                    {{ mov.tipo === 'entrada' ? '+' : mov.tipo === 'saida' ? '-' : '=' }}{{ mov.quantidade }}
+                  </p>
+                  <p class="text-xs text-subtext-light dark:text-subtext-dark">→ {{ mov.quantidade_nova }}</p>
+                </div>
+                <button
+                  v-if="!mov.cancelado"
+                  @click="openCancelModal(mov)"
+                  class="text-gray-400 hover:text-red-500 transition-colors p-0.5"
+                  title="Cancelar"
+                >
+                  <span class="material-icons-outlined text-sm">cancel</span>
+                </button>
+              </div>
             </div>
-            <span class="text-xs">{{ filteredEstoque.length }} registros</span>
-          </div>
-          <div class="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto justify-center sm:justify-end">
-            <button
-              @click="currentPage--"
-              :disabled="currentPage === 1"
-              class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <span class="material-icons-outlined text-sm">chevron_left</span>
-            </button>
-            <span class="hidden xs:inline">Página</span>
-            <input
-              v-model="pageInput"
-              type="text"
-              class="w-10 sm:w-12 text-center border border-border-light dark:border-border-dark rounded px-1 sm:px-2 py-1 bg-white dark:bg-gray-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-              @keyup.enter="goToPage"
-              @blur="goToPage"
-            />
-            <span>de {{ totalPages }}</span>
-            <button
-              @click="currentPage++"
-              :disabled="currentPage === totalPages"
-              class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <span class="material-icons-outlined text-sm">chevron_right</span>
-            </button>
           </div>
         </div>
-      </div>
+
+        <!-- Empty State -->
+        <div v-if="movimentacoesData.length === 0 && !loading" class="text-center py-12 flex flex-col items-center px-4">
+          <span class="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600 mb-2">history</span>
+          <h3 class="text-lg font-medium text-text-light dark:text-text-dark mb-1">Nenhuma movimentação</h3>
+          <p class="text-sm text-subtext-light dark:text-subtext-dark mb-4">
+            {{ hasActiveFilters ? 'Tente ajustar os filtros' : 'Registre movimentações de estoque' }}
+          </p>
+          <button @click="openMovimentacaoModal(null)" class="btn btn-primary">
+            <span class="material-icons-outlined text-sm">swap_horiz</span>
+            Nova Movimentação
+          </button>
+        </div>
+
+        <!-- Paginação -->
+        <div v-if="totalMovimentacoes > 0" class="p-3 sm:p-4 border-t border-border-light dark:border-border-dark text-xs text-subtext-light dark:text-subtext-dark">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+            <div class="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
+              <div class="flex items-center gap-2">
+                <span class="hidden sm:inline">Mostrar</span>
+                <select v-model="itemsPerPage" class="border border-border-light dark:border-border-dark rounded px-2 py-1 bg-white dark:bg-gray-800 text-xs sm:text-sm cursor-pointer">
+                  <option :value="15">15</option>
+                  <option :value="30">30</option>
+                  <option :value="50">50</option>
+                </select>
+              </div>
+              <span class="text-xs">{{ totalMovimentacoes }} registros</span>
+            </div>
+            <div class="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto justify-center sm:justify-end">
+              <button
+                @click="currentPage--"
+                :disabled="currentPage === 1"
+                class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <span class="material-icons-outlined text-sm">chevron_left</span>
+              </button>
+              <span class="hidden xs:inline">Página</span>
+              <input
+                v-model="pageInput"
+                type="text"
+                class="w-10 sm:w-12 text-center border border-border-light dark:border-border-dark rounded px-1 sm:px-2 py-1 bg-white dark:bg-gray-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                @keyup.enter="goToPage"
+                @blur="goToPage"
+              />
+              <span>de {{ totalPages }}</span>
+              <button
+                @click="currentPage++"
+                :disabled="currentPage === totalPages"
+                class="p-1 border border-border-light dark:border-border-dark rounded hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <span class="material-icons-outlined text-sm">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
     </div>
 
-    <!-- Modal de Movimentação (z-index maior que slideover) -->
+    <!-- Modal de Movimentação (só form, sem histórico) -->
     <Teleport to="body">
       <Transition
         enter-active-class="transition-opacity duration-200"
         enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
         leave-active-class="transition-opacity duration-200"
-        leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="showMovimentacaoModal" class="fixed inset-0 z-[60] overflow-y-auto">
-          <div class="fixed inset-0 glass-backdrop" @click="closeMovimentacaoModal"></div>
+        <div v-if="showModal" class="fixed inset-0 z-[60] overflow-y-auto">
+          <div class="fixed inset-0 glass-backdrop" @click="closeModal"></div>
           <div class="flex min-h-full items-center justify-center p-4">
             <Transition
               enter-active-class="transition-all duration-200"
               enter-from-class="opacity-0 scale-95"
-              enter-to-class="opacity-100 scale-100"
               leave-active-class="transition-all duration-200"
-              leave-from-class="opacity-100 scale-100"
               leave-to-class="opacity-0 scale-95"
             >
-              <div v-if="showMovimentacaoModal" class="relative glass-panel rounded-lg shadow-xl w-full max-w-lg">
-                <!-- Modal Header -->
-                <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between">
-                  <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Movimentação de Estoque</h2>
-                  <button @click="closeMovimentacaoModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+              <div v-if="showModal" class="relative glass-panel rounded-xl shadow-2xl w-full max-w-lg">
+
+                <!-- Header -->
+                <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center shrink-0">
+                    <span class="material-icons-outlined text-primary text-lg">inventory_2</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h2 class="text-base font-semibold text-text-light dark:text-text-dark truncate">{{ modalProduto?.nome || 'Nova Movimentação' }}</h2>
+                    <p v-if="modalProduto" class="text-xs text-subtext-light dark:text-subtext-dark">
+                      Estoque atual:
+                      <span :class="getEstoqueQtd(modalProduto.id) > 0 ? 'text-green-600 dark:text-green-400 font-semibold' : 'text-gray-400'">
+                        {{ getEstoqueQtd(modalProduto.id) }}
+                      </span>
+                    </p>
+                  </div>
+                  <button @click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
 
-                <!-- Modal Body -->
+                <!-- Body -->
                 <div class="p-6 space-y-4">
-                  <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Espécie *</label>
-                    <select v-model="movimentacao.especie_id" class="input" required>
-                      <option value="">Selecione a espécie</option>
-                      <option v-for="especie in especies" :key="especie.id" :value="especie.id">
-                        {{ especie.codigo }} - {{ especie.nome }}
+                  <!-- Seletor de produto -->
+                  <div v-if="!modalProduto">
+                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Produto <span class="text-red-500">*</span></label>
+                    <select v-model="selectedProdutoId" class="input" @change="onSelectProduto">
+                      <option value="">Selecione o produto</option>
+                      <option v-for="p in produtos" :key="p.id" :value="p.id">
+                        {{ p.codigo }} - {{ p.nome }}
                       </option>
                     </select>
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Tipo *</label>
-                    <div class="flex gap-4">
-                      <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" v-model="movimentacao.tipo" value="entrada" class="text-primary" />
-                        <span class="text-text-light dark:text-text-dark">Entrada</span>
-                      </label>
-                      <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" v-model="movimentacao.tipo" value="saida" class="text-primary" />
-                        <span class="text-text-light dark:text-text-dark">Saída</span>
-                      </label>
+
+                  <template v-if="modalProduto">
+                    <!-- Tipo -->
+                    <div class="grid grid-cols-3 gap-2">
+                      <button
+                        v-for="tipo in tiposMovimentacao"
+                        :key="tipo.value"
+                        type="button"
+                        @click="form.tipo = tipo.value"
+                        :class="[
+                          'py-2 px-3 rounded-lg text-sm font-medium border-2 transition-all',
+                          form.tipo === tipo.value
+                            ? tipo.activeClass
+                            : 'border-border-light dark:border-border-dark text-subtext-light dark:text-subtext-dark hover:border-gray-400'
+                        ]"
+                      >
+                        <span class="material-icons-outlined text-sm block mb-0.5">{{ tipo.icon }}</span>
+                        {{ tipo.label }}
+                      </button>
                     </div>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Quantidade *</label>
-                    <input type="number" v-model.number="movimentacao.quantidade" class="input" min="0" step="1" required />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Motivo</label>
-                    <select v-model="movimentacao.motivo" class="input">
-                      <option value="">Selecione</option>
-                      <option value="compra">Compra</option>
-                      <option value="producao">Produção</option>
-                      <option value="venda">Venda</option>
-                      <option value="ajuste">Ajuste de Inventário</option>
-                      <option value="perda">Perda/Descarte</option>
-                      <option value="outro">Outro</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observações</label>
-                    <textarea v-model="movimentacao.observacoes" class="input min-h-[60px] resize-y" placeholder="Detalhes da movimentação"></textarea>
-                  </div>
+
+                    <!-- Qtd + Obs -->
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Quantidade <span class="text-red-500">*</span></label>
+                        <input v-model.number="form.quantidade" type="number" min="1" step="1" class="input" placeholder="Ex: 10" />
+                        <p v-if="form.tipo === 'ajuste'" class="text-xs text-subtext-light dark:text-subtext-dark mt-1">Define o valor exato</p>
+                        <p v-else-if="modalProduto && form.quantidade > 0" class="text-xs text-subtext-light dark:text-subtext-dark mt-1">
+                          Novo saldo:
+                          <span class="font-medium">
+                            {{ form.tipo === 'entrada'
+                              ? getEstoqueQtd(modalProduto.id) + (form.quantidade || 0)
+                              : Math.max(0, getEstoqueQtd(modalProduto.id) - (form.quantidade || 0)) }}
+                          </span>
+                        </p>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Observação</label>
+                        <input v-model="form.motivo" type="text" class="input" placeholder="Opcional..." />
+                      </div>
+                    </div>
+                  </template>
                 </div>
 
-                <!-- Modal Footer -->
+                <!-- Footer -->
                 <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
-                  <button @click="closeMovimentacaoModal" class="btn btn-secondary" :disabled="saving">Cancelar</button>
-                  <button @click="saveMovimentacao" class="btn btn-primary" :disabled="saving || !isMovimentacaoValid">
-                    <span v-if="saving" class="material-icons-outlined animate-spin text-sm">refresh</span>
-                    {{ saving ? 'Salvando...' : 'Confirmar' }}
+                  <button @click="closeModal" class="btn btn-secondary">Cancelar</button>
+                  <button
+                    @click="saveMovimentacao"
+                    class="btn btn-primary"
+                    :disabled="saving || !modalProduto || !form.quantidade || form.quantidade <= 0"
+                  >
+                    <span v-if="saving" class="material-icons-outlined text-sm animate-spin">refresh</span>
+                    Confirmar
                   </button>
                 </div>
+
               </div>
             </Transition>
           </div>
@@ -251,330 +364,44 @@
       </Transition>
     </Teleport>
 
-    <!-- Modal de Detalhes da Movimentação -->
+    <!-- Modal Confirmar Cancelamento -->
     <Teleport to="body">
       <Transition
         enter-active-class="transition-opacity duration-200"
         enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
         leave-active-class="transition-opacity duration-200"
-        leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="showDetalhesModal" class="fixed inset-0 z-[70] overflow-y-auto">
-          <div class="fixed inset-0 glass-backdrop" @click="closeDetalhesModal"></div>
+        <div v-if="showCancelModal" class="fixed inset-0 z-[70] overflow-y-auto">
+          <div class="fixed inset-0 glass-backdrop" @click="closeCancelModal"></div>
           <div class="flex min-h-full items-center justify-center p-4">
             <Transition
               enter-active-class="transition-all duration-200"
               enter-from-class="opacity-0 scale-95"
-              enter-to-class="opacity-100 scale-100"
               leave-active-class="transition-all duration-200"
-              leave-from-class="opacity-100 scale-100"
               leave-to-class="opacity-0 scale-95"
             >
-              <div v-if="showDetalhesModal && selectedMovimentacao" class="relative glass-panel rounded-lg shadow-xl w-full max-w-md">
-                <!-- Modal Header -->
-                <div class="border-b border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <span :class="[
-                      'w-10 h-10 rounded-full flex items-center justify-center',
-                      selectedMovimentacao.cancelado ? 'bg-gray-200 text-gray-400' : selectedMovimentacao.tipo === 'entrada' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                    ]">
-                      <span class="material-icons-outlined">{{ selectedMovimentacao.cancelado ? 'block' : selectedMovimentacao.tipo === 'entrada' ? 'add' : 'remove' }}</span>
-                    </span>
-                    <div>
-                      <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">
-                        {{ selectedMovimentacao.tipo === 'entrada' ? 'Entrada' : 'Saída' }}
-                      </h2>
-                      <p class="text-xs text-subtext-light dark:text-subtext-dark">Detalhes da movimentação</p>
-                    </div>
+              <div v-if="showCancelModal" class="relative glass-panel rounded-xl shadow-2xl w-full max-w-sm">
+                <div class="p-6 text-center">
+                  <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
+                    <span class="material-icons-outlined text-red-600 dark:text-red-400 text-2xl">warning</span>
                   </div>
-                  <button @click="closeDetalhesModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <span class="material-icons-outlined">close</span>
-                  </button>
+                  <h3 class="text-base font-semibold text-text-light dark:text-text-dark mb-2">Cancelar lançamento?</h3>
+                  <p class="text-sm text-subtext-light dark:text-subtext-dark mb-1">
+                    O estoque de <span class="font-medium text-text-light dark:text-text-dark">{{ cancelTarget?.produtos?.nome || '—' }}</span> será revertido.
+                  </p>
+                  <p class="text-xs text-red-500 dark:text-red-400 font-medium">Essa ação é irreversível.</p>
                 </div>
-
-                <!-- Modal Body -->
-                <div class="p-6 space-y-4">
-                  <!-- Status -->
-                  <div v-if="selectedMovimentacao.cancelado" class="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                    <p class="text-sm font-medium text-red-600 dark:text-red-400">Movimentação Cancelada</p>
-                    <p class="text-xs text-red-500 mt-1">
-                      Por {{ selectedMovimentacao.cancelado_por_nome || 'Usuário desconhecido' }} em {{ formatDateTime(selectedMovimentacao.cancelado_em) }}
-                    </p>
-                    <p v-if="selectedMovimentacao.motivo_cancelamento" class="text-xs text-red-500 mt-1 italic">
-                      "{{ selectedMovimentacao.motivo_cancelamento }}"
-                    </p>
-                  </div>
-
-                  <!-- Informacoes -->
-                  <div class="grid grid-cols-2 gap-4">
-                    <div>
-                      <p class="text-xs text-subtext-light dark:text-subtext-dark">Quantidade</p>
-                      <p :class="['text-xl font-bold', selectedMovimentacao.cancelado ? 'text-gray-400 line-through' : selectedMovimentacao.tipo === 'entrada' ? 'text-green-600' : 'text-red-600']">
-                        {{ selectedMovimentacao.tipo === 'entrada' ? '+' : '-' }}{{ selectedMovimentacao.quantidade }}
-                      </p>
-                    </div>
-                    <div>
-                      <p class="text-xs text-subtext-light dark:text-subtext-dark">Motivo</p>
-                      <p class="text-sm font-medium text-text-light dark:text-text-dark">{{ selectedMovimentacao.motivo || 'Não informado' }}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p class="text-xs text-subtext-light dark:text-subtext-dark">Data/Hora</p>
-                    <p class="text-sm text-text-light dark:text-text-dark">{{ formatDateTime(selectedMovimentacao.created_at) }}</p>
-                  </div>
-
-                  <div>
-                    <p class="text-xs text-subtext-light dark:text-subtext-dark">Criado por</p>
-                    <p class="text-sm text-text-light dark:text-text-dark">{{ selectedMovimentacao.usuario_nome || 'Usuário desconhecido' }}</p>
-                  </div>
-
-                  <div v-if="selectedMovimentacao.observacoes">
-                    <p class="text-xs text-subtext-light dark:text-subtext-dark">Observações</p>
-                    <p class="text-sm text-text-light dark:text-text-dark italic">"{{ selectedMovimentacao.observacoes }}"</p>
-                  </div>
-
-                  <!-- Formulario de Cancelamento -->
-                  <div v-if="!selectedMovimentacao.cancelado" class="pt-4 border-t border-border-light dark:border-border-dark">
-                    <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-4">
-                      <p class="text-xs text-yellow-700 dark:text-yellow-400">
-                        <span class="material-icons-outlined text-sm align-middle mr-1">warning</span>
-                        Ao cancelar, o estoque será revertido automaticamente. Esta ação não pode ser desfeita.
-                      </p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Motivo do cancelamento *</label>
-                      <textarea
-                        v-model="motivoCancelamento"
-                        class="input min-h-[80px] resize-y"
-                        placeholder="Descreva o motivo do cancelamento..."
-                        required
-                      ></textarea>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Modal Footer -->
                 <div class="border-t border-border-light dark:border-border-dark px-6 py-4 flex items-center justify-end gap-3">
-                  <button @click="closeDetalhesModal" class="btn btn-secondary">Fechar</button>
+                  <button @click="closeCancelModal" class="btn btn-secondary" :disabled="cancelling">Voltar</button>
                   <button
-                    v-if="!selectedMovimentacao.cancelado"
                     @click="confirmarCancelamento"
-                    class="btn btn-danger"
-                    :disabled="!motivoCancelamento.trim() || saving"
+                    class="btn bg-red-600 hover:bg-red-700 text-white"
+                    :disabled="cancelling"
                   >
-                    <span v-if="saving" class="material-icons-outlined animate-spin text-sm">refresh</span>
-                    {{ saving ? 'Cancelando...' : 'Cancelar Movimentação' }}
+                    <span v-if="cancelling" class="material-icons-outlined text-sm animate-spin mr-1">refresh</span>
+                    Cancelar lançamento
                   </button>
-                </div>
-              </div>
-            </Transition>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
-
-    <!-- Slideover de Detalhes -->
-    <Teleport to="body">
-      <Transition
-        enter-active-class="transition-opacity duration-300 ease-out"
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="transition-opacity duration-200 ease-in"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
-      >
-        <div v-if="showSlideover" class="fixed inset-0 z-50 overflow-hidden">
-          <div class="fixed inset-0 glass-backdrop" @click="closeSlideover"></div>
-
-          <div class="fixed inset-y-0 right-0 flex max-w-full">
-            <Transition
-              enter-active-class="transform transition-transform duration-300 ease-out"
-              enter-from-class="translate-x-full"
-              enter-to-class="translate-x-0"
-              leave-active-class="transform transition-transform duration-200 ease-in"
-              leave-from-class="translate-x-0"
-              leave-to-class="translate-x-full"
-            >
-              <div v-if="showSlideover" class="w-screen max-w-full sm:max-w-xl">
-                <div class="h-full flex flex-col glass-panel shadow-2xl">
-                  <!-- Slideover Header -->
-                  <div class="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100 dark:border-border-dark flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                      <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                        <span class="material-icons-outlined text-primary text-xl sm:text-2xl">inventory_2</span>
-                      </div>
-                      <div class="min-w-0 flex-1">
-                        <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-text-dark truncate">
-                          {{ selectedEstoque?.especies?.nome || 'N/A' }}
-                        </h2>
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-subtext-dark">
-                          {{ selectedEstoque?.especies?.codigo || '-' }}
-                        </p>
-                      </div>
-                    </div>
-                    <button @click="closeSlideover" class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shrink-0">
-                      <span class="material-icons-outlined text-xl">close</span>
-                    </button>
-                  </div>
-
-                  <!-- Slideover Content -->
-                  <div class="flex-1 overflow-y-auto">
-                    <div v-if="selectedEstoque" class="p-4 sm:p-6 space-y-5 sm:space-y-6">
-                      <!-- Cards de Status -->
-                      <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
-                          <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Quantidade Atual</p>
-                          <p :class="['text-2xl font-bold', getQuantidadeClass(selectedEstoque)]">{{ selectedEstoque.quantidade || 0 }}</p>
-                          <span :class="['badge mt-2', getEstoqueStatusClass(selectedEstoque)]">
-                            {{ getEstoqueStatusLabel(selectedEstoque) }}
-                          </span>
-                        </div>
-                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
-                          <p class="text-xs text-gray-500 dark:text-subtext-dark mb-1">Estoque Mínimo</p>
-                          <input
-                            type="number"
-                            v-model.number="estoqueMinimo"
-                            class="text-2xl font-bold bg-transparent border-none p-0 w-full text-gray-900 dark:text-text-dark focus:outline-none focus:ring-0"
-                            min="0"
-                            step="1"
-                            @change="saveEstoqueMinimo"
-                          />
-                          <p class="text-xs text-gray-400 mt-2">Clique para editar</p>
-                        </div>
-                      </div>
-
-                      <!-- Historico de Movimentações -->
-                      <div>
-                        <div class="flex flex-col gap-3 mb-4">
-                          <h3 class="text-sm font-semibold text-gray-900 dark:text-text-dark">Movimentações</h3>
-                          <!-- Filtro de Range de Data -->
-                          <div class="flex flex-wrap items-center gap-2">
-                            <div class="flex items-center gap-2">
-                              <label class="text-xs text-gray-500">De:</label>
-                              <input
-                                type="date"
-                                v-model="filterDataInicio"
-                                class="input text-xs py-1 px-2"
-                              />
-                            </div>
-                            <div class="flex items-center gap-2">
-                              <label class="text-xs text-gray-500">Até:</label>
-                              <input
-                                type="date"
-                                v-model="filterDataFim"
-                                class="input text-xs py-1 px-2"
-                              />
-                            </div>
-                            <button
-                              @click="aplicarFiltroData"
-                              class="btn btn-secondary text-xs py-1 px-2"
-                            >
-                              <span class="material-icons-outlined text-sm">filter_alt</span>
-                              Filtrar
-                            </button>
-                            <button
-                              v-if="filterDataInicio || filterDataFim"
-                              @click="limparFiltroData"
-                              class="btn btn-secondary text-xs py-1 px-2"
-                            >
-                              <span class="material-icons-outlined text-sm">clear</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        <!-- Loading Movimentações -->
-                        <div v-if="loadingMovimentacoes" class="text-center py-8">
-                          <span class="material-icons-outlined text-2xl text-gray-300 animate-spin">refresh</span>
-                        </div>
-
-                        <div v-else-if="movimentacoes.length > 0" class="space-y-2">
-                          <div
-                            v-for="mov in paginatedMovimentacoes"
-                            :key="mov.id"
-                            :class="[
-                              'p-3 rounded-xl border transition-colors cursor-pointer hover:border-primary/50',
-                              mov.cancelado ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 opacity-60' : 'bg-gray-50 dark:bg-gray-800/50 border-transparent'
-                            ]"
-                            @click="openDetalhesModal(mov)"
-                          >
-                            <div class="flex items-start justify-between gap-2">
-                              <div class="flex items-start gap-3">
-                                <span :class="[
-                                  'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
-                                  mov.cancelado ? 'bg-gray-200 text-gray-400 dark:bg-gray-700' : mov.tipo === 'entrada' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                                ]">
-                                  <span class="material-icons-outlined text-sm">{{ mov.cancelado ? 'block' : mov.tipo === 'entrada' ? 'add' : 'remove' }}</span>
-                                </span>
-                                <div class="min-w-0">
-                                  <div class="flex items-center gap-2">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-text-dark">
-                                      {{ mov.tipo === 'entrada' ? 'Entrada' : 'Saída' }}
-                                    </p>
-                                    <span v-if="mov.cancelado" class="badge badge-inactive text-xs">Cancelado</span>
-                                  </div>
-                                  <p class="text-xs text-gray-500 dark:text-subtext-dark">
-                                    {{ mov.motivo || 'Sem motivo' }} <span v-if="mov.usuario_nome">• {{ mov.usuario_nome }}</span>
-                                  </p>
-                                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                    {{ formatDateTime(mov.created_at) }}
-                                  </p>
-                                </div>
-                              </div>
-                              <div class="flex flex-col items-end gap-1">
-                                <span :class="[
-                                  'font-semibold',
-                                  mov.cancelado ? 'text-gray-400 line-through' : mov.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'
-                                ]">
-                                  {{ mov.tipo === 'entrada' ? '+' : '-' }}{{ mov.quantidade }}
-                                </span>
-                                <span class="text-xs text-gray-400">
-                                  <span class="material-icons-outlined text-xs">visibility</span>
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <!-- Paginacao Movimentações -->
-                          <div v-if="totalPagesMovimentacoes > 1" class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
-                            <span class="text-xs text-gray-500">{{ movimentacoes.length }} movimentações</span>
-                            <div class="flex items-center gap-2">
-                              <button
-                                @click="currentPageMovimentacoes--"
-                                :disabled="currentPageMovimentacoes === 1"
-                                class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
-                              >
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                              </button>
-                              <span class="text-xs text-gray-500">{{ currentPageMovimentacoes }} / {{ totalPagesMovimentacoes }}</span>
-                              <button
-                                @click="currentPageMovimentacoes++"
-                                :disabled="currentPageMovimentacoes === totalPagesMovimentacoes"
-                                class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
-                              >
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div v-else class="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                          <span class="material-icons-outlined text-3xl text-gray-300 dark:text-gray-600 mb-2">history</span>
-                          <p class="text-sm text-gray-500 dark:text-subtext-dark">Nenhuma movimentação</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Footer -->
-                  <div class="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-border-dark">
-                    <button @click="openMovimentacaoForProduct()" class="w-full btn btn-primary justify-center">
-                      <span class="material-icons-outlined text-sm">swap_horiz</span>
-                      Nova Movimentação
-                    </button>
-                  </div>
                 </div>
               </div>
             </Transition>
@@ -585,282 +412,90 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 import { useCurrentCompany } from '~/composables/useCurrentCompany'
-
-interface Estoque {
-  id: string
-  empresa_id: string
-  produto_id?: string
-  especie_id?: string
-  quantidade: number
-  estoque_minimo: number
-  produtos?: { id: string; codigo: string; nome: string }
-  especies?: { id: string; codigo: string; nome: string }
-}
-
-interface Movimentacao {
-  id: string
-  tipo: string
-  quantidade: number
-  motivo?: string
-  observacoes?: string
-  created_at: string
-  usuario_id?: string
-  usuario_nome?: string
-  cancelado?: boolean
-  cancelado_em?: string
-  cancelado_por?: string
-  cancelado_por_nome?: string
-  motivo_cancelamento?: string
-  producao_id?: string
-}
-
-interface Produto {
-  id: string
-  codigo: string
-  nome: string
-}
-
-interface Especie {
-  id: string
-  codigo: string
-  nome: string
-}
+import { useToast } from '~/composables/useToast'
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const { currentCompany } = useCurrentCompany()
 const { success, error: showError } = useToast()
 
-// Estado
-const estoque = ref<Estoque[]>([])
-const movimentacoes = ref<Movimentacao[]>([])
-const produtos = ref<Produto[]>([])
-const especies = ref<Especie[]>([])
+// === ESTADO ===
 const loading = ref(false)
 const saving = ref(false)
-const loadingMovimentacoes = ref(false)
+const produtos = ref([])
+const estoqueData = ref([])
+const movimentacoesData = ref([])
+const totalMovimentacoes = ref(0)
 
-// Modais e Slideover
-const showMovimentacaoModal = ref(false)
-const showSlideover = ref(false)
-const showDetalhesModal = ref(false)
-const selectedEstoque = ref<Estoque | null>(null)
-const selectedMovimentacao = ref<Movimentacao | null>(null)
-
-// Formularios
-const movimentacao = ref({
-  especie_id: '',
-  tipo: 'entrada',
-  quantidade: 0,
-  motivo: '',
-  observacoes: ''
-})
-
-// Estoque minimo editavel
-const estoqueMinimo = ref(0)
-
-// Motivo cancelamento
-const motivoCancelamento = ref('')
-
-// Filtros e Busca
+// Filtros
 const searchQuery = ref('')
-const filterStatus = ref('')
-const filterDataInicio = ref('')
-const filterDataFim = ref('')
+const filterTipo = ref('')
+const dateRange = ref([null, null])
+const filterDataDe = ref('')
+const filterDataAte = ref('')
+const isDark = ref(false)
 
-// Paginacao
+// Paginação
 const currentPage = ref(1)
-const itemsPerPage = ref(10)
+const itemsPerPage = ref(15)
 const pageInput = ref('1')
 
-// Paginacao Movimentacoes
-const currentPageMovimentacoes = ref(1)
-const itemsPerPageMovimentacoes = 10
+// Modal
+const showModal = ref(false)
+const modalProduto = ref(null)
+const selectedProdutoId = ref('')
+const form = ref({ tipo: 'entrada', quantidade: null, motivo: '' })
 
-// Validacao
-const isMovimentacaoValid = computed(() => {
-  return movimentacao.value.especie_id && movimentacao.value.quantidade > 0
-})
+// Modal Cancelamento
+const showCancelModal = ref(false)
+const cancelTarget = ref(null)
+const cancelling = ref(false)
 
-// Computed - Filtros ativos
-const hasActiveFilters = computed(() => {
-  return searchQuery.value || filterStatus.value
-})
+const tiposMovimentacao = [
+  { value: 'entrada', label: 'Entrada', icon: 'add_circle_outline',    activeClass: 'border-green-500 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 dark:border-green-500' },
+  { value: 'saida',   label: 'Saída',   icon: 'remove_circle_outline', activeClass: 'border-red-500 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400 dark:border-red-500' },
+  { value: 'ajuste',  label: 'Ajuste',  icon: 'tune',                  activeClass: 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-500' },
+]
 
-// Computed - Totais
-const totalItens = computed(() => {
-  return estoque.value.reduce((sum, item) => sum + (item.quantidade || 0), 0)
-})
+// === COMPUTED ===
 
-const countEstoqueBaixo = computed(() => {
-  return estoque.value.filter(item =>
-    item.quantidade <= (item.estoque_minimo || 0)
-  ).length
-})
-
-// Computed - Filtros
-const filteredEstoque = computed(() => {
-  let result = estoque.value
-
-  // Busca (por espécie)
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(item =>
-      (item.especies?.codigo?.toLowerCase().includes(query)) ||
-      (item.especies?.nome?.toLowerCase().includes(query))
-    )
+const estoqueMap = computed(() => {
+  const map = new Map()
+  for (const e of estoqueData.value) {
+    if (e.produto_id) map.set(e.produto_id, e.quantidade || 0)
   }
-
-  // Filtro por status
-  if (filterStatus.value === 'normal') {
-    result = result.filter(item => item.quantidade > (item.estoque_minimo || 0))
-  } else if (filterStatus.value === 'baixo') {
-    result = result.filter(item => item.quantidade > 0 && item.quantidade <= (item.estoque_minimo || 0))
-  } else if (filterStatus.value === 'esgotado') {
-    result = result.filter(item => item.quantidade <= 0)
-  }
-
-  return result
+  return map
 })
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredEstoque.value.length / itemsPerPage.value) || 1
-})
+function getEstoqueQtd(produtoId) {
+  return estoqueMap.value.get(produtoId) || 0
+}
 
-const paginatedEstoque = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredEstoque.value.slice(start, end)
-})
+const totalPages = computed(() => Math.ceil(totalMovimentacoes.value / itemsPerPage.value) || 1)
+const hasActiveFilters = computed(() => !!(searchQuery.value || filterTipo.value || filterDataDe.value || filterDataAte.value))
 
-// Paginacao Movimentacoes
-const totalPagesMovimentacoes = computed(() => {
-  return Math.ceil(movimentacoes.value.length / itemsPerPageMovimentacoes) || 1
-})
+// === HELPERS ===
 
-const paginatedMovimentacoes = computed(() => {
-  const start = (currentPageMovimentacoes.value - 1) * itemsPerPageMovimentacoes
-  const end = start + itemsPerPageMovimentacoes
-  return movimentacoes.value.slice(start, end)
-})
-
-// Funcoes auxiliares
-function formatDateTime(dateStr?: string) {
+function formatDateTime(dateStr) {
   if (!dateStr) return ''
-  const date = new Date(dateStr)
-  return date.toLocaleString('pt-BR')
+  const d = new Date(dateStr)
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const yy = String(d.getFullYear()).slice(2)
+  const hh = String(d.getHours()).padStart(2, '0')
+  const min = String(d.getMinutes()).padStart(2, '0')
+  return `${dd}/${mm}/${yy}, ${hh}:${min}`
 }
 
-function getQuantidadeClass(item: Estoque) {
-  if (item.quantidade <= 0) return 'text-red-600'
-  if (item.quantidade <= (item.estoque_minimo || 0)) return 'text-yellow-600'
-  return 'text-text-light dark:text-text-dark'
-}
-
-function getEstoqueStatusLabel(item: Estoque) {
-  if (item.quantidade <= 0) return 'Esgotado'
-  if (item.quantidade <= (item.estoque_minimo || 0)) return 'Baixo'
-  return 'Normal'
-}
-
-function getEstoqueStatusClass(item: Estoque) {
-  if (item.quantidade <= 0) return 'badge-inactive'
-  if (item.quantidade <= (item.estoque_minimo || 0)) return 'badge-warning'
-  return 'badge-success'
-}
-
-function clearFilters() {
-  searchQuery.value = ''
-  filterStatus.value = ''
-}
-
-// CRUD
-async function loadEstoque() {
-  if (!currentCompany.value?.id) return
-
-  loading.value = true
-  try {
-    // Buscar estoque existente (tanto por produto quanto por espécie)
-    const { data: estoqueData, error: estoqueError } = await supabase
-      .from('estoque')
-      .select(`
-        *,
-        produtos:produto_id (id, codigo, nome),
-        especies:especie_id (id, codigo, nome)
-      `)
-      .eq('empresa_id', currentCompany.value.id)
-
-    if (estoqueError) throw estoqueError
-
-    // Buscar todas as espécies ativas
-    const { data: especiesData, error: especiesError } = await supabase
-      .from('especies')
-      .select('id, codigo, nome')
-      .eq('empresa_id', currentCompany.value.id)
-      .eq('ativo', true)
-      .order('codigo')
-
-    if (especiesError) throw especiesError
-
-    // Criar mapa de estoque por espécie
-    const estoqueEspecieMap = new Map(
-      (estoqueData || []).filter(e => e.especie_id && !e.produto_id).map(e => [e.especie_id, e])
-    )
-
-    // Criar lista combinada - todas as espécies com estoque
-    const combined: Estoque[] = (especiesData || []).map(especie => {
-      const estoqueExistente = estoqueEspecieMap.get(especie.id)
-      if (estoqueExistente) {
-        return estoqueExistente
-      }
-      // Criar registro virtual para espécies sem estoque
-      return {
-        id: `virtual_especie_${especie.id}`,
-        empresa_id: currentCompany.value!.id,
-        especie_id: especie.id,
-        quantidade: 0,
-        estoque_minimo: 0,
-        especies: especie
-      }
-    })
-
-    // Ordenar por codigo da espécie
-    estoque.value = combined.sort((a, b) => {
-      const codigoA = a.especies?.codigo || ''
-      const codigoB = b.especies?.codigo || ''
-      return codigoA.localeCompare(codigoB)
-    })
-  } catch (e: any) {
-    showError('Erro ao carregar estoque: ' + e.message)
-  } finally {
-    loading.value = false
-  }
-}
-
-async function loadEspecies() {
-  if (!currentCompany.value?.id) return
-
-  try {
-    const { data, error } = await supabase
-      .from('especies')
-      .select('id, codigo, nome')
-      .eq('empresa_id', currentCompany.value.id)
-      .eq('ativo', true)
-      .order('codigo')
-
-    if (error) throw error
-    especies.value = data || []
-  } catch (e: any) {
-    console.error('Erro ao carregar espécies:', e)
-  }
-}
+// === CRUD ===
 
 async function loadProdutos() {
   if (!currentCompany.value?.id) return
-
   try {
     const { data, error } = await supabase
       .from('produtos')
@@ -868,337 +503,257 @@ async function loadProdutos() {
       .eq('empresa_id', currentCompany.value.id)
       .eq('ativo', true)
       .order('codigo')
-
     if (error) throw error
     produtos.value = data || []
-  } catch (e: any) {
+  } catch (e) {
     console.error('Erro ao carregar produtos:', e)
   }
 }
 
-async function loadMovimentacoes(especieId?: string, produtoId?: string) {
+async function loadEstoque() {
+  if (!currentCompany.value?.id) return
+  try {
+    const { data, error } = await supabase
+      .from('estoque')
+      .select('id, produto_id, quantidade')
+      .eq('empresa_id', currentCompany.value.id)
+      .not('produto_id', 'is', null)
+    if (error) throw error
+    estoqueData.value = data || []
+  } catch (e) {
+    console.error('Erro ao carregar estoque:', e)
+  }
+}
+
+async function loadMovimentacoes() {
   if (!currentCompany.value?.id) return
 
-  loadingMovimentacoes.value = true
-  currentPageMovimentacoes.value = 1
-
+  loading.value = true
   try {
     let query = supabase
       .from('movimentacoes_estoque')
-      .select('*')
+      .select('*, produtos:produto_id(id, codigo, nome)', { count: 'exact' })
       .eq('empresa_id', currentCompany.value.id)
+      .not('produto_id', 'is', null)
       .order('created_at', { ascending: false })
 
-    // Filtrar por espécie ou produto
-    if (especieId) {
-      query = query.eq('especie_id', especieId)
-    } else if (produtoId) {
-      query = query.eq('produto_id', produtoId)
+    // Filtro por tipo
+    if (filterTipo.value) {
+      query = query.eq('tipo', filterTipo.value)
     }
 
-    // Filtro de data inicio
-    if (filterDataInicio.value) {
-      // Formato YYYY-MM-DD do input date + horario inicio do dia
-      query = query.gte('created_at', `${filterDataInicio.value}T00:00:00`)
+    // Filtro por data
+    if (filterDataDe.value) {
+      query = query.gte('created_at', filterDataDe.value + 'T00:00:00')
+    }
+    if (filterDataAte.value) {
+      query = query.lte('created_at', filterDataAte.value + 'T23:59:59')
     }
 
-    // Filtro de data fim
-    if (filterDataFim.value) {
-      // Formato YYYY-MM-DD do input date + horario fim do dia
-      query = query.lte('created_at', `${filterDataFim.value}T23:59:59`)
+    // Filtro por produto (busca por nome/código)
+    if (searchQuery.value) {
+      const q = searchQuery.value.toLowerCase()
+      const matchingIds = produtos.value
+        .filter(p => p.codigo?.toLowerCase().includes(q) || p.nome?.toLowerCase().includes(q))
+        .map(p => p.id)
+      if (matchingIds.length > 0) {
+        query = query.in('produto_id', matchingIds)
+      } else {
+        // Nenhum produto bate com a busca
+        movimentacoesData.value = []
+        totalMovimentacoes.value = 0
+        loading.value = false
+        return
+      }
     }
 
-    const { data, error } = await query.limit(100)
+    // Paginação server-side
+    const from = (currentPage.value - 1) * itemsPerPage.value
+    const to = from + itemsPerPage.value - 1
+    query = query.range(from, to)
 
+    const { data, error, count } = await query
     if (error) throw error
-
-    // Buscar informacoes dos usuarios
-    const movs = data || []
-    const userIds = [...new Set([
-      ...movs.filter(m => m.usuario_id).map(m => m.usuario_id),
-      ...movs.filter(m => m.cancelado_por).map(m => m.cancelado_por)
-    ])]
-
-    if (userIds.length > 0) {
-      const { data: users } = await supabase
-        .from('user_preferences')
-        .select('user_id, nome_completo')
-        .in('user_id', userIds)
-
-      const userMap = new Map(users?.map(u => [u.user_id, u.nome_completo || 'Usuário']) || [])
-
-      movimentacoes.value = movs.map(m => ({
-        ...m,
-        usuario_nome: m.usuario_id ? userMap.get(m.usuario_id) : null,
-        cancelado_por_nome: m.cancelado_por ? userMap.get(m.cancelado_por) : null
-      }))
-    } else {
-      movimentacoes.value = movs
-    }
-  } catch (e: any) {
-    console.error('Erro ao carregar movimentacoes:', e)
+    movimentacoesData.value = data || []
+    totalMovimentacoes.value = count || 0
+  } catch (e) {
+    console.error('Erro ao carregar movimentações:', e)
+    showError('Erro ao carregar movimentações')
   } finally {
-    loadingMovimentacoes.value = false
+    loading.value = false
   }
 }
 
-function aplicarFiltroData() {
-  if (selectedEstoque.value) {
-    loadMovimentacoes(selectedEstoque.value.especie_id, selectedEstoque.value.produto_id)
+async function upsertEstoque(produtoId, qtdNova) {
+  const existing = estoqueData.value.find((e) => e.produto_id === produtoId)
+  if (existing?.id) {
+    const { error } = await supabase
+      .from('estoque')
+      .update({ quantidade: qtdNova })
+      .eq('id', existing.id)
+    if (error) throw error
+  } else {
+    const { error } = await supabase
+      .from('estoque')
+      .insert({ empresa_id: currentCompany.value.id, produto_id: produtoId, quantidade: qtdNova })
+    if (error) throw error
   }
 }
 
-function limparFiltroData() {
-  filterDataInicio.value = ''
-  filterDataFim.value = ''
-  if (selectedEstoque.value) {
-    loadMovimentacoes(selectedEstoque.value.especie_id, selectedEstoque.value.produto_id)
+async function recalcularEstoqueFromDB(produtoId) {
+  const { data } = await supabase
+    .from('movimentacoes_estoque')
+    .select('tipo, quantidade')
+    .eq('empresa_id', currentCompany.value.id)
+    .eq('produto_id', produtoId)
+    .eq('cancelado', false)
+    .order('created_at', { ascending: true })
+
+  let qtd = 0
+  for (const m of data || []) {
+    if (m.tipo === 'entrada') qtd += m.quantidade
+    else if (m.tipo === 'saida') qtd = Math.max(0, qtd - m.quantidade)
+    else if (m.tipo === 'ajuste') qtd = m.quantidade
   }
+  return qtd
+}
+
+// === MODAL ===
+
+function openMovimentacaoModal(produto) {
+  modalProduto.value = produto || null
+  selectedProdutoId.value = ''
+  form.value = { tipo: 'entrada', quantidade: null, motivo: '' }
+  showModal.value = true
+}
+
+function onSelectProduto() {
+  const p = produtos.value.find(x => x.id === selectedProdutoId.value)
+  if (p) modalProduto.value = p
+}
+
+function closeModal() {
+  showModal.value = false
+  modalProduto.value = null
+  selectedProdutoId.value = ''
 }
 
 async function saveMovimentacao() {
-  if (!currentCompany.value?.id) return
+  if (!currentCompany.value?.id || !modalProduto.value) return
+
+  const { tipo, quantidade, motivo } = form.value
+  if (!quantidade || quantidade <= 0) {
+    showError('Informe uma quantidade válida')
+    return
+  }
+
+  const qtdAtual = getEstoqueQtd(modalProduto.value.id)
+  let qtdNova
+  if (tipo === 'entrada') qtdNova = qtdAtual + quantidade
+  else if (tipo === 'saida') qtdNova = Math.max(0, qtdAtual - quantidade)
+  else qtdNova = quantidade
 
   saving.value = true
   try {
-    const userId = user.value?.id
+    await upsertEstoque(modalProduto.value.id, qtdNova)
 
-    // 1. Registrar movimentacao
     const { error: movError } = await supabase
       .from('movimentacoes_estoque')
       .insert({
         empresa_id: currentCompany.value.id,
-        especie_id: movimentacao.value.especie_id,
-        tipo: movimentacao.value.tipo,
-        quantidade: movimentacao.value.quantidade,
-        motivo: movimentacao.value.motivo || null,
-        observacoes: movimentacao.value.observacoes || null,
-        usuario_id: userId
+        produto_id: modalProduto.value.id,
+        tipo,
+        quantidade,
+        quantidade_anterior: qtdAtual,
+        quantidade_nova: qtdNova,
+        motivo: motivo || null,
+        usuario_id: user.value?.id || null
       })
 
     if (movError) throw movError
 
-    // 2. Atualizar estoque
-    const estoqueAtual = estoque.value.find(e => e.especie_id === movimentacao.value.especie_id)
-    const quantidadeAtual = estoqueAtual?.quantidade || 0
-    const novaQuantidade = movimentacao.value.tipo === 'entrada'
-      ? quantidadeAtual + movimentacao.value.quantidade
-      : quantidadeAtual - movimentacao.value.quantidade
-
-    // Verifica se e um registro real ou virtual
-    const isVirtual = estoqueAtual?.id?.startsWith('virtual_')
-
-    if (estoqueAtual && !isVirtual) {
-      const { error: updError } = await supabase
-        .from('estoque')
-        .update({ quantidade: novaQuantidade })
-        .eq('id', estoqueAtual.id)
-
-      if (updError) throw updError
-    } else {
-      const { error: insError } = await supabase
-        .from('estoque')
-        .insert({
-          empresa_id: currentCompany.value.id,
-          especie_id: movimentacao.value.especie_id,
-          quantidade: novaQuantidade,
-          estoque_minimo: estoqueAtual?.estoque_minimo || 0
-        })
-
-      if (insError) throw insError
-    }
-
-    success('Movimentação registrada com sucesso')
-    closeMovimentacaoModal()
-    loadEstoque()
-
-    if (selectedEstoque.value?.especie_id === movimentacao.value.especie_id) {
-      loadMovimentacoes(movimentacao.value.especie_id)
-      // Atualizar quantidade no slideover
-      if (selectedEstoque.value) {
-        selectedEstoque.value.quantidade = novaQuantidade
-      }
-    }
-  } catch (e: any) {
-    showError('Erro ao salvar movimentação: ' + e.message)
+    success('Estoque atualizado com sucesso')
+    closeModal()
+    await Promise.all([loadEstoque(), loadMovimentacoes()])
+  } catch (e) {
+    console.error('Erro ao salvar movimentação:', e)
+    showError(e.message || 'Erro ao salvar movimentação')
   } finally {
     saving.value = false
   }
 }
 
-async function confirmarCancelamento() {
-  if (!currentCompany.value?.id || !selectedEstoque.value || !selectedMovimentacao.value) return
-  if (!motivoCancelamento.value.trim()) {
-    showError('Informe o motivo do cancelamento')
-    return
-  }
+function openCancelModal(mov) {
+  cancelTarget.value = mov
+  showCancelModal.value = true
+}
 
-  saving.value = true
+function closeCancelModal() {
+  showCancelModal.value = false
+  cancelTarget.value = null
+}
+
+async function confirmarCancelamento() {
+  if (!cancelTarget.value) return
+
+  cancelling.value = true
   try {
-    // 1. Marcar movimentacao como cancelada
-    const { error: updError } = await supabase
+    const mov = cancelTarget.value
+    const { error: cancelError } = await supabase
       .from('movimentacoes_estoque')
       .update({
         cancelado: true,
         cancelado_em: new Date().toISOString(),
-        cancelado_por: user.value?.id,
-        motivo_cancelamento: motivoCancelamento.value.trim()
+        cancelado_por: user.value?.id || null,
+        motivo_cancelamento: 'Cancelado pelo usuário'
       })
-      .eq('id', selectedMovimentacao.value.id)
+      .eq('id', mov.id)
 
-    if (updError) throw updError
+    if (cancelError) throw cancelError
 
-    // 2. Reverter quantidade no estoque
-    const mov = selectedMovimentacao.value
-    const ajuste = mov.tipo === 'entrada' ? -mov.quantidade : mov.quantidade
-    const novaQuantidade = (selectedEstoque.value.quantidade || 0) + ajuste
+    const qtdRecalculada = await recalcularEstoqueFromDB(mov.produto_id)
+    await upsertEstoque(mov.produto_id, qtdRecalculada)
 
-    const isVirtual = selectedEstoque.value.id.startsWith('virtual_')
-
-    if (!isVirtual) {
-      const { error: estoqueError } = await supabase
-        .from('estoque')
-        .update({ quantidade: novaQuantidade })
-        .eq('id', selectedEstoque.value.id)
-
-      if (estoqueError) throw estoqueError
-    }
-
-    success('Movimentação cancelada com sucesso')
-    selectedEstoque.value.quantidade = novaQuantidade
-    closeDetalhesModal()
-    loadMovimentacoes(selectedEstoque.value.especie_id, selectedEstoque.value.produto_id)
-    loadEstoque()
-  } catch (e: any) {
-    showError('Erro ao cancelar movimentação: ' + e.message)
+    success('Lançamento cancelado e estoque revertido')
+    closeCancelModal()
+    await Promise.all([loadEstoque(), loadMovimentacoes()])
+  } catch (e) {
+    console.error('Erro ao cancelar:', e)
+    showError(e.message || 'Erro ao cancelar lançamento')
   } finally {
-    saving.value = false
+    cancelling.value = false
   }
 }
 
-async function saveEstoqueMinimo() {
-  if (!currentCompany.value?.id || !selectedEstoque.value) return
+// === DATE PICKER ===
 
-  try {
-    // Verifica se e um registro virtual (espécie sem estoque ainda)
-    const isVirtual = selectedEstoque.value.id.startsWith('virtual_')
-
-    if (isVirtual) {
-      // Criar registro de estoque
-      const { data, error } = await supabase
-        .from('estoque')
-        .insert({
-          empresa_id: currentCompany.value.id,
-          especie_id: selectedEstoque.value.especie_id,
-          quantidade: 0,
-          estoque_minimo: estoqueMinimo.value
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-
-      // Atualizar o registro selecionado com o ID real
-      if (data) {
-        selectedEstoque.value.id = data.id
-      }
-    } else {
-      // Atualizar registro existente
-      const { error } = await supabase
-        .from('estoque')
-        .update({
-          estoque_minimo: estoqueMinimo.value
-        })
-        .eq('id', selectedEstoque.value.id)
-        .eq('empresa_id', currentCompany.value.id)
-
-      if (error) throw error
-    }
-
-    success('Estoque mínimo atualizado')
-    selectedEstoque.value.estoque_minimo = estoqueMinimo.value
-    loadEstoque()
-  } catch (e: any) {
-    showError('Erro ao atualizar estoque mínimo: ' + e.message)
-  }
-}
-
-// Modais e Slideover
-function openMovimentacaoModal() {
-  movimentacao.value = {
-    especie_id: '',
-    tipo: 'entrada',
-    quantidade: 0,
-    motivo: '',
-    observacoes: ''
-  }
-  showMovimentacaoModal.value = true
-}
-
-function closeMovimentacaoModal() {
-  showMovimentacaoModal.value = false
-}
-
-function openMovimentacaoForProduct() {
-  if (!selectedEstoque.value) return
-  movimentacao.value = {
-    especie_id: selectedEstoque.value.especie_id || '',
-    tipo: 'entrada',
-    quantidade: 0,
-    motivo: '',
-    observacoes: ''
-  }
-  showMovimentacaoModal.value = true
-}
-
-function openDetalhesModal(mov: Movimentacao) {
-  selectedMovimentacao.value = mov
-  motivoCancelamento.value = ''
-  showDetalhesModal.value = true
-}
-
-function closeDetalhesModal() {
-  showDetalhesModal.value = false
-  selectedMovimentacao.value = null
-  motivoCancelamento.value = ''
-}
-
-function openSlideover(item: Estoque) {
-  selectedEstoque.value = item
-  estoqueMinimo.value = item.estoque_minimo || 0
-  filterDataInicio.value = ''
-  filterDataFim.value = ''
-  showSlideover.value = true
-  loadMovimentacoes(item.especie_id, item.produto_id)
-}
-
-function closeSlideover() {
-  showSlideover.value = false
-  selectedEstoque.value = null
-  movimentacoes.value = []
-}
-
-// Watch
-watch(() => currentCompany.value?.id, (newId) => {
-  if (newId) {
-    loadEstoque()
-    loadEspecies()
-  }
-}, { immediate: true })
-
-watch(itemsPerPage, () => {
-  currentPage.value = 1
-  pageInput.value = '1'
+const presetDates = computed(() => {
+  const today = new Date()
+  const last7 = new Date(today)
+  last7.setDate(last7.getDate() - 6)
+  const startMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+  const endMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+  const startLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+  const endLastMonth = new Date(today.getFullYear(), today.getMonth(), 0)
+  return [
+    { label: 'Últimos 7 dias', value: [last7, today] },
+    { label: 'Este mês', value: [startMonth, endMonth] },
+    { label: 'Mês passado', value: [startLastMonth, endLastMonth] },
+  ]
 })
 
-watch(currentPage, (newVal) => {
-  pageInput.value = String(newVal)
-})
+function formatDateDisplay(dates) {
+  if (!dates || dates.length < 2 || !dates[0] || !dates[1]) return ''
+  const fmt = (d) => {
+    const dd = String(d.getDate()).padStart(2, '0')
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const yy = String(d.getFullYear()).slice(2)
+    return `${dd}/${mm}/${yy}`
+  }
+  return `${fmt(dates[0])} – ${fmt(dates[1])}`
+}
 
-watch([searchQuery, filterStatus], () => {
-  currentPage.value = 1
-  pageInput.value = '1'
-})
+// === PAGINAÇÃO ===
 
 function goToPage() {
   const page = parseInt(pageInput.value)
@@ -1209,11 +764,106 @@ function goToPage() {
   }
 }
 
-// Lifecycle
-onMounted(() => {
-  if (currentCompany.value?.id) {
+// === WATCHERS ===
+
+watch(() => currentCompany.value?.id, (newId) => {
+  if (newId) {
+    loadProdutos()
     loadEstoque()
-    loadEspecies()
+    loadMovimentacoes()
   }
+}, { immediate: true })
+
+// Sync datepicker → filtros de data
+watch(dateRange, (val) => {
+  if (val && val.length === 2 && val[0] && val[1]) {
+    filterDataDe.value = val[0].toISOString().split('T')[0]
+    filterDataAte.value = val[1].toISOString().split('T')[0]
+  } else {
+    filterDataDe.value = ''
+    filterDataAte.value = ''
+  }
+}, { deep: true })
+
+// Filtros mudam → reset página e recarregar
+watch([searchQuery, filterTipo, filterDataDe, filterDataAte], () => {
+  currentPage.value = 1
+  pageInput.value = '1'
+  loadMovimentacoes()
+})
+
+watch(currentPage, (newVal) => {
+  pageInput.value = String(newVal)
+  loadMovimentacoes()
+})
+
+watch(itemsPerPage, () => {
+  currentPage.value = 1
+  pageInput.value = '1'
+  loadMovimentacoes()
+})
+
+// Dark mode detect
+onMounted(() => {
+  isDark.value = document.documentElement.classList.contains('dark')
+  const observer = new MutationObserver(() => {
+    isDark.value = document.documentElement.classList.contains('dark')
+  })
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 })
 </script>
+
+<style>
+/* VueDatePicker — Estoque page theme */
+.estoque-date-range-wrapper {
+  min-width: 200px;
+  max-width: 240px;
+}
+
+.estoque-date-range-wrapper .dp__input_wrap .dp__input {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.35rem 0.5rem 0.35rem 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #333;
+  height: 36px;
+  transition: all 0.15s ease;
+}
+
+.estoque-date-range-wrapper .dp__input_wrap .dp__input:hover {
+  border-color: #549E54;
+}
+
+.estoque-date-range-wrapper .dp__input_wrap .dp__input:focus,
+.estoque-date-range-wrapper .dp__input_wrap .dp__input.dp__input_focus {
+  border-color: #549E54;
+  box-shadow: 0 0 0 2px rgba(84, 158, 84, 0.15);
+}
+
+.dark .estoque-date-range-wrapper .dp__input_wrap .dp__input {
+  background: #2a2a2a;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+.dark .estoque-date-range-wrapper .dp__input_wrap .dp__input:hover {
+  border-color: #549E54;
+}
+
+.dark .estoque-date-range-wrapper .dp__input_wrap .dp__input:focus,
+.dark .estoque-date-range-wrapper .dp__input_wrap .dp__input.dp__input_focus {
+  border-color: #549E54;
+  box-shadow: 0 0 0 2px rgba(84, 158, 84, 0.2);
+}
+
+.estoque-date-range-wrapper .dp__input_icon {
+  color: #549E54;
+}
+
+.dark .estoque-date-range-wrapper .dp__input_icon {
+  color: #86efac;
+}
+</style>

@@ -220,16 +220,18 @@ serve(async (req) => {
         if (!localDevice) continue
 
         const params = device.params || {}
-        const temperatura = params.currentTemperature ?? params.temperature ?? null
-        const umidade = params.currentHumidity ?? params.humidity ?? null
+        const rawTemp = params.currentTemperature ?? params.temperature ?? null
+        const rawUmid = params.currentHumidity ?? params.humidity ?? null
+        const temperatura = rawTemp !== null && !isNaN(Number(rawTemp)) ? Number(rawTemp) : null
+        const umidade = rawUmid !== null && !isNaN(Number(rawUmid)) ? Number(rawUmid) : null
 
         if (temperatura === null && umidade === null) continue
 
         leiturasParaInserir.push({
           empresa_id: conta.empresa_id,
           dispositivo_id: localDevice.id,
-          temperatura: temperatura !== null ? parseFloat(String(temperatura)) : null,
-          umidade: umidade !== null ? parseFloat(String(umidade)) : null,
+          temperatura,
+          umidade,
           registrado_em: new Date().toISOString(),
           fonte: 'api',
         })
@@ -237,8 +239,8 @@ serve(async (req) => {
         dispositivosParaAtualizar.push({
           id: localDevice.id,
           online: device.online === true,
-          temperatura_atual: temperatura !== null ? parseFloat(String(temperatura)) : null,
-          umidade_atual: umidade !== null ? parseFloat(String(umidade)) : null,
+          temperatura_atual: temperatura,
+          umidade_atual: umidade,
           ultima_leitura: new Date().toISOString(),
         })
       }

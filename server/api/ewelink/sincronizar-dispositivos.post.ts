@@ -125,18 +125,21 @@ export default defineEventHandler(async (event) => {
 
     let novos = 0
     let atualizados = 0
-    const upsertBatch: any[] = []
+    const upsertMap = new Map<string, any>()
 
     for (const thing of allDevices) {
       const device = thing.itemData || thing
       const deviceId = device.deviceid
       if (!deviceId) continue
 
+      // Deduplicar: se mesmo device_id aparecer mais de uma vez, usa o último
       const { temTemperatura, temUmidade } = detectaSensores(thing)
 
       const params = device.params || {}
-      const tempAtual = params.currentTemperature ?? params.temperature ?? null
-      const umidAtual = params.currentHumidity ?? params.humidity ?? null
+      const rawTemp = params.currentTemperature ?? params.temperature ?? null
+      const rawUmid = params.currentHumidity ?? params.humidity ?? null
+      const tempAtual = rawTemp !== null && !isNaN(Number(rawTemp)) ? Number(rawTemp) : null
+      const umidAtual = rawUmid !== null && !isNaN(Number(rawUmid)) ? Number(rawUmid) : null
 
       const deviceData: any = {
         empresa_id,
@@ -157,11 +160,14 @@ export default defineEventHandler(async (event) => {
       const existingId = existingMap.get(deviceId)
       if (existingId) {
         deviceData.id = existingId
-        atualizados++
-      } else {
-        novos++
       }
-      upsertBatch.push(deviceData)
+      upsertMap.set(deviceId, deviceData)
+    }
+
+    const upsertBatch = Array.from(upsertMap.values())
+    for (const d of upsertBatch) {
+      if (d.id) atualizados++
+      else novos++
     }
 
     // Upsert em batch

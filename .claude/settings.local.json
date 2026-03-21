@@ -90,7 +90,13 @@
       "Bash(xargs grep -l \"venda\\\\|sales\")",
       "WebFetch(domain:forum.ewelink.cc)",
       "WebFetch(domain:coolkit-technologies.github.io)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(supabase --version)",
+      "Bash(ls -1 components/Icon*.vue)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(python -c \":*)",
+      "Bash(xargs grep -l \"rotas\\\\|motorista\\\\|entrega\\\\|delivery\")"
     ]
   }
 }
